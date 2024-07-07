@@ -1,0 +1,40 @@
+.stream-container {
+  width: 100%;
+  position: relative;
+  margin: 5% auto;
+}
+
+#video-container {
+
+}
+
+video {
+  background: gray;
+  border: 2px solid green;
+}
+
+#localVideo {
+  width: 50%;
+}
+
+#admin-button-container {
+
+}
+#viewer-button-container {
+
+}
+#go-liveBtn {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#watch-streamBtn {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
