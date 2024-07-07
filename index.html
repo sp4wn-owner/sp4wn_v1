@@ -5,38 +5,57 @@
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="stream.css">
+    <link rel="stylesheet" href="home-page.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Spawn</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
   </head>
   <body>
-
-    <div id="login-page">
-      <div class="login-container">
-        <div class="login-form">
-          <h1>Login</h1>
-          <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="usernameInput">
+    <header>
+      
+    </header>
+      <div id="login-page">
+        <div class="login-container">
+          <div class="login-form">
+            <h1>Login</h1>
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" id="usernameInput">
+            </div>
+            <button id="loginBtn">Login</button>
           </div>
-          <button id="loginBtn">Login</button>
         </div>
       </div>
-    </div>
 
-    <div id="stream-page">
-      <div class="stream-container">
-        <div id="video-container">
-        <video id="localVideo" autoplay></video>
-        </div>
-        <div id="admin-button-container">
-          <button id="go-liveBtn">Go Live</button>
-        </div>
-        <div id="viewer-button-container">
-          <button id="watch-streamBtn">Watch Stream</button>
+      <div id="stream-page">
+        <div class="stream-container">
+          <div id="video-container">
+          <video id="localVideo" autoplay></video>
+          </div>
+          <div id="admin-button-container">
+            <button id="go-liveBtn">Go Live</button>
+          </div>
+          <div id="viewer-button-container">
+            <button id="watch-streamBtn">Watch Stream</button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div id="home-page">
+        <div class="top-link-bar">
+          <ul>
+            <li><a href="#"><i class="fa fa-search" target="_blank"></i></a></li>
+          </ul>
+        </div>
+        <div class="live-streams">
+          <div class="stream">
+            
+          </div>
+        </div>
+      </div>
+    <footer>
+      
+    </footer>
 
   </body>
   <script src="client.js"></script>

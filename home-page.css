@@ -1,0 +1,9 @@
+.top-link-bar ul {
+    text-align: right;
+    padding: 25px;
+    list-style: none;
+    position: relative;
+}
+.top-link-bar ul li {
+    font-size: 35px;
+}

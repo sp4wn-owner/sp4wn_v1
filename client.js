@@ -84,8 +84,15 @@ var configuration = {
        "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
     };
 
-streamPage.style.display = "none";
-loginPage.style.display = "block";
+function init() {
+   if (name) {
+      streamPage.style.display = "none";
+      loginPage.style.display = "none";
+   }else {
+      streamPage.style.display = "none";
+      loginPage.style.display = "block";
+}};
+
 
 // Login when the user clicks the button
 loginBtn.addEventListener("click", function (event) {
@@ -105,7 +112,7 @@ function handleLogin(success) {
       alert("Ooops...try a different username");
    } else {
       console.log(name);
-      streamPage.style.display = "block";
+      streamPage.style.display = "none";
       loginPage.style.display = "none";
 
       //check if user is admin
@@ -253,3 +260,5 @@ function handleLeave() {
      viewerbtnContainer.style.display = "block";
    }
 };
+
+init();
