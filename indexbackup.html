@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="stream.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Spawn</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -53,14 +54,19 @@
 
       <div id="profilepage">
         <h1>Profile</h1>
-        
-        <div class="stream-container">
-          <div id="video-container">
-          <video id="localVideo" autoplay></video>
+        <div id="stream-page">
+          <div class="stream-container">
+            <div id="video-container">
+            <video id="localVideo" autoplay></video>
+            </div>
+            <div id="admin-button-container">
+              <button id="go-liveBtn">Go Live</button>
+            </div>
+            <div id="viewer-button-container">
+              <button id="watch-streamBtn">Watch Stream</button>
+            </div>
           </div>
-          <button id="go-liveBtn">Go Live</button>
         </div>
-        
       </div>
 
     <footer>

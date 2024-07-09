@@ -98,6 +98,21 @@ wss.on('connection', function(connection) {
 
             break;
 
+            case "streams":
+            console.log("Sending all streams to:",data.name);
+            var conn = users[data.name];
+      
+           
+
+            if(conn != null) {
+               sendTo(conn, {
+                  type: "streams",
+                  users: users
+               });
+            }
+
+            break;
+
          case "leave":
             console.log("Disconnecting from", data.name);
             var conn = users[data.name];

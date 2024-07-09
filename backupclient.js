@@ -37,7 +37,7 @@ conn.onmessage = function (msg) {
          watchStream(data.name);
          break;
       case "streams":
-         handleStreams(data.name);
+         handleStreams(users);
          break;
       default:
          break;
@@ -70,12 +70,9 @@ var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
 var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
-var homePage = document.querySelector('#homepage');
-var profilePage = document.querySelector('#profilepage');
 
 var goliveBtn = document.querySelector('#go-liveBtn');
 var watchstreamBtn = document.querySelector('#watch-streamBtn');
-var getstreamsBtn = document.querySelector('#getstreamsbtn');
 
 var hangUpBtn = document.querySelector('#hangUpBtn');
 
@@ -86,19 +83,18 @@ var yourConn;
 var stream;
 var callToUsernameInput;
 
-
-
 var configuration = {
        "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
     };
 
 function init() {
-   streamPage.style.display = "none";
-   loginPage.style.display = "block";
-   homePage.style.display = "none";
-   profilePage.style.display = "none";
-   
-};
+   if (name) {
+      streamPage.style.display = "none";
+      loginPage.style.display = "none";
+   }else {
+      streamPage.style.display = "none";
+      loginPage.style.display = "block";
+}};
 
 
 // Login when the user clicks the button
@@ -119,29 +115,47 @@ function handleLogin(success) {
       alert("Ooops...try a different username");
    } else {
       console.log(name);
+      streamPage.style.display = "none";
       loginPage.style.display = "none";
-      homePage.style.display = "block";
 
-      document.getElementById("live-streams").innerHTML = "";
-   
-      send({
-         type: "streams",
-         name: name
-      });
-      
-    }
+      //check if user is admin
+      if (name == "admin") {
+        console.log("is admin");
+        adminbtnContainer.style.display = "block";
+        viewerbtnContainer.style.display = "none";
+
+        yourConn = new webkitRTCPeerConnection(configuration);
+
+      } else {
+        console.log(name + " is not admin");
+        fetchstreams();
+        viewerbtnContainer.style.display = "block";
+        adminbtnContainer.style.display = "none";
+        callToUsernameInput = "admin";
+
+        yourConn = new webkitRTCPeerConnection(configuration);
+        stream = new MediaStream()
+        localVideo.srcObject = stream
+
+        //when a remote user adds stream to the peer connection, we display it
+         yourConn.onaddstream = function (e) {
+            localVideo.srcObject = e.stream
+         };
+
+      }
+
+      // Setup ice handling
+      yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
+
+  }
 };
-
-getstreamsBtn.addEventListener("click", function (event) {
-   document.getElementById("live-streams").innerHTML = "";
-   
-      send({
-         type: "streams",
-         name: name
-      });
-   
-
-});
 
 goliveBtn.addEventListener("click", function () {
   console.log(name +" is going live");
@@ -251,27 +265,15 @@ function handleLeave() {
    }
 };
 
+function fetchstreams () {
+   send({
+       type: "streams",
+       });
+}
 function handleStreams(users) {
-   console.log(users);
-   var list = [];
-   list = Object.values(users);
-   console.log(list);
-   
-   console.log(list.length);
-   for (let i = 0; i < list.length; i++) {
-      document.getElementById("live-streams").innerHTML += "<div class='livestream'>" + list[i].name;"</div>"
-  }
-
-      
-}
-function togglehome() {
-   profilePage.style.display = "none";
-   homePage.style.display = "block";
-}
-function toggleprofile() {
-   profilePage.style.display = "block";
-   homePage.style.display = "none";
+       for (let i = 0; i < images.length; i++) {
+           document.getElementById("live-streams").innerHTML = users[i];
+       }
 }
 
 init();
-

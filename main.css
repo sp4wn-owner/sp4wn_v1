@@ -9,8 +9,73 @@ body {
   text-align: center;
 }
 
+.top-link-bar ul {
+  text-align: right;
+  padding: 25px;
+  list-style: none;
+  position: relative;
+  text-align: center;
+}
+.top-link-bar ul li {
+  font-size: 35px;
+  display: inline-block;
+  padding: 25px;
+  
+}
+
 @media screen and (max-width:800px) {
     body{
         width:100%;
     }
+}
+
+#live-streams {
+  
+}
+.livestream {
+  display: inline-block;
+  padding: 25px;
+  margin: 10px;
+  border: solid;
+  
+}
+.stream-container {
+  width: 100%;
+  position: relative;
+  margin: 1.5% auto;
+}
+
+#video-container {
+
+}
+
+video {
+  background: gray;
+  border: 2px solid green;
+}
+
+#localVideo {
+  width: 50%;
+}
+
+#admin-button-container {
+
+}
+#viewer-button-container {
+
+}
+#go-liveBtn {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#watch-streamBtn {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
