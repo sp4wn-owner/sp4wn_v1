@@ -73,7 +73,8 @@ var viewerbtnContainer = document.querySelector('#viewer-button-container');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
 
-var goliveBtn = document.querySelector('#go-liveBtn');
+var goliveBtn = document.querySelector('#goliveBtn');
+var endliveBtn = document.querySelector('#endliveBtn');
 var watchstreamBtn = document.querySelector('#watch-streamBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
 
@@ -85,6 +86,7 @@ var remoteVideo = document.querySelector('#remoteVideo');
 var yourConn;
 var stream;
 var callToUsernameInput;
+let liveVideo = 0;
 
 
 
@@ -93,7 +95,7 @@ var configuration = {
     };
 
 function init() {
-   streamPage.style.display = "none";
+   
    loginPage.style.display = "block";
    homePage.style.display = "none";
    profilePage.style.display = "none";
@@ -145,38 +147,51 @@ getstreamsBtn.addEventListener("click", function (event) {
 
 goliveBtn.addEventListener("click", function () {
   console.log(name +" is going live");
-  navigator.webkitGetUserMedia({ video: true, audio: false }, function (myStream) {
-     stream = myStream;
-
+  navigator.webkitGetUserMedia({ video: true, audio: false }, (stream) => {
+     yourConn = new RTCPeerConnection();
+     
      //displaying local video stream on the page
      localVideo.srcObject = stream
 
-     // setup stream listening
-     yourConn.addStream(stream);
+     stream.getTracks().forEach((track) => {
+      yourConn.addTrack(track, stream);
+      });
 
-  }, function (error) {
-     console.log(error);
-  });
+      if(localVideo) {
+         goliveBtn.style.display = "none";
+         endliveBtn.style.display = "block";
+         liveVideo = 1;
+      }
+     
 
-  if (localVideo) {
-    adminbtnContainer.style.display = "none";
-  }
+   }, function (error) {
+      console.log(error);
+   });
 
-  });
+});
 
-  watchstreamBtn.addEventListener("click", function () {
+endliveBtn.addEventListener("click", function (event) {
+   stopStreamedVideo(localVideo);
+   yourConn.onicecandidate = null;
+   yourConn.onaddstream = null;
+   goliveBtn.style.display = "block";
+   endliveBtn.style.display = "none";
+   liveVideo = 0;
+   
 
-    send({
-       type: "watch",
-       name: name,
-       host: "admin"
-    });
+});
 
-    if(localVideo) {
-      viewerbtnContainer.style.display = "none";
-    }
-
-    });
+// stop both mic and camera
+function stopStreamedVideo(localVideo) {
+   const stream = localVideo.srcObject;
+   const tracks = stream.getTracks();
+ 
+   tracks.forEach((track) => {
+     track.stop();
+   });
+ 
+   localVideo.srcObject = null;
+ }
 
 function watchStream (name) {
   clientName = name;
@@ -198,8 +213,8 @@ function watchStream (name) {
         alert("Error when creating an offer");
      });
 
-  }
-}
+  };
+};
 
 ////////////////////////////////BELOW IS GOOD
 
@@ -243,12 +258,7 @@ function handleLeave() {
    yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
 
-   if (name == "admin") {
-     adminbtnContainer.style.display = "block";
-   }
-   if (name != "admin") {
-     viewerbtnContainer.style.display = "block";
-   }
+   goliveBtn.style.display = "block";
 };
 
 function handleStreams(users) {
@@ -271,6 +281,15 @@ function togglehome() {
 function toggleprofile() {
    profilePage.style.display = "block";
    homePage.style.display = "none";
+   console.log(liveVideo);
+   if (liveVideo == 1) {
+      goliveBtn.style.display = "none";
+      endliveBtn.style.display = "block";
+   } else {
+      goliveBtn.style.display = "block";
+      endliveBtn.style.display = "none";
+   }
+   
 }
 
 init();

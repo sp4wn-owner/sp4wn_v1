@@ -64,12 +64,15 @@ video {
 #viewer-button-container {
 
 }
-#go-liveBtn {
+#goliveBtn {
   margin: 0;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+#endliveBtn {
+  margin: 0 auto;
 }
 
 #watch-streamBtn {
