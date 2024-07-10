@@ -75,7 +75,8 @@ var profilePage = document.querySelector('#profilepage');
 
 var goliveBtn = document.querySelector('#goliveBtn');
 var endliveBtn = document.querySelector('#endliveBtn');
-var watchstreamBtn = document.querySelector('#watch-streamBtn');
+var endotherliveBtn = document.querySelector('#endotherliveBtn');
+var spawnBtn = document.querySelector('#spawnBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
 
 var hangUpBtn = document.querySelector('#hangUpBtn');
@@ -226,6 +227,12 @@ function watchStream (name) {
   };
 };
 
+spawnBtn.addEventListener("click", function (event) {
+   
+   
+
+});
+
 ////////////////////////////////BELOW IS GOOD
 
 //when somebody sends us an offer
@@ -281,14 +288,19 @@ function handleStreams(liveusers) {
    
    console.log(list.length);
    for (let i = 0; i < list.length; i++) {
-      document.getElementById("live-streams").innerHTML += "<a class='livestream' onclick='otherProfile("+ list[i].name;")'>" + list[i].name;"</a>"
-  }  
+      document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream' onclick='otherProfile("+ list[i].name + ")()'>" + list[i].name + "</a>";
+    //  document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream'" + list[i].name +"</a>";
+
+   }  
 }
 function otherProfile(otheruser) {
    user = otheruser;
+   connectedUser = user;
    profilePage.style.display = "block";
    homePage.style.display = "none";
    goliveBtn.style.display = "none";
+   endliveBtn.style.display = "none";
+   spawnBtn.style.display = "block";
    endliveBtn.style.display = "none";
 
 }
@@ -305,14 +317,28 @@ function togglehome() {
 function toggleprofile() {
    profilePage.style.display = "block";
    homePage.style.display = "none";
-   
-   if (liveVideo == 1) {
-      goliveBtn.style.display = "none";
-      endliveBtn.style.display = "block";
+   console.log(liveVideo);
+   console.log(connectedUser);
+   if (connectedUser == null) {
+      spawnBtn.style.display = "none";
+      endotherliveBtn.style.display = "none";
+      if (liveVideo == 1) {
+         goliveBtn.style.display = "none";
+         endliveBtn.style.display = "block";
+      } else {
+         goliveBtn.style.display = "block";
+         endliveBtn.style.display = "none";
+      }
    } else {
-      goliveBtn.style.display = "block";
-      endliveBtn.style.display = "none";
+      if (localVideo) {
+         spawnBtn.style.display = "none";
+         endotherliveBtn.style.display = "block";
+      } 
+      spawnBtn.style.display = "block";
+      endotherliveBtn.style.display = "none";
+      
    }
+   
    
 }
 
