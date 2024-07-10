@@ -6,6 +6,7 @@ var wss = new WebSocketServer({port: 9090});
 
 //all connected to the server users
 var users = {};
+var liveusers = {};
 
 //when a user connects to our sever
 wss.on('connection', function(connection) {
@@ -47,6 +48,24 @@ wss.on('connection', function(connection) {
                   success: true
                });
             }
+
+            break;
+         
+         case "live":
+            //add user to list of live users
+            liveusers[data.name] = connection;
+            connection.name = data.name;
+            console.log(data.name, " is added to live list");
+
+            break;
+
+         case "updatelive":
+            //delete user from list of live users
+            if(liveusers[data.name]) {
+               delete liveusers[connection.name];
+               console.log(data.name, " is removed from live list");
+            }
+            
 
             break;
 
@@ -101,13 +120,11 @@ wss.on('connection', function(connection) {
             case "streams":
             console.log("Sending all streams to:",data.name);
             var conn = users[data.name];
-      
-           
 
             if(conn != null) {
                sendTo(conn, {
-                  type: "streams",
-                  users: users
+                  type: "liveusers",
+                  name: liveusers
                });
             }
 

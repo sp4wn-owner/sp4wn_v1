@@ -36,7 +36,7 @@ conn.onmessage = function (msg) {
       case "watch":
          watchStream(data.name);
          break;
-      case "streams":
+      case "liveusers":
          handleStreams(data.name);
          break;
       default:
@@ -161,6 +161,12 @@ goliveBtn.addEventListener("click", function () {
          goliveBtn.style.display = "none";
          endliveBtn.style.display = "block";
          liveVideo = 1;
+
+         send({
+            type: "live",
+            name: name
+         });
+         
       }
      
 
@@ -178,10 +184,14 @@ endliveBtn.addEventListener("click", function (event) {
    endliveBtn.style.display = "none";
    liveVideo = 0;
    
+   send({
+      type: "updatelive",
+      name: name
+   });
 
 });
 
-// stop both mic and camera
+// stop stream
 function stopStreamedVideo(localVideo) {
    const stream = localVideo.srcObject;
    const tracks = stream.getTracks();
@@ -261,27 +271,41 @@ function handleLeave() {
    goliveBtn.style.display = "block";
 };
 
-function handleStreams(users) {
-   console.log(users);
+function handleStreams(liveusers) {
+   //console.log(users);
+   console.log(liveusers);
    var list = [];
-   list = Object.values(users);
+   //list = Object.values(users);
+   list = Object.values(liveusers);
    console.log(list);
    
    console.log(list.length);
    for (let i = 0; i < list.length; i++) {
-      document.getElementById("live-streams").innerHTML += "<div class='livestream'>" + list[i].name;"</div>"
-  }
-
-      
+      document.getElementById("live-streams").innerHTML += "<a class='livestream' onclick='otherProfile("+ list[i].name;")'>" + list[i].name;"</a>"
+  }  
 }
+function otherProfile(otheruser) {
+   user = otheruser;
+   profilePage.style.display = "block";
+   homePage.style.display = "none";
+   goliveBtn.style.display = "none";
+   endliveBtn.style.display = "none";
+
+}
+
 function togglehome() {
    profilePage.style.display = "none";
    homePage.style.display = "block";
+   document.getElementById("live-streams").innerHTML = "";
+   send({
+      type: "streams",
+      name: name
+   });
 }
 function toggleprofile() {
    profilePage.style.display = "block";
    homePage.style.display = "none";
-   console.log(liveVideo);
+   
    if (liveVideo == 1) {
       goliveBtn.style.display = "none";
       endliveBtn.style.display = "block";
