@@ -35,8 +35,18 @@ body {
     }
 }
 
-#live-streams {
+#livestreams a {
+  display: inline-block;
+  padding: 25px;
+  margin: 10px;
+  border: solid;
   
+}
+#otherprofile {
+  display: inline-block;
+  padding: 25px;
+  margin: 10px;
+  border: solid;
 }
 .livestream {
   display: inline-block;

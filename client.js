@@ -80,6 +80,8 @@ var endliveBtn = document.querySelector('#endliveBtn');
 var endotherliveBtn = document.querySelector('#endotherliveBtn');
 var spawnBtn = document.querySelector('#spawnBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
+var otherProfile = document.querySelector('#otherprofile');
+var liveStreams = document.querySelector("#livestreams");
 
 var hangUpBtn = document.querySelector('#hangUpBtn');
 
@@ -91,8 +93,6 @@ var stream;
 var callToUsernameInput;
 let liveVideo = 0;
 let liveremoteVideo = 0;
-
-
 
 var configuration = {
        "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
@@ -128,7 +128,7 @@ function handleLogin(success) {
       loginPage.style.display = "none";
       homePage.style.display = "block";
 
-      document.getElementById("live-streams").innerHTML = "";
+      liveStreams.innerHTML = "";
    
       send({
          type: "streams",
@@ -139,7 +139,7 @@ function handleLogin(success) {
 };
 
 getstreamsBtn.addEventListener("click", function (event) {
-   document.getElementById("live-streams").innerHTML = "";
+   liveStreams.innerHTML = "";
    
       send({
          type: "streams",
@@ -170,11 +170,24 @@ goliveBtn.addEventListener("click", function () {
             type: "live",
             name: name
          });
-         
-      }
+
+         //when a remote user adds stream to the peer connection, we display it
+         yourConn.doAddStream = function (e) {
+         remoteVideo.srcObject = window.URL.createObjectURL(e.stream)
+         }
+
+         // Setup ice handling
+         yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
      
 
-   }, function (error) {
+   }}, function (error) {
       console.log(error);
    });
 
@@ -231,7 +244,26 @@ function watchStream (name) {
 };
 
 spawnBtn.addEventListener("click", function (event) {
-   
+   clientName = event;
+  var callToUsername = clientName;
+
+  if (callToUsername.length > 0) {
+
+     connectedUser = callToUsername;
+
+     // create an offer
+     yourConn.createOffer(function (offer) {
+        send({
+           type: "offer",
+           offer: offer
+        });
+
+        yourConn.setLocalDescription(offer);
+     }, function (error) {
+        alert("Error when creating an offer");
+     });
+     
+   };
    
 
 });
@@ -288,29 +320,31 @@ function handleStreams(liveusers) {
    
    console.log(list.length);
    for (let i = 0; i < list.length; i++) {
-      text = list[i].name.toString();
-      //text = list[i].name;      
+      var text = list[i].name.toString();
+      liveStreams.innerHTML += "<a href ='#'>" + text + "</a>"; 
       console.log(text);
-      document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream' onclick='otherProfile('"+text+"')>" + text + "</a>";
-
-    //  document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream' onclick='otherProfile("+ list[i].name +")'>" + list[i].name + "</a>";
-    //  document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream'" + list[i].name +"</a>";
-
    }  
+
 }
-function otherProfile(othername) {
-   console.log(othername);
-   otheruser = toString(othername);
+liveStreams.addEventListener("click", function (event) {
+   var val = event.target.innerHTML;
+   console.log(val);
+   checkProfile(val);     
+
+});
+function checkProfile (userdata) {
+   console.log(userdata);
+   otheruser = userdata;
    console.log(otheruser);
-
    toggleprofile('remote');
-
 }
 
 function togglehome() {
    profilePage.style.display = "none";
    homePage.style.display = "block";
-   document.getElementById("live-streams").innerHTML = "";
+   liveStreams.innerHTML = "";
+   otheruser = "";
+   console.log(otheruser);
    send({
       type: "streams",
       name: name
