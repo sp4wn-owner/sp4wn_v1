@@ -1,6 +1,7 @@
 //our username
 var name;
 var connectedUser;
+var otheruser;
 
 //connecting to our signaling server
 var conn = new WebSocket('ws://localhost:9090');
@@ -72,6 +73,7 @@ var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
+var profileTitle = document.querySelector('#profiletitle');
 
 var goliveBtn = document.querySelector('#goliveBtn');
 var endliveBtn = document.querySelector('#endliveBtn');
@@ -88,6 +90,7 @@ var yourConn;
 var stream;
 var callToUsernameInput;
 let liveVideo = 0;
+let liveremoteVideo = 0;
 
 
 
@@ -279,29 +282,28 @@ function handleLeave() {
 };
 
 function handleStreams(liveusers) {
-   //console.log(users);
-   console.log(liveusers);
    var list = [];
-   //list = Object.values(users);
    list = Object.values(liveusers);
-   console.log(list);
+   //otheruser = "";
    
    console.log(list.length);
    for (let i = 0; i < list.length; i++) {
-      document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream' onclick='otherProfile("+ list[i].name + ")()'>" + list[i].name + "</a>";
+      text = list[i].name.toString();
+      //text = list[i].name;      
+      console.log(text);
+      document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream' onclick='otherProfile('"+text+"')>" + text + "</a>";
+
+    //  document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream' onclick='otherProfile("+ list[i].name +")'>" + list[i].name + "</a>";
     //  document.getElementById("live-streams").innerHTML += "<a href='#' class='livestream'" + list[i].name +"</a>";
 
    }  
 }
-function otherProfile(otheruser) {
-   user = otheruser;
-   connectedUser = user;
-   profilePage.style.display = "block";
-   homePage.style.display = "none";
-   goliveBtn.style.display = "none";
-   endliveBtn.style.display = "none";
-   spawnBtn.style.display = "block";
-   endliveBtn.style.display = "none";
+function otherProfile(othername) {
+   console.log(othername);
+   otheruser = toString(othername);
+   console.log(otheruser);
+
+   toggleprofile('remote');
 
 }
 
@@ -314,32 +316,50 @@ function togglehome() {
       name: name
    });
 }
-function toggleprofile() {
+
+function toggleprofile(msg) {
+   var data = msg;
    profilePage.style.display = "block";
    homePage.style.display = "none";
    console.log(liveVideo);
-   console.log(connectedUser);
-   if (connectedUser == null) {
-      spawnBtn.style.display = "none";
-      endotherliveBtn.style.display = "none";
-      if (liveVideo == 1) {
-         goliveBtn.style.display = "none";
-         endliveBtn.style.display = "block";
-      } else {
-         goliveBtn.style.display = "block";
-         endliveBtn.style.display = "none";
-      }
-   } else {
-      if (localVideo) {
+   console.log(otheruser);
+   switch(data) {
+      case "local":
+         profileTitle.innerHTML = name;
+         remoteVideo.style.display = "none";
+         localVideo.style.display = "block";
          spawnBtn.style.display = "none";
-         endotherliveBtn.style.display = "block";
-      } 
-      spawnBtn.style.display = "block";
-      endotherliveBtn.style.display = "none";
-      
+         endotherliveBtn.style.display = "none";
+         if (liveVideo == 1) {
+            goliveBtn.style.display = "none";
+            endliveBtn.style.display = "block";
+         } else {
+            goliveBtn.style.display = "block";
+            endliveBtn.style.display = "none";
+         }
+         break;
+
+      case "remote":
+         if (otheruser == name) {
+            toggleprofile('local');
+         } else {
+            profileTitle.innerHTML = otheruser;
+            remoteVideo.style.display = "block";
+            localVideo.style.display = "none";
+            goliveBtn.style.display = "none";
+            endliveBtn.style.display = "none";
+            if (remoteVideo == 1) {
+               spawnBtn.style.display = "none";
+               endotherliveBtn.style.display = "block";
+            } else {
+               spawnBtn.style.display = "block";
+               endotherliveBtn.style.display = "none";
+            }
+            
+         }
+      break;
    }
-   
-   
+      
 }
 
 init();

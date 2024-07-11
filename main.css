@@ -23,6 +23,12 @@ body {
   
 }
 
+#profiletitle {
+  font-size: 35px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
 @media screen and (max-width:800px) {
     body{
         width:100%;
@@ -54,8 +60,9 @@ video {
   border: 2px solid green;
 }
 
-#localVideo {
+#localVideo, #remoteVideo {
   width: 50%;
+  margin: 0 auto;
 }
 
 #admin-button-container {

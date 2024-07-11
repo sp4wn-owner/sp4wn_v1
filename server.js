@@ -158,8 +158,12 @@ wss.on('connection', function(connection) {
    //this may help if we are still in "offer","answer" or "candidate" state
    connection.on("close", function() {
 
+      if(liveusers[connection.name]) {
+         delete liveusers[connection.name];
+      }
       if(connection.name) {
       delete users[connection.name];
+      
 
          if(connection.otherName) {
             console.log("Disconnecting from ", connection.otherName);

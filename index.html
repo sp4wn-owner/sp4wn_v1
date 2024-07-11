@@ -13,7 +13,7 @@
       <div class="top-link-bar">
         <ul>
           <li><a href="#" onclick="togglehome()"><i class="fa fa-home" target="_blank"></i></a></li>
-          <li><a href="#" onclick="toggleprofile()"><i class="fa fa-user" target="_blank"></i></a></li>
+          <li><a href="#" onclick="toggleprofile('local')"><i class="fa fa-user" target="_blank"></i></a></li>
           <li><a href="#"><i class="fa fa-search" target="_blank"></i></a></li>
         </ul>
       </div>
@@ -39,17 +39,17 @@
       </div>
 
       <div id="profilepage">
-        <h1>Profile</h1>
+        <div id="profiletitle"></div>
         <div class="stream-container">
           <div id="video-container">
           <video id="localVideo" autoplay></video>
+          <video id="remoteVideo" autoplay></video>
           </div>          
           <button id="goliveBtn">Go Live</button>
           <button id="spawnBtn">Spawn In</button>
         </div>
         <button id="endliveBtn">End Live</button>
         <button id="endotherliveBtn">Stop Watching</button>
-        
       </div>
 
     <footer>
