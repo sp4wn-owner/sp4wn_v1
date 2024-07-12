@@ -1,5 +1,6 @@
 //our username
 var name;
+var username;
 var connectedUser;
 var otheruser;
 
@@ -18,11 +19,11 @@ conn.onmessage = function (msg) {
 
    switch(data.type) {
       case "login":
-         handleLogin(data.success);
+         handleLogin(data.success, data.name);
          break;
       //when somebody wants to call us
       case "offer":
-         handleOffer(data.offer, data.name);
+         handleOffer(data.offer, data.name, data.host);
          break;
       case "answer":
          handleAnswer(data.answer);
@@ -34,11 +35,17 @@ conn.onmessage = function (msg) {
       case "leave":
          handleLeave();
          break;
+      case "remoteleave":
+         handleRemoteLeave();
+         break;
       case "watch":
          watchStream(data.name);
          break;
       case "liveusers":
          handleStreams(data.name);
+         break;
+      case "finalleave":
+         handleFinalLeave();
          break;
       default:
          break;
@@ -120,10 +127,11 @@ loginBtn.addEventListener("click", function (event) {
 
 });
 
-function handleLogin(success) {
+function handleLogin(success, name) {
    if (success === false) {
       alert("Ooops...try a different username");
    } else {
+      username = name;
       console.log(name);
       loginPage.style.display = "none";
       homePage.style.display = "block";
@@ -150,14 +158,14 @@ getstreamsBtn.addEventListener("click", function (event) {
    
       send({
          type: "streams",
-         name: name
+         name: username
       });
    
 
 });
 
 goliveBtn.addEventListener("click", function () {
-  console.log(name +" is going live");
+  console.log(username +" is going live");
   navigator.webkitGetUserMedia({ video: true, audio: false }, (stream) => {
       
      localStream(stream);
@@ -167,10 +175,7 @@ goliveBtn.addEventListener("click", function () {
          endliveBtn.style.display = "block";
          liveVideo = 1;
 
-         send({
-            type: "live",
-            name: name
-         });
+         updatelive("addlive");
       }    
 
    }, function (error) {
@@ -200,20 +205,17 @@ function localStream(stream) {
          }
       };
  }
-
+// stop local stream
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
    console.log(name + " is ending stream");
-
-   try {
-      send({
-         type: "updatelive",
-         name: name
-      });
-   } catch (error) {
-      console.log(error);
-   }
    
+   send({
+      type: "leave",
+      username: username,
+      othername: connectedUser
+   });
+   updatelive('local');
    
    stopStreamedVideo(localVideo);
    toggleprofile('local');
@@ -224,9 +226,10 @@ endotherliveBtn.addEventListener("click", function (event) {
    
    send({
       type: "leave",
-      name: otheruser
+      usernamename: username,
+      othername: connectedUser
    });
-   handleLeave();
+   handleRemoteLeave();
    toggleprofile('remote');
 });
 
@@ -267,11 +270,11 @@ spawnBtn.addEventListener("click", function (event) {
          });
       }
    };
-
+   updatelive('remote');
    
    send({
       type: "watch",
-      name: name,
+      name: username,
       host: connectedUser
    });
    liveremoteVideo = 1;
@@ -291,7 +294,9 @@ function watchStream (name) {
       yourConn.createOffer(function (offer) {
          send({
             type: "offer",
-            offer: offer
+            offer: offer,
+            name: name,
+            host: connectedUser
          });
  
          yourConn.setLocalDescription(offer);
@@ -302,11 +307,37 @@ function watchStream (name) {
    }
  }
 
+ function updatelive(msg) {
+   var data = msg;
+   
+   switch(data) {
+      case "addlive":
+         send({
+            type: "addlive",
+            username: username
+         });
+      break;
+      case "local":
+         send({
+            type: "updatelive",
+            username: username
+         });
+         break;
+
+      case "remote":
+         send({
+            type: "updatelive",
+            username: connectedUser
+         });
+      break;
+   }
+ }
+
 ////////////////////////////////BELOW IS GOOD
 
 //when somebody sends us an offer
-function handleOffer(offer, name) {
-   connectedUser = name;
+function handleOffer(offer) {
+   //connectedUser = host;
    yourConn.setRemoteDescription(new RTCSessionDescription(offer));
 
    //create an answer to an offer
@@ -315,7 +346,9 @@ function handleOffer(offer, name) {
 
       send({
          type: "answer",
-         answer: answer
+         answer: answer,
+         name: username,
+         host: connectedUser
       });
     //  document.getElementById('sdp-answer').value = JSON.stringify(answer)
    }, function (error) {
@@ -336,8 +369,18 @@ function handleCandidate(candidate) {
 
 //hang up
 
-
 function handleLeave() {
+   connectedUser = null;
+
+   //otheruser = null;
+  // remoteVideo.srcObject = null;
+ //  localVideo.srcObject = null;
+   //yourConn.close();
+  // yourConn.onicecandidate = null;
+  // yourConn.onaddstream = null;
+   
+};
+function handleRemoteLeave() {
    connectedUser = null;
    //otheruser = null;
    remoteVideo.srcObject = null;
@@ -345,11 +388,18 @@ function handleLeave() {
    yourConn.close();
    yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
-   
-
-   
+   spawnBtn.style.display = "block";
    
 };
+function handleFinalLeave() {
+   connectedUser = null;
+   remoteVideo.srcObject = null;
+   localVideo.srcObject = null;
+   yourConn.close();
+   yourConn.onicecandidate = null;
+   yourConn.onaddstream = null;
+}
+
 
 function handleStreams(liveusers) {
    var list = [];
@@ -385,7 +435,7 @@ function togglehome() {
    console.log(otheruser);
    send({
       type: "streams",
-      name: name
+      name: username
    });
 }
 

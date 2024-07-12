@@ -45,25 +45,29 @@ wss.on('connection', function(connection) {
 
                sendTo(connection, {
                   type: "login",
-                  success: true
+                  success: true,
+                  name: data.name
                });
             }
 
             break;
          
-         case "live":
+         case "addlive":
             //add user to list of live users
-            liveusers[data.name] = connection;
-            connection.name = data.name;
-            console.log(data.name, " is added to live list");
+            console.log(data.username, " is added to live list");
+            liveusers[data.username] = connection;
+            connection.name = data.username;
+            
 
             break;
 
          case "updatelive":
             //delete user from list of live users
-            if(liveusers[data.name]) {
+            if(liveusers[data.username]) {
                delete liveusers[connection.name];
-               console.log(data.name, " is removed from live list");
+               console.log(data.username, " is removed from live list");
+            } else {
+               console.log(data.username, " is not removed from live list");
             }
             
 
@@ -71,31 +75,35 @@ wss.on('connection', function(connection) {
 
          case "offer":
             //for ex. UserA wants to call UserB
-            console.log("Sending offer to: ", data.name);
+            console.log("Sending offer to: ", data.host);
 
             //if UserB exists then send him offer details
-            var conn = users[data.name];
+            var conn = users[data.host];
 
             if(conn != null) {
                //setting that UserA connected with UserB
-               connection.otherName = data.name;
+               connection.otherName = data.host;
+              // console.log("Offer name: ", connection.name);
+              // console.log("Offer othername to: ", connection.otherName);
 
                sendTo(conn, {
                   type: "offer",
                   offer: data.offer,
-                  name: connection.name
+                  name: connection.name,
+                  host: data.host
                });
             }
 
             break;
 
          case "answer":
-            console.log("Sending answer to: ", data.name);
+            console.log("Sending answer to: ", data.host);
             //for ex. UserB answers UserA
-            var conn = users[data.name];
-
+            var conn = users[data.host];
+            console.log(connection.name + " conn name in answer");
+            console.log(connection.otherName + " other conn name in answer");
             if(conn != null) {
-               connection.otherName = data.name;
+               connection.otherName = data.host;
                sendTo(conn, {
                   type: "answer",
                   answer: data.answer
@@ -131,7 +139,7 @@ wss.on('connection', function(connection) {
              break;
              
          case "watch":
-            console.log("Sending offer to: ", data.name);
+            console.log("Sending offer to: ", data.host);
             var conn = users[data.host];
             if(conn != null) {
                //setting that UserA connected with UserB
@@ -146,9 +154,9 @@ wss.on('connection', function(connection) {
             break;
 
          case "leave":
-            console.log("Disconnecting from", data.name);
-            var conn = users[data.name];
-            conn.otherName = null;
+            console.log("On Leave - disconnecting from", data.othername);
+            var conn = users[data.username];
+            //conn.othername = null;
 
             //notify the other user so he can disconnect his peer connection
             if(conn != null) {
@@ -175,28 +183,18 @@ wss.on('connection', function(connection) {
 
       if(liveusers[connection.name]) {
          delete liveusers[connection.name];
+         console.log("Deleting live user ", connection.name);
       }
       if(connection.name) {
+         console.log("Deleting user ", connection.name);
          delete users[connection.name];
+         
       
          if(connection.otherName ) {
-            console.log("Disconnecting from ", connection.otherName);
+            console.log("On Close - disconnecting from ", connection.otherName);
             var conn = users[connection.otherName];
+               conn.otherName = null;
            
-            if(conn.otherName) {
-               try {
-                  conn.otherName = null;
-               } catch (error) {
-                  console.log(error);
-               }
-               
-               }
-               
-            if(conn != null) {
-               sendTo(conn, {
-                  type: "leave"
-               });
-            }
          }
       }
    });
