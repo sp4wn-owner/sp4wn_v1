@@ -78,6 +78,7 @@ var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
 var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
+var allPages = document.querySelector('#allpages');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
 var profileTitle = document.querySelector('#profiletitle');
@@ -106,10 +107,9 @@ var configuration = {
     };
 
 function init() {
-   
    loginPage.style.display = "block";
-   homePage.style.display = "none";
-   profilePage.style.display = "none";
+   allPages.style.display = "none";
+   
    
 };
 
@@ -134,6 +134,7 @@ function handleLogin(success, name) {
       username = name;
       console.log(name);
       loginPage.style.display = "none";
+      allPages.style.display = "block";
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
        
