@@ -159,24 +159,8 @@ getstreamsBtn.addEventListener("click", function (event) {
 goliveBtn.addEventListener("click", function () {
   console.log(name +" is going live");
   navigator.webkitGetUserMedia({ video: true, audio: false }, (stream) => {
-     yourConn = new RTCPeerConnection(configuration);
-     
-     //displaying local video stream on the page
-     localVideo.srcObject = stream
-
-     stream.getTracks().forEach((track) => {
-      yourConn.addTrack(track, stream);
-      });
-
-       // Setup ice handling
-       yourConn.onicecandidate = function (event) {
-         if (event.candidate) {
-            send({
-               type: "candidate",
-               candidate: event.candidate
-            });
-         }
-      };
+      
+     localStream(stream);
 
       if(localVideo) {
          goliveBtn.style.display = "none";
@@ -195,22 +179,52 @@ goliveBtn.addEventListener("click", function () {
 
 });
 
+// Local stream
+function localStream(stream) {
+   yourConn = new RTCPeerConnection(configuration);
+     
+     //displaying local video stream on the page
+     localVideo.srcObject = stream
+
+     stream.getTracks().forEach((track) => {
+      yourConn.addTrack(track, stream);
+      });
+
+       // Setup ice handling
+       yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
+ }
+
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
-   console.log(name + "is ending stream");
-   send({
-      type: "updatelive",
-      name: name
-   });
+   console.log(name + " is ending stream");
+
+   try {
+      send({
+         type: "updatelive",
+         name: name
+      });
+   } catch (error) {
+      console.log(error);
+   }
+   
    
    stopStreamedVideo(localVideo);
    toggleprofile('local');
 });
+// stop remote stream
 endotherliveBtn.addEventListener("click", function (event) {
    liveremoteVideo = 0;
    
    send({
       type: "leave",
+      name: otheruser
    });
    handleLeave();
    toggleprofile('remote');
@@ -218,9 +232,10 @@ endotherliveBtn.addEventListener("click", function (event) {
 
 // stop local stream
 function stopStreamedVideo(localVideo) {
-   const stream = localVideo.srcObject;
-   const tracks = stream.getTracks();
    try {
+      const stream = localVideo.srcObject;
+      const tracks = stream.getTracks();
+      
       tracks.forEach((track) => {
          track.stop();
        });
@@ -234,6 +249,7 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {
+   connectedUser = otheruser;
    yourConn = new RTCPeerConnection(configuration);
    stream = new MediaStream()
    remoteVideo.srcObject = stream
@@ -251,8 +267,8 @@ spawnBtn.addEventListener("click", function (event) {
          });
       }
    };
+
    
-   connectedUser = otheruser;
    send({
       type: "watch",
       name: name,
@@ -323,12 +339,15 @@ function handleCandidate(candidate) {
 
 function handleLeave() {
    connectedUser = null;
+   //otheruser = null;
    remoteVideo.srcObject = null;
-   localVideo.srcObject = null;
-
+ //  localVideo.srcObject = null;
    yourConn.close();
    yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
+   
+
+   
    
 };
 

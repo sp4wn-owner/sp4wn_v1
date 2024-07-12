@@ -184,7 +184,12 @@ wss.on('connection', function(connection) {
             var conn = users[connection.otherName];
            
             if(conn.otherName) {
-               conn.otherName = null;
+               try {
+                  conn.otherName = null;
+               } catch (error) {
+                  console.log(error);
+               }
+               
                }
                
             if(conn != null) {
