@@ -128,20 +128,8 @@ function handleLogin(success) {
       loginPage.style.display = "none";
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
-
-      yourConn = new RTCPeerConnection(configuration);
-
        
-       // Setup ice handling
-       yourConn.onicecandidate = function (event) {
-         if (event.candidate) {
-            send({
-               type: "candidate",
-               candidate: event.candidate
-            });
-         }
-      };
-   
+        
       send({
          type: "streams",
          name: name
@@ -171,7 +159,7 @@ getstreamsBtn.addEventListener("click", function (event) {
 goliveBtn.addEventListener("click", function () {
   console.log(name +" is going live");
   navigator.webkitGetUserMedia({ video: true, audio: false }, (stream) => {
-     
+     yourConn = new RTCPeerConnection(configuration);
      
      //displaying local video stream on the page
      localVideo.srcObject = stream
@@ -179,6 +167,16 @@ goliveBtn.addEventListener("click", function () {
      stream.getTracks().forEach((track) => {
       yourConn.addTrack(track, stream);
       });
+
+       // Setup ice handling
+       yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
 
       if(localVideo) {
          goliveBtn.style.display = "none";
@@ -236,12 +234,24 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {
+   yourConn = new RTCPeerConnection(configuration);
    stream = new MediaStream()
    remoteVideo.srcObject = stream
    //when a remote user adds stream to the peer connection, we display it
    yourConn.onaddstream = function (e) {
    remoteVideo.srcObject = e.stream
    }
+
+    // Setup ice handling
+    yourConn.onicecandidate = function (event) {
+      if (event.candidate) {
+         send({
+            type: "candidate",
+            candidate: event.candidate
+         });
+      }
+   };
+   
    connectedUser = otheruser;
    send({
       type: "watch",
