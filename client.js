@@ -127,19 +127,38 @@ function handleLogin(success) {
       console.log(name);
       loginPage.style.display = "none";
       homePage.style.display = "block";
-
       liveStreams.innerHTML = "";
+
+      yourConn = new RTCPeerConnection(configuration);
+
+       
+       // Setup ice handling
+       yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
    
       send({
          type: "streams",
          name: name
       });
-      
+            
     }
 };
 
 getstreamsBtn.addEventListener("click", function (event) {
    liveStreams.innerHTML = "";
+
+      if(connectedUser != null) {
+         send({
+            type: "leave",
+         });
+         handleLeave();
+      }
    
       send({
          type: "streams",
@@ -152,7 +171,7 @@ getstreamsBtn.addEventListener("click", function (event) {
 goliveBtn.addEventListener("click", function () {
   console.log(name +" is going live");
   navigator.webkitGetUserMedia({ video: true, audio: false }, (stream) => {
-     yourConn = new RTCPeerConnection();
+     
      
      //displaying local video stream on the page
      localVideo.srcObject = stream
@@ -170,103 +189,92 @@ goliveBtn.addEventListener("click", function () {
             type: "live",
             name: name
          });
+      }    
 
-         //when a remote user adds stream to the peer connection, we display it
-         yourConn.doAddStream = function (e) {
-         remoteVideo.srcObject = window.URL.createObjectURL(e.stream)
-         }
-
-         // Setup ice handling
-         yourConn.onicecandidate = function (event) {
-         if (event.candidate) {
-            send({
-               type: "candidate",
-               candidate: event.candidate
-            });
-         }
-      };
-     
-
-   }}, function (error) {
+   }, function (error) {
       console.log(error);
    });
 
 });
 
 endliveBtn.addEventListener("click", function (event) {
-   stopStreamedVideo(localVideo);
-   yourConn.onicecandidate = null;
-   yourConn.onaddstream = null;
-   goliveBtn.style.display = "block";
-   endliveBtn.style.display = "none";
    liveVideo = 0;
-   
+   console.log(name + "is ending stream");
    send({
       type: "updatelive",
       name: name
    });
-
+   
+   stopStreamedVideo(localVideo);
+   toggleprofile('local');
+});
+endotherliveBtn.addEventListener("click", function (event) {
+   liveremoteVideo = 0;
+   
+   send({
+      type: "leave",
+   });
+   handleLeave();
+   toggleprofile('remote');
 });
 
-// stop stream
+// stop local stream
 function stopStreamedVideo(localVideo) {
    const stream = localVideo.srcObject;
    const tracks = stream.getTracks();
- 
-   tracks.forEach((track) => {
-     track.stop();
-   });
+   try {
+      tracks.forEach((track) => {
+         track.stop();
+       });
+   } catch (error) {
+      console.log(error);
+      toggleprofile('local');
+   }
  
    localVideo.srcObject = null;
  }
 
-function watchStream (name) {
-  clientName = name;
-  var callToUsername = clientName;
-
-  if (callToUsername.length > 0) {
-
-     connectedUser = callToUsername;
-
-     // create an offer
-     yourConn.createOffer(function (offer) {
-        send({
-           type: "offer",
-           offer: offer
-        });
-
-        yourConn.setLocalDescription(offer);
-     }, function (error) {
-        alert("Error when creating an offer");
-     });
-
-  };
-};
 
 spawnBtn.addEventListener("click", function (event) {
-   clientName = event;
-  var callToUsername = clientName;
-
-  if (callToUsername.length > 0) {
-
-     connectedUser = callToUsername;
-
-     // create an offer
-     yourConn.createOffer(function (offer) {
-        send({
-           type: "offer",
-           offer: offer
-        });
-
-        yourConn.setLocalDescription(offer);
-     }, function (error) {
-        alert("Error when creating an offer");
-     });
-     
-   };
-   
+   stream = new MediaStream()
+   remoteVideo.srcObject = stream
+   //when a remote user adds stream to the peer connection, we display it
+   yourConn.onaddstream = function (e) {
+   remoteVideo.srcObject = e.stream
+   }
+   connectedUser = otheruser;
+   send({
+      type: "watch",
+      name: name,
+      host: connectedUser
+   });
+   liveremoteVideo = 1;
+   toggleprofile('remote');
 
 });
+
+function watchStream (name) {
+   clientName = name;
+   var callToUsername = clientName;
+ 
+   if (callToUsername.length > 0) {
+ 
+      connectedUser = callToUsername;
+ 
+      // create an offer
+      yourConn.createOffer(function (offer) {
+         send({
+            type: "offer",
+            offer: offer
+         });
+ 
+         yourConn.setLocalDescription(offer);
+      }, function (error) {
+         alert("Error when creating an offer");
+      });
+ 
+   }
+ }
 
 ////////////////////////////////BELOW IS GOOD
 
@@ -287,6 +295,7 @@ function handleOffer(offer, name) {
    }, function (error) {
       alert("Error when creating an answer");
    });
+   //toggleprofile('remote');
 };
 
 //when we got an answer from a remote user
@@ -304,13 +313,13 @@ function handleCandidate(candidate) {
 
 function handleLeave() {
    connectedUser = null;
+   remoteVideo.srcObject = null;
    localVideo.srcObject = null;
 
    yourConn.close();
    yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
-
-   goliveBtn.style.display = "block";
+   
 };
 
 function handleStreams(liveusers) {
@@ -357,6 +366,7 @@ function toggleprofile(msg) {
    homePage.style.display = "none";
    console.log(liveVideo);
    console.log(otheruser);
+   console.log(liveremoteVideo);
    switch(data) {
       case "local":
          profileTitle.innerHTML = name;
@@ -382,7 +392,7 @@ function toggleprofile(msg) {
             localVideo.style.display = "none";
             goliveBtn.style.display = "none";
             endliveBtn.style.display = "none";
-            if (remoteVideo == 1) {
+            if (liveremoteVideo == 1) {
                spawnBtn.style.display = "none";
                endotherliveBtn.style.display = "block";
             } else {

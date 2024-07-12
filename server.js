@@ -117,14 +117,29 @@ wss.on('connection', function(connection) {
 
             break;
 
-            case "streams":
-            console.log("Sending all streams to:",data.name);
-            var conn = users[data.name];
+         case "streams":
+         console.log("Sending all streams to:",data.name);
+         var conn = users[data.name];
 
+         if(conn != null) {
+            sendTo(conn, {
+               type: "liveusers",
+               name: liveusers
+            });
+         }
+
+             break;
+             
+         case "watch":
+            console.log("Sending offer to: ", data.name);
+            var conn = users[data.host];
             if(conn != null) {
+               //setting that UserA connected with UserB
+               connection.otherName = data.host;
+
                sendTo(conn, {
-                  type: "liveusers",
-                  name: liveusers
+                  type: "watch",
+                  name: connection.name
                });
             }
 
@@ -162,14 +177,16 @@ wss.on('connection', function(connection) {
          delete liveusers[connection.name];
       }
       if(connection.name) {
-      delete users[connection.name];
+         delete users[connection.name];
       
-
-         if(connection.otherName) {
+         if(connection.otherName ) {
             console.log("Disconnecting from ", connection.otherName);
             var conn = users[connection.otherName];
-            conn.otherName = null;
-
+           
+            if(conn.otherName) {
+               conn.otherName = null;
+               }
+               
             if(conn != null) {
                sendTo(conn, {
                   type: "leave"
