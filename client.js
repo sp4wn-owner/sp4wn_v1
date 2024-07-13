@@ -78,7 +78,6 @@ var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
 var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
-var allPages = document.querySelector('#allpages');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
 var profileTitle = document.querySelector('#profiletitle');
@@ -108,10 +107,10 @@ var configuration = {
 
 function init() {
    loginPage.style.display = "block";
-   allPages.style.display = "none";
+   homePage.style.display = "none";
+   profilePage.style.display = "none";
    
-   
-};
+   };
 
 
 // Login when the user clicks the button
@@ -134,15 +133,10 @@ function handleLogin(success, name) {
       username = name;
       console.log(name);
       loginPage.style.display = "none";
-      allPages.style.display = "block";
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
-       
-        
-      send({
-         type: "streams",
-         name: name
-      });
+
+      getstreamsBtn.click();
             
     }
 };
@@ -159,7 +153,7 @@ getstreamsBtn.addEventListener("click", function (event) {
    
       send({
          type: "streams",
-         name: username
+         username: username
       });
    
 
@@ -224,12 +218,7 @@ endliveBtn.addEventListener("click", function (event) {
 // stop remote stream
 endotherliveBtn.addEventListener("click", function (event) {
    liveremoteVideo = 0;
-   
-   send({
-      type: "leave",
-      usernamename: username,
-      othername: connectedUser
-   });
+   updatelive('remoteadd');
    handleRemoteLeave();
    toggleprofile('remote');
 });
@@ -271,7 +260,7 @@ spawnBtn.addEventListener("click", function (event) {
          });
       }
    };
-   updatelive('remote');
+   updatelive('remotedelete');
    
    send({
       type: "watch",
@@ -325,9 +314,15 @@ function watchStream (name) {
          });
          break;
 
-      case "remote":
+      case "remotedelete":
          send({
             type: "updatelive",
+            username: connectedUser
+         });
+      break;
+      case "remoteadd":
+         send({
+            type: "addlive",
             username: connectedUser
          });
       break;
@@ -382,14 +377,20 @@ function handleLeave() {
    
 };
 function handleRemoteLeave() {
-   connectedUser = null;
-   //otheruser = null;
+   send({
+      type: "leave",
+      username: username,
+      othername: connectedUser
+   });
+   
    remoteVideo.srcObject = null;
  //  localVideo.srcObject = null;
    yourConn.close();
    yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
    spawnBtn.style.display = "block";
+   
+   
    
 };
 function handleFinalLeave() {
@@ -403,13 +404,14 @@ function handleFinalLeave() {
 
 
 function handleStreams(liveusers) {
-   var list = [];
-   list = Object.values(liveusers);
+   var list = liveusers;
+   //list = Object.values(liveusers);
    //otheruser = "";
    
    console.log(list.length);
    for (let i = 0; i < list.length; i++) {
-      var text = list[i].name.toString();
+      //var text = list[i].name.toString();
+      var text = list[i];
       liveStreams.innerHTML += "<a href ='#'>" + text + "</a>"; 
       console.log(text);
    }  
@@ -422,69 +424,72 @@ liveStreams.addEventListener("click", function (event) {
 
 });
 function checkProfile (userdata) {
-   console.log(userdata);
-   otheruser = userdata;
-   console.log(otheruser);
+   otheruser = userdata;   
    toggleprofile('remote');
 }
 
 function togglehome() {
-   profilePage.style.display = "none";
-   homePage.style.display = "block";
-   liveStreams.innerHTML = "";
-   otheruser = "";
-   console.log(otheruser);
-   send({
-      type: "streams",
-      name: username
-   });
+   if (username) {
+      profilePage.style.display = "none";
+      homePage.style.display = "block";
+      liveStreams.innerHTML = "";
+      otheruser = "";
+      console.log(otheruser);
+      getstreamsBtn.click();
+   } else {
+      init();
+   }
+ 
 }
 
 function toggleprofile(msg) {
-   var data = msg;
-   profilePage.style.display = "block";
-   homePage.style.display = "none";
-   console.log(liveVideo);
-   console.log(otheruser);
-   console.log(liveremoteVideo);
-   switch(data) {
-      case "local":
-         profileTitle.innerHTML = name;
-         remoteVideo.style.display = "none";
-         localVideo.style.display = "block";
-         spawnBtn.style.display = "none";
-         endotherliveBtn.style.display = "none";
-         if (liveVideo == 1) {
-            goliveBtn.style.display = "none";
-            endliveBtn.style.display = "block";
-         } else {
-            goliveBtn.style.display = "block";
-            endliveBtn.style.display = "none";
-         }
-         break;
-
-      case "remote":
-         if (otheruser == name) {
-            toggleprofile('local');
-         } else {
-            profileTitle.innerHTML = otheruser;
-            remoteVideo.style.display = "block";
-            localVideo.style.display = "none";
-            goliveBtn.style.display = "none";
-            endliveBtn.style.display = "none";
-            if (liveremoteVideo == 1) {
-               spawnBtn.style.display = "none";
-               endotherliveBtn.style.display = "block";
+   if (username) {
+      var data = msg;
+      profilePage.style.display = "block";
+      homePage.style.display = "none";
+      console.log(liveVideo);
+      console.log(otheruser);
+      console.log(liveremoteVideo);
+      switch(data) {
+         case "local":
+            profileTitle.innerHTML = username;
+            remoteVideo.style.display = "none";
+            localVideo.style.display = "block";
+            spawnBtn.style.display = "none";
+            endotherliveBtn.style.display = "none";
+            if (liveVideo == 1) {
+               goliveBtn.style.display = "none";
+               endliveBtn.style.display = "block";
             } else {
-               spawnBtn.style.display = "block";
-               endotherliveBtn.style.display = "none";
+               goliveBtn.style.display = "block";
+               endliveBtn.style.display = "none";
             }
-            
+            break;
+   
+         case "remote":
+            if (otheruser == username) {
+               toggleprofile('local');
+            } else {
+               profileTitle.innerHTML = otheruser;
+               remoteVideo.style.display = "block";
+               localVideo.style.display = "none";
+               goliveBtn.style.display = "none";
+               endliveBtn.style.display = "none";
+               if (liveremoteVideo == 1) {
+                  spawnBtn.style.display = "none";
+                  endotherliveBtn.style.display = "block";
+               } else {
+                  spawnBtn.style.display = "block";
+                  endotherliveBtn.style.display = "none";
+               }
+               
+            }
          }
-      break;
+         
+      } else {
+         init();
+      }
    }
-      
-}
 
 init();
 

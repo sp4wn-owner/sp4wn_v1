@@ -6,7 +6,7 @@ var wss = new WebSocketServer({port: 9090});
 
 //all connected to the server users
 var users = {};
-var liveusers = {};
+var liveusers = [];
 
 //when a user connects to our sever
 wss.on('connection', function(connection) {
@@ -54,17 +54,29 @@ wss.on('connection', function(connection) {
          
          case "addlive":
             //add user to list of live users
-            console.log(data.username, " is added to live list");
-            liveusers[data.username] = connection;
-            connection.name = data.username;
+            console.log(data.username, " is being to live list");
+            var a = {name: data.username};
+            JSON.stringify(a);
+            liveusers.push(a.name);
+
+            console.log(a.name, " is added to live list");
+           // liveusers[data.username] = connection;
+           // connection.name = data.username;
             
 
             break;
 
          case "updatelive":
-            //delete user from list of live users
-            if(liveusers[data.username]) {
-               delete liveusers[connection.name];
+            console.log(data.username);
+            var a = data.username;
+            //console.log(liveusers[a.name]);
+            if(liveusers.includes(a)) {
+               var index = liveusers.indexOf(a);
+               if (index !== -1) {
+                  liveusers.splice(index, 1);
+              }
+               
+               //liveusers[data.username];
                console.log(data.username, " is removed from live list");
             } else {
                console.log(data.username, " is not removed from live list");
@@ -126,8 +138,8 @@ wss.on('connection', function(connection) {
             break;
 
          case "streams":
-         console.log("Sending all streams to:",data.name);
-         var conn = users[data.name];
+         console.log("Sending all streams to:",data.username);
+         var conn = users[data.username];
 
          if(conn != null) {
             sendTo(conn, {
@@ -154,16 +166,27 @@ wss.on('connection', function(connection) {
             break;
 
          case "leave":
-            console.log("On Leave - disconnecting from", data.othername);
-            var conn = users[data.username];
-            //conn.othername = null;
+            if (data.otherName) {
+               console.log("On Leave - disconnecting from", data.othername);
+               var conn = users[data.username];
+               conn.otherName = null;
 
-            //notify the other user so he can disconnect his peer connection
-            if(conn != null) {
-               sendTo(conn, {
-                  type: "leave"
-               });
+               //notify the other user so he can disconnect his peer connection
+               if(conn != null) {
+                  sendTo(conn, {
+                     type: "leave"
+                  });
+               }
+
+            } else {
+               console.log("On Leave - closing stream", data.username);
+               
+               
             }
+            
+            
+
+            
 
             break;
 
@@ -183,10 +206,10 @@ wss.on('connection', function(connection) {
 
       if(liveusers[connection.name]) {
          delete liveusers[connection.name];
-         console.log("Deleting live user ", connection.name);
+         console.log("On Close-deleting live user ", connection.name);
       }
       if(connection.name) {
-         console.log("Deleting user ", connection.name);
+         console.log("On Close- deleting user ", connection.name);
          delete users[connection.name];
          
       

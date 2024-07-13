@@ -61,10 +61,6 @@ body {
   margin: 1.5% auto;
 }
 
-#video-container {
-
-}
-
 video {
   background: gray;
   border: 2px solid green;
@@ -75,12 +71,6 @@ video {
   margin: 0 auto;
 }
 
-#admin-button-container {
-
-}
-#viewer-button-container {
-
-}
 #goliveBtn, #spawnBtn {
   margin: 0;
   position: absolute;
