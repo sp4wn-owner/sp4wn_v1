@@ -54,32 +54,23 @@ wss.on('connection', function(connection) {
          
          case "addlive":
             //add user to list of live users
-            console.log(data.username, " is being to live list");
             var a = {name: data.username};
             JSON.stringify(a);
             liveusers.push(a.name);
-
             console.log(a.name, " is added to live list");
-           // liveusers[data.username] = connection;
-           // connection.name = data.username;
-            
 
             break;
 
          case "updatelive":
-            console.log(data.username);
             var a = data.username;
-            //console.log(liveusers[a.name]);
             if(liveusers.includes(a)) {
                var index = liveusers.indexOf(a);
                if (index !== -1) {
                   liveusers.splice(index, 1);
               }
-               
-               //liveusers[data.username];
-               console.log(data.username, " is removed from live list");
+               console.log(a, " is removed from live list");
             } else {
-               console.log(data.username, " is not removed from live list");
+               console.log(a, " is not removed from live list");
             }
             
 
@@ -95,8 +86,6 @@ wss.on('connection', function(connection) {
             if(conn != null) {
                //setting that UserA connected with UserB
                connection.otherName = data.host;
-              // console.log("Offer name: ", connection.name);
-              // console.log("Offer othername to: ", connection.otherName);
 
                sendTo(conn, {
                   type: "offer",
@@ -112,8 +101,6 @@ wss.on('connection', function(connection) {
             console.log("Sending answer to: ", data.host);
             //for ex. UserB answers UserA
             var conn = users[data.host];
-            console.log(connection.name + " conn name in answer");
-            console.log(connection.otherName + " other conn name in answer");
             if(conn != null) {
                connection.otherName = data.host;
                sendTo(conn, {
@@ -184,10 +171,7 @@ wss.on('connection', function(connection) {
                
             }
             
-            
-
-            
-
+   
             break;
 
          default:
@@ -204,9 +188,14 @@ wss.on('connection', function(connection) {
    //this may help if we are still in "offer","answer" or "candidate" state
    connection.on("close", function() {
 
-      if(liveusers[connection.name]) {
-         delete liveusers[connection.name];
-         console.log("On Close-deleting live user ", connection.name);
+      var a = connection.name;
+            //console.log(liveusers[a.name]);
+      if(liveusers.includes(a)) {
+         var index = liveusers.indexOf(a);
+         if (index !== -1) {
+            liveusers.splice(index, 1);
+            console.log("On Close-deleting live user ", connection.name);
+         }
       }
       if(connection.name) {
          console.log("On Close- deleting user ", connection.name);
@@ -217,7 +206,6 @@ wss.on('connection', function(connection) {
             console.log("On Close - disconnecting from ", connection.otherName);
             var conn = users[connection.otherName];
                conn.otherName = null;
-           
          }
       }
    });

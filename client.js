@@ -131,7 +131,6 @@ function handleLogin(success, name) {
       alert("Ooops...try a different username");
    } else {
       username = name;
-      console.log(name);
       loginPage.style.display = "none";
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
@@ -147,6 +146,8 @@ getstreamsBtn.addEventListener("click", function (event) {
       if(connectedUser != null) {
          send({
             type: "leave",
+            othername: connectedUser,
+            username: username
          });
          handleLeave();
       }
@@ -203,7 +204,7 @@ function localStream(stream) {
 // stop local stream
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
-   console.log(name + " is ending stream");
+   console.log(username + " is ending stream");
    
    send({
       type: "leave",
@@ -320,12 +321,7 @@ function watchStream (name) {
             username: connectedUser
          });
       break;
-      case "remoteadd":
-         send({
-            type: "addlive",
-            username: connectedUser
-         });
-      break;
+      
    }
  }
 
@@ -368,12 +364,20 @@ function handleCandidate(candidate) {
 function handleLeave() {
    connectedUser = null;
 
-   //otheruser = null;
-  // remoteVideo.srcObject = null;
- //  localVideo.srcObject = null;
-   //yourConn.close();
-  // yourConn.onicecandidate = null;
-  // yourConn.onaddstream = null;
+   if (liveVideo == 1) {
+      updatelive('addlive');
+   } 
+   
+   if (liveremoteVideo == 1) {
+      liveremoteVideo = 0;
+      remoteVideo.srcObject = null;
+      yourConn.close();
+      yourConn.onicecandidate = null;
+      yourConn.onaddstream = null;
+      spawnBtn.style.display = "block";
+      //toggleprofile('remote');
+   }
+
    
 };
 function handleRemoteLeave() {
@@ -382,7 +386,7 @@ function handleRemoteLeave() {
       username: username,
       othername: connectedUser
    });
-   
+   connectedUser = null;
    remoteVideo.srcObject = null;
  //  localVideo.srcObject = null;
    yourConn.close();
@@ -408,21 +412,20 @@ function handleStreams(liveusers) {
    //list = Object.values(liveusers);
    //otheruser = "";
    
-   console.log(list.length);
    for (let i = 0; i < list.length; i++) {
       //var text = list[i].name.toString();
       var text = list[i];
       liveStreams.innerHTML += "<a href ='#'>" + text + "</a>"; 
       console.log(text);
    }  
-
 }
+
 liveStreams.addEventListener("click", function (event) {
    var val = event.target.innerHTML;
-   console.log(val);
    checkProfile(val);     
 
 });
+
 function checkProfile (userdata) {
    otheruser = userdata;   
    toggleprofile('remote');
@@ -430,11 +433,9 @@ function checkProfile (userdata) {
 
 function togglehome() {
    if (username) {
-      profilePage.style.display = "none";
       homePage.style.display = "block";
+      profilePage.style.display = "none";
       liveStreams.innerHTML = "";
-      otheruser = "";
-      console.log(otheruser);
       getstreamsBtn.click();
    } else {
       init();
@@ -447,23 +448,25 @@ function toggleprofile(msg) {
       var data = msg;
       profilePage.style.display = "block";
       homePage.style.display = "none";
-      console.log(liveVideo);
-      console.log(otheruser);
-      console.log(liveremoteVideo);
       switch(data) {
          case "local":
-            profileTitle.innerHTML = username;
-            remoteVideo.style.display = "none";
-            localVideo.style.display = "block";
-            spawnBtn.style.display = "none";
-            endotherliveBtn.style.display = "none";
-            if (liveVideo == 1) {
-               goliveBtn.style.display = "none";
-               endliveBtn.style.display = "block";
+            if (liveremoteVideo == 1) {
+               toggleprofile('remote');
             } else {
-               goliveBtn.style.display = "block";
-               endliveBtn.style.display = "none";
+               profileTitle.innerHTML = username;
+               remoteVideo.style.display = "none";
+               localVideo.style.display = "block";
+               spawnBtn.style.display = "none";
+               endotherliveBtn.style.display = "none";
+               if (liveVideo == 1) {
+                  goliveBtn.style.display = "none";
+                  endliveBtn.style.display = "block";
+               } else {
+                  goliveBtn.style.display = "block";
+                  endliveBtn.style.display = "none";
+               }
             }
+            
             break;
    
          case "remote":
