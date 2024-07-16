@@ -55,9 +55,13 @@ wss.on('connection', function(connection) {
          case "addlive":
             //add user to list of live users
             var a = {name: data.username};
-            JSON.stringify(a);
-            liveusers.push(a.name);
-            console.log(a.name, " is added to live list");
+            var a = data.username;
+            if(liveusers.includes(a)) {
+               console.log(a, " is already live");
+              } else {
+               liveusers.push(a);
+               console.log(a, " is added to live list");
+              }
 
             break;
 
@@ -70,7 +74,7 @@ wss.on('connection', function(connection) {
               }
                console.log(a, " is removed from live list");
             } else {
-               console.log(a, " is not removed from live list");
+               console.log(a, " is no longer live");
             }
             
 
@@ -153,25 +157,26 @@ wss.on('connection', function(connection) {
             break;
 
          case "leave":
-            if (data.otherName) {
-               console.log("On Leave - disconnecting from", data.othername);
-               var conn = users[data.username];
-               conn.otherName = null;
-
+            console.log("On leave - closing stream", data.username);
+            if(connection.otherName ) {
+               console.log("On leave - disconnecting from", connection.otherName);
+               var conn = users[connection.otherName];
                //notify the other user so he can disconnect his peer connection
                if(conn != null) {
                   sendTo(conn, {
                      type: "leave"
                   });
+               } if (conn != null) {
+                  try {
+                     conn.otherName = null;
+                  } catch (error) {
+                     console.log(error);
+                  }
                }
-
-            } else {
-               console.log("On Leave - closing stream", data.username);
                
                
             }
             
-   
             break;
 
          default:
@@ -194,18 +199,25 @@ wss.on('connection', function(connection) {
          var index = liveusers.indexOf(a);
          if (index !== -1) {
             liveusers.splice(index, 1);
-            console.log("On Close-deleting live user ", connection.name);
+            console.log("On Close-deleting live user", connection.name);
          }
       }
       if(connection.name) {
-         console.log("On Close- deleting user ", connection.name);
+         console.log("On Close- deleting user", connection.name);
          delete users[connection.name];
          
       
          if(connection.otherName ) {
-            console.log("On Close - disconnecting from ", connection.otherName);
+            console.log("On Close - disconnecting from", connection.otherName);
             var conn = users[connection.otherName];
-               conn.otherName = null;
+            //notify the other user so he can disconnect his peer connection
+            if(conn != null) {
+               sendTo(conn, {
+                  type: "leave"
+               });
+            }
+           //conn.otherName = null;
+           //ended stream > closed b 
          }
       }
    });

@@ -218,10 +218,15 @@ endliveBtn.addEventListener("click", function (event) {
 });
 // stop remote stream
 endotherliveBtn.addEventListener("click", function (event) {
-   liveremoteVideo = 0;
-   updatelive('remoteadd');
-   handleRemoteLeave();
-   toggleprofile('remote');
+   if (liveremoteVideo == 1) {
+      liveremoteVideo = 0;
+      updatelive('addremotelive');
+      handleRemoteLeave();
+      toggleprofile('remote');
+   } else {
+      updatelive('addremotelive');
+      
+   }
 });
 
 // stop local stream
@@ -308,6 +313,12 @@ function watchStream (name) {
             username: username
          });
       break;
+      case "addremotelive":
+         send({
+            type: "addlive",
+            username: connectedUser
+         });
+      break;
       case "local":
          send({
             type: "updatelive",
@@ -361,11 +372,11 @@ function handleCandidate(candidate) {
 
 //hang up
 
-function handleLeave() {
-   connectedUser = null;
+function handleLeave() {   
 
    if (liveVideo == 1) {
       updatelive('addlive');
+      connectedUser = null;
    } 
    
    if (liveremoteVideo == 1) {
@@ -374,8 +385,15 @@ function handleLeave() {
       yourConn.close();
       yourConn.onicecandidate = null;
       yourConn.onaddstream = null;
-      spawnBtn.style.display = "block";
-      //toggleprofile('remote');
+      toggleprofile('local');
+      if(connectedUser != null) {
+         send({
+            type: "leave",
+            othername: connectedUser,
+            username: username
+         });
+         connectedUser = null;
+      }
    }
 
    

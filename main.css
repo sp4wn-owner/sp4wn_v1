@@ -29,12 +29,6 @@ body {
   text-transform: uppercase;
 }
 
-@media screen and (max-width:800px) {
-    body{
-        width:100%;
-    }
-}
-
 #livestreams a {
   display: inline-block;
   padding: 25px;
@@ -88,4 +82,11 @@ video {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+@media screen and (max-width:800px) {
+  #localVideo, #remoteVideo {
+    width: 100%;
+    
+  }
 }

@@ -14,7 +14,7 @@
         <ul>
           <li><a href="#" onclick="togglehome()"><i class="fa fa-home" target="_blank"></i></a></li>
           <li><a href="#" onclick="toggleprofile('local')"><i class="fa fa-user" target="_blank"></i></a></li>
-          <li><a href="#"><i class="fa fa-search" target="_blank"></i></a></li>
+          <li><a href="#" onclick="toggleprofile('local')"><i class="fa fa-gear" target="_blank"></i></a></li>
         </ul>
       </div>
     </header>
@@ -33,17 +33,13 @@
       </div>
       
         <div id="homepage">
-          <h1>Homepage</h1>
-          <div id="livestreams">
-            <a href=""></a>
-                     
-          </div>
-          
+          <h1>Live Users</h1><br>
+          <div id="livestreams"></div><br>
           <button id="getstreamsbtn">Get Streams</button>
         </div>
   
         <div id="profilepage">
-          <div id="profiletitle"></div>
+          <div id="profiletitle"></div><br>
           <div class="stream-container">
             <div id="video-container">
             <video id="localVideo" autoplay></video>
