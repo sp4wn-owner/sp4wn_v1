@@ -6,6 +6,7 @@ var otheruser;
 
 //connecting to our signaling server
 var conn = new WebSocket('ws://localhost:9090');
+//var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
 conn.onopen = function () {
    console.log("Connected to the signaling server");
