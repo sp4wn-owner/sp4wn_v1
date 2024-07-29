@@ -6,7 +6,7 @@ var otheruser;
 
 //connecting to our signaling server
 //var conn = new WebSocket('ws://10.0.0.30:9090');
-var conn = new WebSocket('ws://0.0.0.0:9090');
+var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
 conn.onopen = function () {
