@@ -171,6 +171,9 @@ footer {
   body {
     font-size: 16px;
   }
+  .login-container {
+    padding: 10px;
+  }
   #localVideo, #remoteVideo {
     width: 100%;
     
