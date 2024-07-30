@@ -172,7 +172,8 @@ footer {
     font-size: 16px;
   }
   .login-container {
-    padding: 10px;
+    
+    width: 90%;
   }
   #localVideo, #remoteVideo {
     width: 100%;
@@ -183,8 +184,5 @@ footer {
   }
   .footer-social {
     padding-left: 10px;
-  }
-  .login-container {
-    width: 90%;
   }
 }
