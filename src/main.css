@@ -184,4 +184,7 @@ footer {
   .footer-social {
     padding-left: 10px;
   }
+  .login-container {
+    width: 90%;
+  }
 }
