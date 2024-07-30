@@ -52,3 +52,11 @@ button:hover {
 .hidden {
   display: none;
 }
+
+@media screen and (max-width:600px) {
+
+  .login-container {
+    width: 70%;
+  }
+
+}
