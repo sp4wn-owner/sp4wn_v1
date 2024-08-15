@@ -238,6 +238,41 @@ function localStream(stream) {
             });
          }
       };
+
+      // Monitor ICE connection state changes
+      yourConn.oniceconnectionstatechange = () => {
+         const iceConnectionState = yourConn.iceConnectionState;
+         console.log('ICE Connection State changed to:', iceConnectionState);
+         
+         // Handle different states
+         switch (iceConnectionState) {
+            case 'new':
+               console.log('ICE Connection State is new.');
+               break;
+            case 'checking':
+               console.log('ICE Connection is checking.');
+               break;
+            case 'connected':
+               console.log('ICE Connection has been established.');
+               break;
+            case 'completed':
+               console.log('ICE Connection is completed.');
+               break;
+            case 'failed':
+               console.error('ICE Connection has failed.');
+               // Potentially restart ICE or alert the user
+               break;
+            case 'disconnected':
+               console.warn('ICE Connection is disconnected.');
+               // May indicate a temporary network issue
+               break;
+            case 'closed':
+               console.log('ICE Connection has closed.');
+               break;
+            default:
+               console.log('Unknown ICE Connection State:', iceConnectionState);
+         }
+      }
  }
 
 //open datachannel as Peer A
@@ -455,15 +490,7 @@ function handleAnswer(answer) {
    yourConn.setRemoteDescription(new RTCSessionDescription(answer));
 };
 
-//when we got an ice candidate from a remote user
-function handleCandidate(candidate) {
-   yourConn.addIceCandidate(new RTCIceCandidate(candidate));
-   yourConn.oniceconnectionstatechange = () => {
-      if (yourConn.iceConnectionState === 'disconnected') {
-        console.error('ICE Connection Disconnected');
-      }
-    };
-};
+
 
 
 
