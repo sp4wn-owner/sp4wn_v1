@@ -136,7 +136,10 @@ let liveVideo = 0;
 let liveremoteVideo = 0;
 
 var configuration = {
-       "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+       "iceServers": [{ "url": "stun:stun.1.google.com:19302",
+         "url": "stun:stun1.1.google.com:19302",
+         "url": "stun:stun2.1.google.com:19302"
+        }]
     };
 
 function init() {
