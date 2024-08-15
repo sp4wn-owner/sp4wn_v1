@@ -460,6 +460,12 @@ function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
+peerConnection.oniceconnectionstatechange = () => {
+   if (peerConnection.iceConnectionState === 'disconnected') {
+     console.error('ICE Connection Disconnected');
+   }
+ };
+
 //hang up
 
 function handleLeave() {   
