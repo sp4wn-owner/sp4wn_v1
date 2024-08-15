@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
     <link rel="icon" type="image/x-icon" href="resources/images/favicon.ico">
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Spawn</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -29,7 +28,7 @@
               <label>Username</label>
               <input type="text" id="usernameInput">
             </div>
-            <button id="loginBtn">Login</button>
+            <button class="main-btn" id="loginBtn">Login</button>
           </div>
         </div>
       </div>
@@ -37,7 +36,7 @@
         <div id="homepage">
           <h1>Live Users</h1><br>
           <div id="livestreams"></div><br>
-          <button id="getstreamsbtn">Get Streams</button>
+          <button class="main-btn" id="getstreamsbtn">Get Streams</button>
         </div>
   
         <div id="profilepage">
@@ -47,14 +46,62 @@
             <video id="localVideo" autoplay></video>
             <video id="remoteVideo" autoplay></video>
             </div>          
-            <button id="goliveBtn">Go Live</button>
-            <button id="spawnBtn">Spawn In</button>
+            <button class="main-btn" id="goliveBtn">Go Live</button>
+            <button class="main-btn" id="spawnBtn">Spawn In</button>
           </div>
-          <button id="endliveBtn">End Live</button>
-          <button id="endotherliveBtn">Stop Watching</button> 
+          <button class="main-btn" id="endliveBtn">End Live</button>
+          <div id="control-panel">
+            <h2 id="cph2">Control Panel</h2>            
+            <span id="deviceinfo">No device connected</span>
+            <div class="device-dropdown">
+              <button class="main-btn" id="connectdevice-Btn" onclick="toggleDevices()">Connect</button>
+              <div class="device-dropdown-content">
+                  <button class="drop-btn" onclick="deviceSelect('option2')">v0 Robot</button>
+              </div>
+            </div>
+            <div class="control-panel-outputs">
+              <div class="arrow-container-host">
+                <div class="arrow-buttons">
+                    <button id="host-forward" class="arrow up">&#9650;</button>
+                    <button id="host-turnleft" class="arrow left">&#9664;</button>
+                    <button id="host-turnright" class="arrow right">&#9654;</button>
+                    <button id="host-reverse" class="arrow down">&#9660;</button>
+                </div>
+              </div>
+              <div class="arrow-container-remote">
+                <div class="arrow-buttons">
+                    <button id="forward" class="arrow up">&#9650;</button>
+                    <button id="turnleft" class="arrow left">&#9664;</button>
+                    <button id="turnright" class="arrow right">&#9654;</button>
+                    <button id="reverse" class="arrow down">&#9660;</button>
+                </div>
+              </div>
+              <div class="arrow-container-host">
+                <div class="arrow-buttons">
+                    <button id="host-up" class="arrow up" onclick="move(-105)">&#9650;</button>
+                    <button id="host-left" class="arrow left" onclick="move(5)">&#9664;</button>
+                    <button id="host-right" class="arrow right" onclick="move(-5)">&#9654;</button>
+                    <button id="host-down" class="arrow down" onclick="move(105)">&#9660;</button>
+                </div>
+              </div>
+              <div class="arrow-container-remote">
+                <div class="arrow-buttons">
+                    <button id="up" class="arrow up" onclick="sendDC(-105)">&#9650;</button>
+                    <button id="left" class="arrow left" onclick="sendDC(5)">&#9664;</button>
+                    <button id="right" class="arrow right" onclick="sendDC(-5)">&#9654;</button>
+                    <button id="down" class="arrow down" onclick="sendDC(105)">&#9660;</button>
+                </div>
+              </div>
+              <div class="bottom-control-panel">
+                <button id="reset-Btn">Reset</button>
+                <br>
+                <button class="main-btn" id="endotherliveBtn">Stop Watching</button>
+                <button id="disconnectdevice-Btn">Disconnect</button>
+              </div>
+                            
+            </div>
+          </div>
         </div>
-      
-
       
         <footer>
           <div class="footer-container">
