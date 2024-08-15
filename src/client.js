@@ -458,13 +458,14 @@ function handleAnswer(answer) {
 //when we got an ice candidate from a remote user
 function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
+   yourConn.oniceconnectionstatechange = () => {
+      if (yourConn.iceConnectionState === 'disconnected') {
+        console.error('ICE Connection Disconnected');
+      }
+    };
 };
 
-yourConn.oniceconnectionstatechange = () => {
-  if (yourConn.iceConnectionState === 'disconnected') {
-    console.error('ICE Connection Disconnected');
-  }
-};
+
 
 //hang up
 
