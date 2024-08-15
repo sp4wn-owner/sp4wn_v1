@@ -490,6 +490,10 @@ function handleAnswer(answer) {
    yourConn.setRemoteDescription(new RTCSessionDescription(answer));
 };
 
+//when we got an ice candidate from a remote user
+function handleCandidate(candidate) {
+   yourConn.addIceCandidate(new RTCIceCandidate(candidate));
+};
 
 
 
