@@ -138,32 +138,8 @@ let liveVideo = 0;
 let liveremoteVideo = 0;
 
 var configuration = {
-   iceServers: [
-       {
-         urls: "stun:stun2.1.google.com:19302",
-       },
-       {
-         urls: "turn:global.relay.metered.ca:80",
-         username: "27669f6c0372d71cb8aa8e67",
-         credential: "1YAoI8sksn13VTSc",
-       },
-       {
-         urls: "turn:global.relay.metered.ca:80?transport=tcp",
-         username: "27669f6c0372d71cb8aa8e67",
-         credential: "1YAoI8sksn13VTSc",
-       },
-       {
-         urls: "turn:global.relay.metered.ca:443",
-         username: "27669f6c0372d71cb8aa8e67",
-         credential: "1YAoI8sksn13VTSc",
-       },
-       {
-         urls: "turns:global.relay.metered.ca:443?transport=tcp",
-         username: "27669f6c0372d71cb8aa8e67",
-         credential: "1YAoI8sksn13VTSc",
-       },
-   ],
- };
+   "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+};
 
 
 function init() {
@@ -378,15 +354,7 @@ spawnBtn.addEventListener("click", function (event) {
    remoteVideo.srcObject = e.stream
    }
 
-    // Setup ice handling
-    yourConn.onicecandidate = function (event) {
-      if (event.candidate) {
-         send({
-            type: "candidate",
-            candidate: event.candidate
-         });
-      }
-   };
+    
    updatelive('remotedelete');
    
    send({
@@ -431,9 +399,6 @@ spawnBtn.addEventListener("click", function (event) {
          case 'disconnected':
             console.warn('ICE Connection is disconnected.');
             // May indicate a temporary network issue
-           
-             
-   
             break;
          case 'closed':
             console.log('ICE Connection has closed.');
@@ -442,6 +407,15 @@ spawnBtn.addEventListener("click", function (event) {
             console.log('Unknown ICE Connection State:', iceConnectionState);
       }
    }
+   // Setup ice handling
+   yourConn.onicecandidate = function (event) {
+      if (event.candidate) {
+         send({
+            type: "candidate",
+            candidate: event.candidate
+         });
+      }
+   };
 
 });
 
