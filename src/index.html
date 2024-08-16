@@ -13,8 +13,8 @@
     <header>
       <div class="top-link-bar">
         <ul>
-          <li><a href="#" onclick="togglehome()"><i class="fa fa-home"></i></a></li>
-          <li><a href="#" onclick="toggleprofile('local')"><i class="fa fa-user"></i></a></li>
+          <li><a href="#" id="home-icon" onclick="togglehome()"><i class="fa fa-home"></i></a></li>
+          <li><a href="#" id="profile-icon" onclick="toggleprofile('local')"><i class="fa fa-user"></i></a></li>
           <li><a href="https://about.sp4wn.com" target="_blank"><i class="fa fa-gear"></i></a></li>
         </ul>
       </div>
@@ -35,9 +35,15 @@
       </div>
       
         <div id="homepage">
-          <h1>Live Users</h1><br>
-          <div id="livestreams"></div><br>
-          <button class="main-btn" id="getstreamsbtn">Get Streams</button>
+          <h1>Public</h1><br>
+          <div id="livestreams"></div>
+          <span id="live-span-public" style="margin-bottom: 20px;"></span><br>
+          <button class="main-btn" id="getstreamsbtn">Refresh</button> 
+          <hr>
+          <h1 style="margin-top: 25px;">Private</h1><br>
+          <div id="livestreams"></div>
+          <span id="live-span-private" style="margin-bottom: 20px;">Feature not available yet</span><br>
+          <button class="main-btn" id="getstreamsbtn">Refresh</button>         
         </div>
   
         <div id="profilepage">

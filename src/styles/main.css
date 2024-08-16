@@ -98,6 +98,12 @@ button:hover {
 #homepage {
   height: 600px;
 }
+#home-icon.active {
+  color: lime;
+}
+#profile-icon.active {
+  color: lime;
+}
 #profiletitle {
   font-size: 35px;
   font-weight: bold;
@@ -110,6 +116,9 @@ button:hover {
   margin: 10px;
   border: solid;
   
+}
+#getstreamsbtn {
+  margin: 25px;
 }
 #otherprofile {
   display: inline-block;
@@ -157,6 +166,10 @@ video {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+#cph2 {
+  margin-bottom: 25px;
 }
 
 /* Basic styling for the dropdown button */
@@ -310,7 +323,7 @@ footer {
   padding: 60px 0;
   font-size: 20px;
   text-align: left;
-  margin-top: 50px;
+  margin-top: 100px;
 }
 
 .footer-container {

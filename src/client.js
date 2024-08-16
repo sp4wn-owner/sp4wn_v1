@@ -122,6 +122,9 @@ var controlpanel = document.querySelector('#control-panel');
 var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 
+let profileicon = document.querySelector('#profile-icon');
+let homeicon = document.querySelector('#home-icon');
+
 const forward = document.getElementById("forward");
 const left = document.getElementById("turnleft");
 const right = document.getElementById("turnright");
@@ -633,6 +636,9 @@ function handleStreams(liveusers) {
       liveStreams.innerHTML += "<a href ='#'>" + text + "</a>"; 
       console.log(text);
    }  
+   if (list.length < 1) {
+      document.getElementById("live-span-public").innerText = "No public robots available";
+   }
 }
 
 liveStreams.addEventListener("click", function (event) {
@@ -650,8 +656,11 @@ function togglehome() {
    if (username) {
       homePage.style.display = "block";
       profilePage.style.display = "none";
+      homeicon.classList.add("active");
+      profileicon.classList.remove("active");
       liveStreams.innerHTML = "";
       getstreamsBtn.click();
+
    } else {
       init();
    }
@@ -663,11 +672,13 @@ if (username) {
    var data = msg;
    profilePage.style.display = "block";
    homePage.style.display = "none";
+   homeicon.classList.remove("active");
+   profileicon.classList.add("active");
    switch(data) {
       case "local":
          if (liveremoteVideo == 1) {
             toggleprofile('remote');
-         } else {
+         } else {            
             profileTitle.innerHTML = username;
             remoteVideo.style.display = "none";
             localVideo.style.display = "block";
@@ -675,7 +686,7 @@ if (username) {
             endotherliveBtn.style.display = "none";
             disconnectdeviceBtn.style.display = "none";
             controlpaneloutputs.style.display = "none";
-            //cparrowsremote.style.display = "none";
+            deviceinfo.style.display = "none";
             cparrowsremote.forEach(cparrowsremote => {
                cparrowsremote.style.display = 'none';
              });
@@ -700,8 +711,7 @@ if (username) {
             localVideo.style.display = "none";
             goliveBtn.style.display = "none";
             endliveBtn.style.display = "none";
-            controlpanel.style.display = "none";
-            //cparrowshost.style.display = "none";
+            controlpanel.style.display = "none";            
             cparrowshost.forEach(cparrowshost => {
                cparrowshost.style.display = 'none';
              });
@@ -819,7 +829,7 @@ async function connectDevice(params) {
        cparrowshost.forEach(cparrowshost => {
          cparrowshost.style.display = 'inline-block';
        });
-
+       deviceinfo.style.display = "inline-block";
        deviceinfo.innerHTML = deviceName;
        console.log('Connected and ready to send messages.');
    } catch (error) {
