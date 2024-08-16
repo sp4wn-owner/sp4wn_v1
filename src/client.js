@@ -75,7 +75,8 @@ conn.onerror = function (err) {
 function send(message) {
    //attach the other peer username to our messages
    if (connectedUser) {
-      message.name = connectedUser;
+      message.name = otheruser;
+     // message.name = connectedUser;
    }
 
    conn.send(JSON.stringify(message));

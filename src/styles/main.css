@@ -161,10 +161,11 @@ video {
 
 /* Basic styling for the dropdown button */
 .drop-btn {
-  background-color: #8F00FF;
+  background-color: gray;
   color: white;
   padding: 16px;
   font-size: 16px;
+  font-weight: bold;
   border: none;
   cursor: pointer;
 }
