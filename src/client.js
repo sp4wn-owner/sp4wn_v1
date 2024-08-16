@@ -829,7 +829,7 @@ async function connectDevice(params) {
        cparrowshost.forEach(cparrowshost => {
          cparrowshost.style.display = 'inline-block';
        });
-       deviceinfo.style.display = "inline-block";
+       deviceinfo.style.display = "block";
        deviceinfo.innerHTML = deviceName;
        console.log('Connected and ready to send messages.');
    } catch (error) {
