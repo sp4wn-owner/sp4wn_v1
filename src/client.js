@@ -45,6 +45,7 @@ conn.onmessage = function (msg) {
          break;
       //when a remote peer sends an ice candidate to us
       case "candidate":
+         console.log("handling candidate");
          handleCandidate(data.candidate);
          break;
       case "leave":
@@ -137,11 +138,33 @@ let liveVideo = 0;
 let liveremoteVideo = 0;
 
 var configuration = {
-       "iceServers": [{ "url": "stun:stun.1.google.com:19302",
-         "url": "stun:stun1.1.google.com:19302",
-         "url": "stun:stun2.1.google.com:19302"
-        }]
-    };
+   iceServers: [
+       {
+         urls: "stun:stun2.1.google.com:19302",
+       },
+       {
+         urls: "turn:global.relay.metered.ca:80",
+         username: "27669f6c0372d71cb8aa8e67",
+         credential: "1YAoI8sksn13VTSc",
+       },
+       {
+         urls: "turn:global.relay.metered.ca:80?transport=tcp",
+         username: "27669f6c0372d71cb8aa8e67",
+         credential: "1YAoI8sksn13VTSc",
+       },
+       {
+         urls: "turn:global.relay.metered.ca:443",
+         username: "27669f6c0372d71cb8aa8e67",
+         credential: "1YAoI8sksn13VTSc",
+       },
+       {
+         urls: "turns:global.relay.metered.ca:443?transport=tcp",
+         username: "27669f6c0372d71cb8aa8e67",
+         credential: "1YAoI8sksn13VTSc",
+       },
+   ],
+ };
+
 
 function init() {
    loginPage.style.display = "block";
@@ -155,6 +178,7 @@ function init() {
 
 // Login when the user clicks the button
 loginBtn.addEventListener("click", function (event) {
+   
    name = usernameInput.value;
 
    if (name.length > 0) {
@@ -163,6 +187,7 @@ loginBtn.addEventListener("click", function (event) {
          name: name
       });
    }
+
 
 });
 
@@ -380,6 +405,44 @@ spawnBtn.addEventListener("click", function (event) {
       cparrowsremote.style.display = 'inline-block';
     });
 
+     // Monitor ICE connection state changes
+     yourConn.oniceconnectionstatechange = () => {
+      const iceConnectionState = yourConn.iceConnectionState;
+      console.log('ICE Connection State changed to:', iceConnectionState);
+      
+      // Handle different states
+      switch (iceConnectionState) {
+         case 'new':
+            console.log('ICE Connection State is new.');
+            break;
+         case 'checking':
+            console.log('ICE Connection is checking.');            
+            break;
+         case 'connected':
+            console.log('ICE Connection has been established.');
+            break;
+         case 'completed':
+            console.log('ICE Connection is completed.');
+            break;
+         case 'failed':
+            console.error('ICE Connection has failed.');
+            // Potentially restart ICE or alert the user
+            break;
+         case 'disconnected':
+            console.warn('ICE Connection is disconnected.');
+            // May indicate a temporary network issue
+           
+             
+   
+            break;
+         case 'closed':
+            console.log('ICE Connection has closed.');
+            break;
+         default:
+            console.log('Unknown ICE Connection State:', iceConnectionState);
+      }
+   }
+
 });
 
 function dcpeerB() {
@@ -493,6 +556,7 @@ function handleAnswer(answer) {
 
 //when we got an ice candidate from a remote user
 function handleCandidate(candidate) {
+   console.log("in handleCandidate function");
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
@@ -535,7 +599,10 @@ function handleRemoteLeave() {
       username: username,
       othername: connectedUser
    });
-   dc.close();
+   if (dc === open) {
+      dc.close();
+   }
+   
    console.log("Data channel B is closed");
    dc = null;
    connectedUser = null;
