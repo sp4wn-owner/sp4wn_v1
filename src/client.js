@@ -327,6 +327,7 @@ function opendc() {
       console.log("Data channel A detected closure from Peer B");
   };
 }
+
 // stop local stream
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
