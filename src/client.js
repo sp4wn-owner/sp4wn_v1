@@ -104,6 +104,7 @@ var endliveBtn = document.querySelector('#endliveBtn');
 var endotherliveBtn = document.querySelector('#endotherliveBtn');
 var spawnBtn = document.querySelector('#spawnBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
+var getprivatestreamsBtn = document.querySelector('#getprivatestreamsbtn');
 var otherProfile = document.querySelector('#otherprofile');
 var liveStreams = document.querySelector("#livestreams");
 
@@ -204,12 +205,13 @@ function handleLogin(success, name) {
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "block";
-      getstreamsBtn.click();
+     // getstreamsBtn.click();
+     getStreams();
             
     }
 };
 
-getstreamsBtn.addEventListener("click", function (event) {
+function getStreams() {
    liveStreams.innerHTML = "";
 
       if(connectedUser != null) {
@@ -225,8 +227,7 @@ getstreamsBtn.addEventListener("click", function (event) {
          type: "streams",
          username: username
       });
-   
-});
+}
 
 goliveBtn.addEventListener("click", function () {
   console.log(username +" is going live");
@@ -660,7 +661,8 @@ function togglehome() {
       homeicon.classList.add("active");
       profileicon.classList.remove("active");
       liveStreams.innerHTML = "";
-      getstreamsBtn.click();
+    //  getstreamsBtn.click();
+      getStreams();
 
    } else {
       init();
