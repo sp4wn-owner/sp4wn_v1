@@ -231,7 +231,7 @@ function getStreams() {
 
 goliveBtn.addEventListener("click", function () {
   console.log(username +" is going live");
-  navigator.getUserMedia({ video: true, audio: true }, (stream) => {
+  navigator.getUserMedia({ video: true, audio: false }, (stream) => {
       
      localStream(stream);
 
@@ -375,7 +375,9 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {
-   connectToHost();
+   //setTimeout(connectToHost(), 5000);
+   //connectToHost();
+   retryFunction();
    
 
    updatelive('remotedelete');
@@ -454,10 +456,23 @@ async function connectToHost() {
       }      
    } catch (error) {
       console.log(error);
-      
+      console.log("couldn't connect");
+
    }
 }
-
+async function retryFunction(connectToHost, retries = 3, delay = 1000) {
+   for (let i = 0; i < retries; i++) {
+       try {
+           return await connectToHost();
+       } catch (error) {
+           console.error(`Attempt ${i + 1} failed. ${error}`);
+           if (i < retries - 1) {
+               await new Promise(res => setTimeout(res, delay)); // Wait before retrying
+           }
+       }
+   }
+   throw new Error(`Function failed after ${retries} attempts`);
+}
 function dcpeerB() {
    // Listen for the data channel event
    yourConn.ondatachannel = (event) => {
