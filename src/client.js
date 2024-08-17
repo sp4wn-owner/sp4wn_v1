@@ -229,7 +229,7 @@ getstreamsBtn.addEventListener("click", function (event) {
 
 goliveBtn.addEventListener("click", function () {
   console.log(username +" is going live");
-  navigator.webkitGetUserMedia({ video: true, audio: true }, (stream) => {
+  navigator.getUserMedia({ video: true, audio: true }, (stream) => {
       
      localStream(stream);
 
