@@ -173,6 +173,7 @@ function init() {
    loginPage.style.display = "block";
    homePage.style.display = "none";
    profilePage.style.display = "none";
+   document.getElementsByTagName('header')[0].style.display = "none";
    xposition = 90;
    yposition = 90;
    
@@ -202,7 +203,7 @@ function handleLogin(success, name) {
       loginPage.style.display = "none";
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
-
+      document.getElementsByTagName('header')[0].style.display = "block";
       getstreamsBtn.click();
             
     }
