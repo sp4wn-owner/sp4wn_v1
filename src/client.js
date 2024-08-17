@@ -376,8 +376,23 @@ function stopStreamedVideo(localVideo) {
 
 spawnBtn.addEventListener("click", function (event) {
    //setTimeout(connectToHost(), 5000);
-   connectToHost();
+   //connectToHost();
    //retryFunction();
+   // Example usage:
+   retryFunction(async () => {
+      // Your function logic here
+      connectedUser = otheruser;
+      yourConn = new RTCPeerConnection(configuration);
+      stream = new MediaStream();
+      remoteVideo.srcObject = stream
+      //when a remote user adds stream to the peer connection, we display it
+      yourConn.onaddstream = function (e) {
+      remoteVideo.srcObject = e.stream
+      console.log('Function executed successfully');
+      }
+      // throw new Error('Test error'); // Uncomment to simulate an error
+   })
+   .catch(error => console.error(error.message));
    
 
    updatelive('remotedelete');
@@ -444,23 +459,25 @@ spawnBtn.addEventListener("click", function (event) {
 
 });
 
-
-async function connectToHost() {
-   try {
-      connectedUser = otheruser;
-      yourConn = new RTCPeerConnection(configuration);
-      stream = new MediaStream();
-      remoteVideo.srcObject = stream
-      //when a remote user adds stream to the peer connection, we display it
-      yourConn.onaddstream = function (e) {
-      remoteVideo.srcObject = e.stream
-      }      
-   } catch (error) {
-      console.log(error);
-      console.log("couldn't connect");
-
+async function retryFunction(fn, retries = 3, delay = 1000) {
+   if (typeof fn !== 'function') {
+       throw new TypeError('Expected fn to be a function');
    }
+
+   for (let i = 0; i < retries; i++) {
+       try {
+           return await fn();
+       } catch (error) {
+           console.error(`Attempt ${i + 1} failed: ${error.message}`);
+           if (i < retries - 1) {
+               await new Promise(res => setTimeout(res, delay)); // Wait before retrying
+           }
+       }
+   }
+
+   throw new Error(`Function failed after ${retries} attempts`);
 }
+
 
 function dcpeerB() {
    // Listen for the data channel event
