@@ -375,16 +375,9 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {
-   connectedUser = otheruser;
-   yourConn = new RTCPeerConnection(configuration);
-   stream = new MediaStream()
-   remoteVideo.srcObject = stream
-   //when a remote user adds stream to the peer connection, we display it
-   yourConn.onaddstream = function (e) {
-   remoteVideo.srcObject = e.stream
-   }
+   connectToHost();
+   
 
-    
    updatelive('remotedelete');
    
    send({
@@ -448,6 +441,22 @@ spawnBtn.addEventListener("click", function (event) {
    };
 
 });
+
+async function connectToHost() {
+   try {
+      connectedUser = otheruser;
+      yourConn = new RTCPeerConnection(configuration);
+      stream = new MediaStream();
+      remoteVideo.srcObject = stream
+      //when a remote user adds stream to the peer connection, we display it
+      yourConn.onaddstream = function (e) {
+      remoteVideo.srcObject = e.stream
+      }      
+   } catch (error) {
+      console.log(error);
+      
+   }
+}
 
 function dcpeerB() {
    // Listen for the data channel event
