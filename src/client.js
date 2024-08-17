@@ -376,8 +376,8 @@ function stopStreamedVideo(localVideo) {
 
 spawnBtn.addEventListener("click", function (event) {
    //setTimeout(connectToHost(), 5000);
-   //connectToHost();
-   retryFunction();
+   connectToHost();
+   //retryFunction();
    
 
    updatelive('remotedelete');
@@ -444,6 +444,7 @@ spawnBtn.addEventListener("click", function (event) {
 
 });
 
+
 async function connectToHost() {
    try {
       connectedUser = otheruser;
@@ -460,19 +461,7 @@ async function connectToHost() {
 
    }
 }
-async function retryFunction(connectToHost, retries = 3, delay = 1000) {
-   for (let i = 0; i < retries; i++) {
-       try {
-           return await connectToHost();
-       } catch (error) {
-           console.error(`Attempt ${i + 1} failed. ${error}`);
-           if (i < retries - 1) {
-               await new Promise(res => setTimeout(res, delay)); // Wait before retrying
-           }
-       }
-   }
-   throw new Error(`Function failed after ${retries} attempts`);
-}
+
 function dcpeerB() {
    // Listen for the data channel event
    yourConn.ondatachannel = (event) => {
