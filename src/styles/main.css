@@ -149,7 +149,7 @@ video {
 }
 
 #localVideo, #remoteVideo {
-  width: 50%;
+  width: 65%;
   margin: 0 auto;
 }
 
@@ -420,5 +420,8 @@ footer {
   }
   #login-page {
     height: 600px;
+  }
+  .stream-container {
+    margin-bottom: 25px;
   }
 }
