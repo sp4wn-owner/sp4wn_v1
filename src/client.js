@@ -889,25 +889,25 @@ forward.onpointerdown = function() {
    sendDC(2000);
 }
 forward.onpointerup = function () {
-   setTimeout(sendDC, 100, 2004);
+   setTimeout(sendDC, 200, 2004);
 }
 turnleft.onpointerdown = function() {
    sendDC(2001);
 }
 turnleft.onpointerup = function() {
-   setTimeout(sendDC, 100, 2004);
+   setTimeout(sendDC, 200, 2004);
 }
 turnright.onpointerdown = function() {
    sendDC(2002);
 }
 turnright.onpointerup = function() {
-   setTimeout(sendDC, 100, 2004);
+   setTimeout(sendDC, 200, 2004);
 }
 reverse.onpointerdown = function() {
    sendDC(2003);
 }
 reverse.onpointerup = function() {
-   setTimeout(sendDC, 100, 2004);
+   setTimeout(sendDC, 200, 2004);
 }
 hostforward.onpointerdown = function() {
    move(2000);
