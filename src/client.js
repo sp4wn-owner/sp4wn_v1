@@ -13,7 +13,7 @@ let yposition;
 let drive;
 let dc;
 
-const deviceName = 'ESP32_BLE_Server';
+const deviceName = 'v0_Robot';
 const serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
 const characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
 
