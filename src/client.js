@@ -335,27 +335,7 @@ confirmDeviceBtn.onclick = function() {
 
       if (prefix == "https://") {
          try {
-            // Get the canvas context and draw the image onto the canvas
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            const stream = canvas.captureStream();
-            const videoTrack = stream.getVideoTracks()[0];
-            
-            // Copy the stream
-            const copiedStream1 = new MediaStream([videoTrack]);
-            //const copiedStream2 = new MediaStream([videoTrack]);
-   
-            // Set these streams to video elements
-            localVideo.srcObject = copiedStream1;
-            //document.getElementById('video2').srcObject = copiedStream2;
-            
-            yourConn = new RTCPeerConnection(configuration);
-            // Add the video track to your WebRTC peer connection
-            yourConn.addTrack(videoTrack, copiedStream1);
-   
-            // Start updating the canvas at a specific frame rate
-            updateCanvasAtInterval(context, image, canvas, 1000 / 40); // 40 fps
+            drawStream();
 
             if(localVideo) {
                goliveBtn.style.display = "none";
@@ -372,25 +352,7 @@ confirmDeviceBtn.onclick = function() {
       } else {
          alert("HTTPS is required for IP Cameras unless serving this page locally and getting stream from LAN.");
          try {
-            // Get the canvas context and draw the image onto the canvas
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            const stream = canvas.captureStream();
-            const videoTrack = stream.getVideoTracks()[0];
-            
-            // Copy the stream
-            const copiedStream1 = new MediaStream([videoTrack]);
-   
-            // Set these streams to video elements
-            localVideo.srcObject = copiedStream1;
-            
-            yourConn = new RTCPeerConnection(configuration);
-            // Add the video track to your WebRTC peer connection
-            yourConn.addTrack(videoTrack, stream);
-   
-            // Start updating the canvas at a specific frame rate
-            updateCanvasAtInterval(context, image, canvas, 1000 / 60); // 60 fps
+            drawStream();
 
             if(localVideo) {
                goliveBtn.style.display = "none";
@@ -406,7 +368,28 @@ confirmDeviceBtn.onclick = function() {
       }
    }
 }
+function drawStream() {
+   // Get the canvas context and draw the image onto the canvas
+   const canvas = document.createElement('canvas');
+   const context = canvas.getContext('2d');
+   context.drawImage(image, 0, 0, canvas.width, canvas.height);
+   const stream = canvas.captureStream();
+   const videoTrack = stream.getVideoTracks()[0];
+   
+   // Copy the stream
+   const copiedStream1 = new MediaStream([videoTrack]);
 
+   // Set these streams to video elements
+   localVideo.srcObject = copiedStream1;
+   captureImageFromVideo();
+   
+   yourConn = new RTCPeerConnection(configuration);
+   // Add the video track to your WebRTC peer connection
+   yourConn.addTrack(videoTrack, stream);
+
+   // Start updating the canvas at a specific frame rate
+   updateCanvasAtInterval(context, image, canvas, 1000 / 60); // 60 fps
+}
 function beginICE() {
    // Setup ice handling
    yourConn.onicecandidate = function (event) {
