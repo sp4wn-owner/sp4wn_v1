@@ -97,6 +97,7 @@ var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
+var infoPage = document.querySelector('#infopage');
 var profileTitle = document.querySelector('#profiletitle');
 
 var goliveBtn = document.querySelector('#goliveBtn');
@@ -125,6 +126,7 @@ var remoteVideo = document.querySelector('#remoteVideo');
 
 let profileicon = document.querySelector('#profile-icon');
 let homeicon = document.querySelector('#home-icon');
+let infoicon = document.querySelector('#info-icon');
 
 const forward = document.getElementById("forward");
 const left = document.getElementById("turnleft");
@@ -176,6 +178,7 @@ var configuration = {
 function init() {
    loginPage.style.display = "block";
    homePage.style.display = "none";
+   infoPage.style.display = "none";
    profilePage.style.display = "none";
    document.getElementsByTagName('header')[0].style.display = "none";
    xposition = 90;
@@ -766,13 +769,22 @@ function checkProfile (userdata) {
    otheruser = userdata;   
    toggleprofile('remote');
 }
-
+function toggleinfo() {
+   homePage.style.display = "none";
+   profilePage.style.display = "none";
+   infoPage.style.display = "block";
+   infoicon.classList.add("active");
+   homeicon.classList.remove("active");
+   profileicon.classList.remove("active");
+}
 function togglehome() {
    if (username) {
       homePage.style.display = "block";
       profilePage.style.display = "none";
+      infoPage.style.display = "none";
       homeicon.classList.add("active");
       profileicon.classList.remove("active");
+      infoicon.classList.remove("active");
       liveStreams.innerHTML = "";
     //  getstreamsBtn.click();
       getStreams();
@@ -788,7 +800,9 @@ if (username) {
    var data = msg;
    profilePage.style.display = "block";
    homePage.style.display = "none";
+   infoPage.style.display = "none";
    homeicon.classList.remove("active");
+   infoicon.classList.remove("active");
    profileicon.classList.add("active");
    switch(data) {
       case "local":

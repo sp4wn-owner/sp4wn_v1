@@ -90,7 +90,7 @@ button:hover {
 .top-link-bar ul li {
   font-size: 35px;
   display: inline-block;
-  padding: 25px;
+  padding: 0 25px;
   
 }
 .top-link-bar li a {
@@ -100,12 +100,18 @@ button:hover {
   color: lime;
 }
 #homepage {
-  height: 600px;
+  margin-bottom: 50px;
+}
+#infopage {
+  margin-bottom: 50px;
 }
 #home-icon.active {
   color: lime;
 }
 #profile-icon.active {
+  color: lime;
+}
+#info-icon.active {
   color: lime;
 }
 #profiletitle {
