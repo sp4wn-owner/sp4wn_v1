@@ -755,7 +755,7 @@ function handleStreams(liveusers) {
       console.log(text);
    }  
    if (list.length < 1) {
-      document.getElementById("live-span-public").innerText = "No public robots available";
+      document.getElementById("live-span-public").innerText = "No robots available";
    }
 }
 
