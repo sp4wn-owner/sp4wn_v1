@@ -135,9 +135,6 @@ const hostleft = document.getElementById("host-left");
 const hostright = document.getElementById("host-right");
 const hostreverse = document.getElementById("host-reverse");
 
-var modal = document.getElementById("myModal");
-var span = document.getElementsByClassName("close")[0];
-var confirmDeviceBtn = document.querySelector('#confirmDeviceBTN');
 var yourConn;
 var stream;
 var callToUsernameInput;
@@ -233,72 +230,10 @@ function getStreams() {
 }
 
 goliveBtn.addEventListener("click", function () {
-   modal.style.display = "block";
-   
- });
- span.onclick = function() {
-   modal.style.display = "none";
- }
- window.onclick = function(event) {
-   if (event.target == modal) {
-     modal.style.display = "none";
-   }
-}
-
-// Get the select element
-var selectElement = document.getElementById("mySelect");
-
-// Add an event listener for the 'change' event
-selectElement.addEventListener("change", function() {
-  // Get the selected value
-  var selectedValue = selectElement.value;
-
-  if (selectedValue == "0") {
-   document.getElementById("useripaddress").style.display = "none";
-  }
-
-  if (selectedValue == "1") {
-   document.getElementById("useripaddress").style.display = "none";
-  }
-  
-  if (selectedValue == "2") {
-   document.getElementById("useripaddress").style.display = "block";
-  }
-  
-});
-
-const image = new Image();
-// Set crossOrigin attribute to handle CORS
-image.crossOrigin = 'anonymous'; // Use 'anonymous' or 'use-credentials' depending on the server settings
-image.src = ''; // Set the image source to your URL
-
-// Function to update the canvas at a specified interval (frame rate)
-function updateCanvasAtInterval(context, image, canvas, interval) {
-   setInterval(() => {
-     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-   }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
- }
-
-confirmDeviceBtn.onclick = function() {
-   var selectedValue = selectElement.value;
-   var deviceIPsrc = document.getElementById("useripaddress").value;
-   console.log(deviceIPsrc);
-   modal.style.display = "none";
-   if (selectedValue == "1") {
-      console.log(username +" is going live using this device");
-      navigator.getUserMedia({ video: true, audio: false }, (stream) => {
+  console.log(username +" is going live");
+  navigator.getUserMedia({ video: true, audio: false }, (stream) => {
       
-      yourConn = new RTCPeerConnection(configuration);
-     
-      //displaying local video stream on the page
-      localVideo.srcObject = stream
-
-      stream.getTracks().forEach((track) => {
-         yourConn.addTrack(track, stream);
-      });
-
-      beginICE();
-      ICEstatus();
+     localStream(stream);
 
       if(localVideo) {
          goliveBtn.style.display = "none";
@@ -308,100 +243,68 @@ confirmDeviceBtn.onclick = function() {
          updatelive("addlive");
       }    
 
-      }, function (error) {
-         console.log(error);
-      });
-      
-      
-   }
+   }, function (error) {
+      console.log(error);
+   });
+
+});
+
+// Local stream
+function localStream(stream) {
+   yourConn = new RTCPeerConnection(configuration);
      
-   if (selectedValue == "2") {
-      console.log(username +" is going live with IP Camera");
-      image.src = deviceIPsrc;
+     //displaying local video stream on the page
+     localVideo.srcObject = stream
 
-      // Get the canvas context and draw the image onto the canvas
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      const stream = canvas.captureStream();
-      const videoTrack = stream.getVideoTracks()[0];
-      
-      // Copy the stream
-      const copiedStream1 = new MediaStream([videoTrack]);
-      //const copiedStream2 = new MediaStream([videoTrack]);
+     stream.getTracks().forEach((track) => {
+      yourConn.addTrack(track, stream);
+      });
 
-      // Set these streams to video elements
-      localVideo.srcObject = copiedStream1;
-      //document.getElementById('video2').srcObject = copiedStream2;
-      
-      yourConn = new RTCPeerConnection(configuration);
-      // Add the video track to your WebRTC peer connection
-      yourConn.addTrack(videoTrack, copiedStream1);
+       // Setup ice handling
+       yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
 
-      // Start updating the canvas at a specific frame rate
-      updateCanvasAtInterval(context, image, canvas, 1000 / 40); // 40 fps
-      
-      if(localVideo) {
-         goliveBtn.style.display = "none";
-         endliveBtn.style.display = "block";
-         liveVideo = 1;
-
-         updatelive("addlive");
-      }
-      ICEstatus(); 
-      beginICE();
+      // Monitor ICE connection state changes
+      yourConn.oniceconnectionstatechange = () => {
+         const iceConnectionState = yourConn.iceConnectionState;
+         console.log('ICE Connection State changed to:', iceConnectionState);
          
-   }
-}
-
-function beginICE() {
-   // Setup ice handling
-   yourConn.onicecandidate = function (event) {
-      if (event.candidate) {
-         send({
-            type: "candidate",
-            candidate: event.candidate
-         });
+         // Handle different states
+         switch (iceConnectionState) {
+            case 'new':
+               console.log('ICE Connection State is new.');
+               break;
+            case 'checking':
+               console.log('ICE Connection is checking.');
+               break;
+            case 'connected':
+               console.log('ICE Connection has been established.');
+               break;
+            case 'completed':
+               console.log('ICE Connection is completed.');
+               break;
+            case 'failed':
+               console.error('ICE Connection has failed.');
+               // Potentially restart ICE or alert the user
+               break;
+            case 'disconnected':
+               console.warn('ICE Connection is disconnected.');
+               // May indicate a temporary network issue
+               break;
+            case 'closed':
+               console.log('ICE Connection has closed.');
+               break;
+            default:
+               console.log('Unknown ICE Connection State:', iceConnectionState);
+         }
       }
-   };
-}
-
-function ICEstatus() {
-   // Monitor ICE connection state changes
-   yourConn.oniceconnectionstatechange = () => {
-      const iceConnectionState = yourConn.iceConnectionState;
-      console.log('ICE Connection State changed to:', iceConnectionState);
-      
-      // Handle different states
-      switch (iceConnectionState) {
-         case 'new':
-            console.log('ICE Connection State is new.');
-            break;
-         case 'checking':
-            console.log('ICE Connection is checking.');
-            break;
-         case 'connected':
-            console.log('ICE Connection has been established.');
-            break;
-         case 'completed':
-            console.log('ICE Connection is completed.');
-            break;
-         case 'failed':
-            console.error('ICE Connection has failed.');
-            // Potentially restart ICE or alert the user
-            break;
-         case 'disconnected':
-            console.warn('ICE Connection is disconnected.');
-            // May indicate a temporary network issue
-            break;
-         case 'closed':
-            console.log('ICE Connection has closed.');
-            break;
-         default:
-            console.log('Unknown ICE Connection State:', iceConnectionState);
-      }
-   }
-}
+ }
 
 //open datachannel as Peer A
 function opendc() {
@@ -472,28 +375,33 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {
-   
-
-   retryFunction(async () => {      
+   //setTimeout(connectToHost(), 5000);
+   //connectToHost();
+   //retryFunction();
+   // Example usage:
+   retryFunction(async () => {
+      // Your function logic here
       connectedUser = otheruser;
       yourConn = new RTCPeerConnection(configuration);
       stream = new MediaStream();
-      remoteVideo.srcObject = stream;
-      yourConn.onaddstream = function (e) {         
-         remoteVideo.srcObject = e.stream;       
-         console.log('Function executed successfully');
-      }            
-      send({
-         type: "watch",
-         name: username,
-         host: connectedUser
-      });
-       beginICE();
+      remoteVideo.srcObject = stream
+      //when a remote user adds stream to the peer connection, we display it
+      yourConn.onaddstream = function (e) {
+      remoteVideo.srcObject = e.stream
+      console.log('Function executed successfully');
+      }
+      // throw new Error('Test error'); // Uncomment to simulate an error
    })
    .catch(error => console.error(error.message));
    
+
    updatelive('remotedelete');
    
+   send({
+      type: "watch",
+      name: username,
+      host: connectedUser
+   });
    liveremoteVideo = 1;
    toggleprofile('remote');
    dcpeerB();
@@ -504,9 +412,51 @@ spawnBtn.addEventListener("click", function (event) {
    cparrowsremote.forEach(cparrowsremote => {
       cparrowsremote.style.display = 'inline-block';
     });
-    ICEstatus();
-    
-    
+
+     // Monitor ICE connection state changes
+     yourConn.oniceconnectionstatechange = () => {
+      const iceConnectionState = yourConn.iceConnectionState;
+      console.log('ICE Connection State changed to:', iceConnectionState);
+      
+      // Handle different states
+      switch (iceConnectionState) {
+         case 'new':
+            console.log('ICE Connection State is new.');
+            break;
+         case 'checking':
+            console.log('ICE Connection is checking.');            
+            break;
+         case 'connected':
+            console.log('ICE Connection has been established.');
+            break;
+         case 'completed':
+            console.log('ICE Connection is completed.');
+            break;
+         case 'failed':
+            console.error('ICE Connection has failed.');
+            // Potentially restart ICE or alert the user
+            break;
+         case 'disconnected':
+            console.warn('ICE Connection is disconnected.');
+            // May indicate a temporary network issue
+            break;
+         case 'closed':
+            console.log('ICE Connection has closed.');
+            break;
+         default:
+            console.log('Unknown ICE Connection State:', iceConnectionState);
+      }
+   }
+   // Setup ice handling
+   yourConn.onicecandidate = function (event) {
+      if (event.candidate) {
+         send({
+            type: "candidate",
+            candidate: event.candidate
+         });
+      }
+   };
+
 });
 
 async function retryFunction(fn, retries = 3, delay = 1000) {

@@ -30,8 +30,8 @@
           <li><a href="https://about.sp4wn.com" target="_blank"><i class="fa fa-gear"></i></a></li>
         </ul>
       </div>
-    </header>    
-
+    </header> 
+    
       <div id="login-page" style="background-image: url('resources/images/meshbots.jpg'); background-size: cover;">
         <div id="login-header"></div>
         <h1 id="login-title" style="font-family: Exarros; color: rgb(252, 255, 255); text-shadow: 2px 2px rgb(0, 0, 0);">Dawn of Telepresence Robotics</h1>
@@ -47,94 +47,109 @@
         </div>
       </div>
       
-        <div id="homepage">
-          <h1>Public</h1><br>
-          <div id="livestreams"></div>
-          <span id="live-span-public" style="margin-bottom: 20px;"></span>
-          <div style="height: 35px;"></div>      
-          <hr>
-          <h1 style="margin-top: 25px;">Private</h1><br>
-          <div id="livestreams"></div>
-          <span id="live-span-private" style="margin-bottom: 20px;">Feature coming soon!</span><br>         
-        </div>
+      <div id="homepage">
+        <h1>Public</h1><br>
+        <div id="livestreams"></div>
+        <span id="live-span-public" style="margin-bottom: 20px;"></span>
+        <div style="height: 35px;"></div>      
+        <hr>
+        <h1 style="margin-top: 25px;">Private</h1><br>
+        <div id="livestreams"></div>
+        <span id="live-span-private" style="margin-bottom: 20px;">Feature coming soon!</span><br>         
+      </div>
   
-        <div id="profilepage">
-          <div id="profiletitle"></div><br>
-          <div class="stream-container">
-            <div id="video-container">
-              <video id="localVideo" autoplay></video>
-              <video id="remoteVideo" autoplay></video>
-            </div>          
-            <button class="main-btn" id="goliveBtn">Go Live</button>
-            <button class="main-btn" id="spawnBtn">Spawn In</button>
+      <div id="profilepage">
+        <div id="myModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1>Video Source</h1>
+            <div class="custom-select" style="width:200px;">
+              <select id="mySelect">
+                <option value="0">Select device</option>
+                <option value="1">This Device</option>
+                <option value="2">IP Camera</option>
+              </select>              
+            </div>            
+            <input type="text" id="useripaddress" value="http://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">
+            <button class="main-btn" id="confirmDeviceBTN">Confirm</button>            
+          </div>          
+        </div>   
+        <div id="profiletitle"></div><br>
+        <div class="stream-container">
+          <div id="video-container">
+            <video id="localVideo" autoplay></video>
+            <video id="remoteVideo" autoplay></video>            
+          </div>            
+          <button class="main-btn" id="goliveBtn">Go Live</button>
+          <button class="main-btn" id="spawnBtn">Spawn In</button>
+        </div>
+        <button class="main-btn" id="endliveBtn">End Live</button>
+        <div id="control-panel">
+          <h2 id="cph2">Control Panel</h2>            
+          <span id="deviceinfo">No device connected</span>
+          <div class="device-dropdown">
+            <button class="main-btn" id="connectdevice-Btn" onclick="toggleDevices()">Connect</button>
+            <div class="device-dropdown-content">
+                <button class="drop-btn" onclick="deviceSelect('option2')">v0 Robot</button>                  
+            </div>
           </div>
-          <button class="main-btn" id="endliveBtn">End Live</button>
-          <div id="control-panel">
-            <h2 id="cph2">Control Panel</h2>            
-            <span id="deviceinfo">No device connected</span>
-            <div class="device-dropdown">
-              <button class="main-btn" id="connectdevice-Btn" onclick="toggleDevices()">Connect</button>
-              <div class="device-dropdown-content">
-                  <button class="drop-btn" onclick="deviceSelect('option2')">v0 Robot</button>                  
+          <div class="control-panel-outputs">
+            <div class="arrow-container-host">
+              <div class="arrow-buttons">
+                  <button id="host-forward" class="arrow up">&#9650;</button>
+                  <button id="host-left" class="arrow left">&#9664;</button>
+                  <button id="host-right" class="arrow right">&#9654;</button>
+                  <button id="host-reverse" class="arrow down">&#9660;</button>
               </div>
             </div>
-            <div class="control-panel-outputs">
-              <div class="arrow-container-host">
-                <div class="arrow-buttons">
-                    <button id="host-forward" class="arrow up">&#9650;</button>
-                    <button id="host-left" class="arrow left">&#9664;</button>
-                    <button id="host-right" class="arrow right">&#9654;</button>
-                    <button id="host-reverse" class="arrow down">&#9660;</button>
-                </div>
+            <div class="arrow-container-remote">
+              <div class="arrow-buttons">
+                  <button id="forward" class="arrow up">&#9650;</button>
+                  <button id="turnleft" class="arrow left">&#9664;</button>
+                  <button id="turnright" class="arrow right">&#9654;</button>
+                  <button id="reverse" class="arrow down">&#9660;</button>
               </div>
-              <div class="arrow-container-remote">
-                <div class="arrow-buttons">
-                    <button id="forward" class="arrow up">&#9650;</button>
-                    <button id="turnleft" class="arrow left">&#9664;</button>
-                    <button id="turnright" class="arrow right">&#9654;</button>
-                    <button id="reverse" class="arrow down">&#9660;</button>
-                </div>
-              </div>              
-              <div class="bottom-control-panel">
-                <button id="reset-Btn">Reset</button>
-                <br>
-                <button class="main-btn" id="endotherliveBtn">Stop Watching</button>
-                <button id="disconnectdevice-Btn">Disconnect</button>
-              </div>
-                            
+            </div>              
+            <div class="bottom-control-panel">
+              <button id="reset-Btn">Reset</button>
+              <br>
+              <button class="main-btn" id="endotherliveBtn">Stop Watching</button>
+              <button id="disconnectdevice-Btn">Disconnect</button>
             </div>
+                          
           </div>
         </div>
+      </div>
       
-        <footer>
-          <div class="footer-container">
-              <div class="footer-content">
-                  <div class="footer-logo">
-                    <div class="footer-logo-name">
-                      SP4WN
-                    </div>
-                      <p><i>Bleep bleep...</i></p>
+      <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                  <div class="footer-logo-name">
+                    SP4WN
                   </div>
-                  <div class="footer-links">
-                      <h3>Quick Links</h3>
-                      <ul>
-                          <li><a href="#">Home</a></li>
-                          <li><a href="https://about.sp4wn.com" target="_blank">About</a></li>
-                          <li><a href="#">Store</a></li>
-                      </ul>
-                  </div>
-                  <div class="footer-social">
-                      <h3>Follow Us</h3>
-                      <ul>
-                          <li><a href="https://t.me/sp4wn_official" target="_blank"><i class="fa fa-telegram" target="_blank"></i></a></li>
-                          <li><a href="https://www.twitter.com/Sp4wn_Official" target="_blank"><i class="fa fa-twitter" target="_blank"></i></a></li>
-                          <li><a href="https://github.com/sp4wn-owner" target="_blank"><i class="fa fa-github" target="_blank"></i></a></li>
-                          <li><a href="https://www.reddit.com/r/Sp4wn/" target="_blank"><i class="fa fa-reddit" target="_blank"></i></a></li>
-                      </ul>
-                  </div>
-              </div>
-          </div>
-      </footer>
+                    <p><i>Bleep bleep...</i></p>
+                </div>
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="https://about.sp4wn.com" target="_blank">About</a></li>
+                        <li><a href="#">Store</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h3>Follow Us</h3>
+                    <ul>
+                        <li><a href="https://t.me/sp4wn_official" target="_blank"><i class="fa fa-telegram" target="_blank"></i></a></li>
+                        <li><a href="https://www.twitter.com/Sp4wn_Official" target="_blank"><i class="fa fa-twitter" target="_blank"></i></a></li>
+                        <li><a href="https://github.com/sp4wn-owner" target="_blank"><i class="fa fa-github" target="_blank"></i></a></li>
+                        <li><a href="https://www.reddit.com/r/Sp4wn/" target="_blank"><i class="fa fa-reddit" target="_blank"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
 
   </body>
   <script src="client.js"></script>
