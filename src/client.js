@@ -272,17 +272,29 @@ const image = new Image();
 image.crossOrigin = 'anonymous'; // Use 'anonymous' or 'use-credentials' depending on the server settings
 image.src = ''; // Set the image source to your URL
 
+let intervalID;
 // Function to update the canvas at a specified interval (frame rate)
 function updateCanvasAtInterval(context, image, canvas, interval) {
-   setInterval(() => {
-     context.drawImage(image, 0, 0, canvas.width, canvas.height);
+   intervalID = setInterval(() => {
+      try { 
+         context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      } catch (error) {         
+         goliveBtn.style.display = "block";
+         endliveBtn.style.display = "none";
+         liveVideo = 0;
+         updatelive("local");
+         alert("Error getting stream. Make sure https is enabled on your IP camera.");
+         clearInterval(intervalID);
+      }
    }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
  }
 
 confirmDeviceBtn.onclick = function() {
    var selectedValue = selectElement.value;
-   var deviceIPsrc = document.getElementById("useripaddress").value;
-   console.log(deviceIPsrc);
+   //const urlprefix = "https://";
+   var enteredIP = document.getElementById("useripaddress").value;
+   //var deviceIPsrc = urlprefix.concat(enteredIP);
+   deviceIPsrc = enteredIP;
    modal.style.display = "none";
    if (selectedValue == "1") {
       console.log(username +" is going live using this device");
@@ -318,39 +330,48 @@ confirmDeviceBtn.onclick = function() {
    if (selectedValue == "2") {
       console.log(username +" is going live with IP Camera");
       image.src = deviceIPsrc;
+      const prefix = deviceIPsrc.slice(0,8);
+      console.log(prefix);
 
-      // Get the canvas context and draw the image onto the canvas
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      const stream = canvas.captureStream();
-      const videoTrack = stream.getVideoTracks()[0];
+      if (prefix == "https://") {
+         try {
+            // Get the canvas context and draw the image onto the canvas
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const stream = canvas.captureStream();
+            const videoTrack = stream.getVideoTracks()[0];
+            
+            // Copy the stream
+            const copiedStream1 = new MediaStream([videoTrack]);
+            //const copiedStream2 = new MediaStream([videoTrack]);
+   
+            // Set these streams to video elements
+            localVideo.srcObject = copiedStream1;
+            //document.getElementById('video2').srcObject = copiedStream2;
+            
+            yourConn = new RTCPeerConnection(configuration);
+            // Add the video track to your WebRTC peer connection
+            yourConn.addTrack(videoTrack, copiedStream1);
+   
+            // Start updating the canvas at a specific frame rate
+            updateCanvasAtInterval(context, image, canvas, 1000 / 40); // 40 fps
+
+            if(localVideo) {
+               goliveBtn.style.display = "none";
+               endliveBtn.style.display = "block";
+               liveVideo = 1;
       
-      // Copy the stream
-      const copiedStream1 = new MediaStream([videoTrack]);
-      //const copiedStream2 = new MediaStream([videoTrack]);
-
-      // Set these streams to video elements
-      localVideo.srcObject = copiedStream1;
-      //document.getElementById('video2').srcObject = copiedStream2;
-      
-      yourConn = new RTCPeerConnection(configuration);
-      // Add the video track to your WebRTC peer connection
-      yourConn.addTrack(videoTrack, copiedStream1);
-
-      // Start updating the canvas at a specific frame rate
-      updateCanvasAtInterval(context, image, canvas, 1000 / 40); // 40 fps
-      
-      if(localVideo) {
-         goliveBtn.style.display = "none";
-         endliveBtn.style.display = "block";
-         liveVideo = 1;
-
-         updatelive("addlive");
+               updatelive("addlive");
+            }
+            ICEstatus(); 
+            beginICE();
+         } catch (error) {
+            console.log(error);
+         }
+      } else {
+         alert("https is required for IP Cameras");
       }
-      ICEstatus(); 
-      beginICE();
-         
    }
 }
 
