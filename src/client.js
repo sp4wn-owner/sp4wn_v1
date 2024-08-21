@@ -1013,25 +1013,25 @@ hostforward.onpointerdown = function() {
    move(2000);
 }
 hostforward.onpointerup = function () {
-   move(2004);
+   setTimeout(move, 200, 2004);   
 }
 hostleft.onpointerdown = function() {
    move(2001);
 }
 hostleft.onpointerup = function() {
-   move(2004);
+   setTimeout(move, 200, 2004);   
 }
 hostright.onpointerdown = function() {
    move(2002);
 }
 hostright.onpointerup = function() {
-   move(2004);
+   setTimeout(move, 200, 2004);   
 }
 hostreverse.onpointerdown = function() {
    move(2003);
 }
 hostreverse.onpointerup = function() {
-   move(2004);
+   setTimeout(move, 200, 2004);   
 }
 
 function move(string) {
