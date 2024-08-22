@@ -787,6 +787,7 @@ function handleLeave() {
    if (liveremoteVideo == 1) {
       liveremoteVideo = 0;
       remoteVideo.srcObject = null;
+      disconnectDevice();
       yourConn.close();
       yourConn.onicecandidate = null;
       yourConn.onaddstream = null;
@@ -825,6 +826,7 @@ function handleRemoteLeave() {
 
 };
 function handleFinalLeave() {
+   disconnectDevice();
    connectedUser = null;
    dc = null;
    remoteVideo.srcObject = null;
@@ -1034,16 +1036,24 @@ async function connectDevice() {
            filters: [{ name: BLE_Name }],
            optionalServices: [serviceUUID]
        });
-
+       console.log("attempting to connect to: " + BLE_Name);
        // Connect to the GATT server
        server = await device.gatt.connect();
-
        // Get the primary service
        const service = await server.getPrimaryService(serviceUUID);
-
        // Get the characteristic
        characteristic = await service.getCharacteristic(characteristicUUID);
-
+       console.log(characteristic.properties);
+       if (characteristic.properties.notify) {
+         console.log('This characteristic supports notifications');
+         await characteristic.startNotifications();
+         characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+         console.log('Connected and listening for notifications...');
+       } else if (characteristic.properties.indicate) {
+         console.log('This characteristic supports indications');
+       } else {
+         console.error('Notifications or indications are not supported on this characteristic');
+       }
        //enable buttons
        connectdeviceBtn.style.display = "none";    
        disconnectdeviceBtn.style.display = "block";          
@@ -1058,7 +1068,14 @@ async function connectDevice() {
        console.error('Connection failed:', error);
    }
 }
-
+// Handle incoming data from the characteristic
+function handleCharacteristicValueChanged(event) {
+   const value = event.target.value;
+   const decoder = new TextDecoder('utf-8');
+   const response = decoder.decode(value);
+ 
+   console.log('Notification received:', response);
+ }
 async function disconnectDevice(params) {
    if (server) {
        server.disconnect();
@@ -1078,10 +1095,10 @@ async function disconnectDevice(params) {
 }
 
 forward.onpointerdown = function() {
-   sendDC(2000);
+   sendDC('A');
 }
 forward.onpointerup = function () {
-   setTimeout(sendDC, 200, 2004);
+   setTimeout(sendDC, 200, 'B');
 }
 turnleft.onpointerdown = function() {
    sendDC(2001);
@@ -1102,16 +1119,16 @@ reverse.onpointerup = function() {
    setTimeout(sendDC, 200, 2004);
 }
 hostforward.onpointerdown = function() {
-   move(2000);
+   move('a');
 }
 hostforward.onpointerup = function () {
-   setTimeout(move, 200, 2004);   
+   setTimeout(move, 200, "b");   
 }
 hostleft.onpointerdown = function() {
-   move(2001);
+   move('x');
 }
 hostleft.onpointerup = function() {
-   setTimeout(move, 200, 2004);   
+   setTimeout(move, 200, 'y');   
 }
 hostright.onpointerdown = function() {
    move(2002);
@@ -1127,8 +1144,9 @@ hostreverse.onpointerup = function() {
 }
 
 function move(string) {
+   
    let value = Number(string);
-   console.log(value);
+   //console.log(value);
    if (value > -100 && value < 100) {
        xposition = xposition + value;
        if (xposition < 0) {
@@ -1149,8 +1167,8 @@ function move(string) {
            yposition = 180;
        }
        sendpos('tilt');
-   } else if (value > 1999) {
-       drive = value;
+   } else {
+       drive = string;
        sendpos('drive');
    }
    
