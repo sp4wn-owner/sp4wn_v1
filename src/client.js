@@ -132,10 +132,10 @@ let infoicon = document.querySelector('#info-icon');
 
 var deviceaddressinput;
 
-const forward = document.getElementById("forward");
-const left = document.getElementById("turnleft");
-const right = document.getElementById("turnright");
-const reverse = document.getElementById("reverse");
+const forwardbtn = document.getElementById("forwardbtn");
+const leftbtn = document.getElementById("turnleftbtn");
+const rightbtn = document.getElementById("turnrightbtn");
+const reversebtn = document.getElementById("reversebtn");
 const hostforward = document.getElementById("host-forward");
 const hostleft = document.getElementById("host-left");
 const hostright = document.getElementById("host-right");
@@ -1094,28 +1094,36 @@ async function disconnectDevice(params) {
    }
 }
 
-forward.onpointerdown = function() {
+//CONTROLS
+let forward = "forward";
+let reverse = "reverse";
+let right = "right";
+let left = "left";
+let park = "park";
+
+
+forwardbtn.onpointerdown = function() {
    sendDC('A');
 }
-forward.onpointerup = function () {
+forwardbtn.onpointerup = function () {
    setTimeout(sendDC, 200, 'B');
 }
-turnleft.onpointerdown = function() {
+turnleftbtn.onpointerdown = function() {
    sendDC(2001);
 }
-turnleft.onpointerup = function() {
+turnleftbtn.onpointerup = function() {
    setTimeout(sendDC, 200, 2004);
 }
-turnright.onpointerdown = function() {
+turnrightbtn.onpointerdown = function() {
    sendDC(2002);
 }
-turnright.onpointerup = function() {
+turnrightbtn.onpointerup = function() {
    setTimeout(sendDC, 200, 2004);
 }
-reverse.onpointerdown = function() {
+reversebtn.onpointerdown = function() {
    sendDC(2003);
 }
-reverse.onpointerup = function() {
+reversebtn.onpointerup = function() {
    setTimeout(sendDC, 200, 2004);
 }
 hostforward.onpointerdown = function() {
