@@ -12,10 +12,12 @@ let xposition;
 let yposition;
 let drive;
 let dc;
+let deviceConn;
+var deviceaddress;
 
-const deviceName = 'v0_Robot';
-const serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
-const characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
+let BLE_Name = 'v0_Robot';
+let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
+let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
 
 //connecting to our signaling server
 //var conn = new WebSocket('ws://10.0.0.30:9090');
@@ -35,15 +37,13 @@ conn.onmessage = function (msg) {
    switch(data.type) {
       case "login":
          handleLogin(data.success, data.name);
-         break;
-      //when somebody wants to call us
+         break;   
       case "offer":
          handleOffer(data.offer, data.name, data.host);
          break;
       case "answer":
          handleAnswer(data.answer);
          break;
-      //when a remote peer sends an ice candidate to us
       case "candidate":
          console.log("handling candidate");
          handleCandidate(data.candidate);
@@ -79,8 +79,10 @@ function send(message) {
       message.name = otheruser;
      // message.name = connectedUser;
    }
-
    conn.send(JSON.stringify(message));
+};
+function sendtoESP(message) {
+   deviceConn.send(JSON.stringify(message));
 };
 
 //******
@@ -128,6 +130,8 @@ let profileicon = document.querySelector('#profile-icon');
 let homeicon = document.querySelector('#home-icon');
 let infoicon = document.querySelector('#info-icon');
 
+var deviceaddressinput;
+
 const forward = document.getElementById("forward");
 const left = document.getElementById("turnleft");
 const right = document.getElementById("turnright");
@@ -137,9 +141,12 @@ const hostleft = document.getElementById("host-left");
 const hostright = document.getElementById("host-right");
 const hostreverse = document.getElementById("host-reverse");
 
-var modal = document.getElementById("myModal");
-var span = document.getElementsByClassName("close")[0];
-var confirmDeviceBtn = document.querySelector('#confirmDeviceBTN');
+var modalVideo = document.getElementById("modal-video-select");
+var modalDevice = document.getElementById("modal-device-select");
+var videospan = document.getElementById("close-video-select");
+var devicespan = document.getElementById("close-device-select");
+var confirmVideoBtn = document.querySelector('#confirmvideoBTN');
+var confirmDeviceBtn = document.querySelector('#confirmdeviceBTN');
 var yourConn;
 var stream;
 var callToUsernameInput;
@@ -183,6 +190,7 @@ function init() {
    document.getElementsByTagName('header')[0].style.display = "none";
    xposition = 90;
    yposition = 90;
+   deviceaddress = null;
    
    };
 
@@ -211,7 +219,6 @@ function handleLogin(success, name) {
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "block";
-     // getstreamsBtn.click();
      getStreams();
             
     }
@@ -236,39 +243,124 @@ function getStreams() {
 }
 
 goliveBtn.addEventListener("click", function () {
-   modal.style.display = "block";
+   modalVideo.style.display = "block";
    
  });
- span.onclick = function() {
-   modal.style.display = "none";
+videospan.onclick = function() {
+   modalVideo.style.display = "none";
+ }
+devicespan.onclick = function() {
+   modalDevice.style.display = "none";
  }
  window.onclick = function(event) {
-   if (event.target == modal) {
-     modal.style.display = "none";
+   if (event.target == modalVideo) {
+      modalVideo.style.display = "none";
+   }
+   if (event.target == modalDevice) {
+      modalDevice.style.display = "none";
    }
 }
 
 // Get the select element
-var selectElement = document.getElementById("mySelect");
+var videoSelect = document.getElementById("videoSelect");
+var deviceSelect = document.getElementById("deviceSelect");
+var useripaddress = document.getElementById("useripaddressinput");
+var deviceserviceinput = document.getElementById("deviceserviceinput");
+var devicecharinput = document.getElementById("devicecharinput");
+var devicenameinput = document.getElementById("devicenameinput");
+var deviceaddressinput = document.getElementById("deviceaddressinput");
 
 // Add an event listener for the 'change' event
-selectElement.addEventListener("change", function() {
+videoSelect.addEventListener("change", function() {
   // Get the selected value
-  var selectedValue = selectElement.value;
+  var selectedValue = videoSelect.value;
 
   if (selectedValue == "0") {
-   document.getElementById("useripaddress").style.display = "none";
+   useripaddress.style.display = "none";
   }
 
   if (selectedValue == "1") {
-   document.getElementById("useripaddress").style.display = "none";
+   useripaddress.style.display = "none";
   }
   
   if (selectedValue == "2") {
-   document.getElementById("useripaddress").style.display = "block";
+   useripaddress.style.display = "block";
   }
   
 });
+
+deviceSelect.addEventListener("change", function() {
+   // Get the selected value
+   var selectedValue = deviceSelect.value;
+ 
+   if (selectedValue == "0") {
+      deviceaddressinput.style.display = "none";
+      devicenameinput.style.display = "none";
+      deviceserviceinput.style.display = "none";
+      devicecharinput.style.display = "none";
+   }
+ 
+   if (selectedValue == "1") {
+      deviceaddressinput.style.display = "none";
+      devicenameinput.style.display = "block";
+      deviceserviceinput.style.display = "block";
+      devicecharinput.style.display = "block";
+   }
+   
+   if (selectedValue == "2") {
+      deviceaddressinput.style.display = "block";
+      devicenameinput.style.display = "none";
+      deviceserviceinput.style.display = "none";
+      devicecharinput.style.display = "none";
+   }
+   
+ });
+connectdeviceBtn.onclick = function() {
+   modalDevice.style.display = "block";   
+ }
+
+confirmDeviceBtn.onclick = function() {
+   var selectedValue = deviceSelect.value; 
+   
+   if (selectedValue == "1") {
+      BLE_Name = devicenameinput.value;
+      serviceUUID = deviceserviceinput.value;
+      characteristicUUID = devicecharinput.value;
+      connectDevice();
+      modalDevice.style.display = "none";   
+   }
+   if (selectedValue == "2") {
+      deviceaddress = deviceaddressinput.value;     
+      deviceConn = new WebSocket('ws://10.0.0.31:8085');
+
+      try {
+         deviceConn.onopen = function(event) {
+            console.log('Socket1 is open');
+            sendtoESP({
+               type: "test",
+               command: '1'
+            });
+         };
+        
+         deviceConn.onmessage = function(event) {
+            console.log('Message from socket1:', event.data);
+         };
+         
+         deviceConn.onclose = function(event) {
+            console.log('Socket1 is closed');
+         };
+         deviceConn.onerror = function (err) {
+            console.log("Got error", err);
+         };
+         modalDevice.style.display = "none";   
+         
+      } catch (error) {
+         console.log(error);
+      }
+      
+
+   }   
+ }
 
 const image = new Image();
 // Set crossOrigin attribute to handle CORS
@@ -292,13 +384,13 @@ function updateCanvasAtInterval(context, image, canvas, interval) {
    }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
  }
 
-confirmDeviceBtn.onclick = function() {
-   var selectedValue = selectElement.value;
+confirmVideoBtn.onclick = function() {
+   var selectedValue = videoSelect.value;
    //const urlprefix = "https://";
-   var enteredIP = document.getElementById("useripaddress").value;
+   var enteredIP = useripaddress.value;
    //var deviceIPsrc = urlprefix.concat(enteredIP);
    deviceIPsrc = enteredIP;
-   modal.style.display = "none";
+   modalVideo.style.display = "none";
    if (selectedValue == "1") {
       console.log(username +" is going live using this device");
       navigator.getUserMedia({ video: true, audio: false }, (stream) => {
@@ -878,7 +970,7 @@ function toggleDevices() {
   }
 }
 
-function deviceSelect(option) {
+function deviceSelectold(option) {
    switch(option) {
       case "option1":
          devicedropBtns.style.display = "none";
@@ -935,11 +1027,11 @@ disconnectdeviceBtn.addEventListener("click", function (event) {
    resetDevice();
 });
 
-async function connectDevice(params) {
+async function connectDevice() {
    try {
        // Request a Bluetooth device
        device = await navigator.bluetooth.requestDevice({
-           filters: [{ name: deviceName }],
+           filters: [{ name: BLE_Name }],
            optionalServices: [serviceUUID]
        });
 
@@ -960,7 +1052,7 @@ async function connectDevice(params) {
          cparrowshost.style.display = 'inline-block';
        });
        deviceinfo.style.display = "block";
-       deviceinfo.innerHTML = deviceName;
+       deviceinfo.innerHTML = BLE_Name;
        console.log('Connected and ready to send messages.');
    } catch (error) {
        console.error('Connection failed:', error);

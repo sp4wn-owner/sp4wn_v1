@@ -59,22 +59,22 @@
       </div>
   
       <div id="profilepage">
-        <div id="myModal" class="modal">
+        <div id="modal-video-select" class="modal">
           <div class="modal-content">
-            <span class="close">&times;</span>
+            <span id="close-video-select" class="close">&times;</span>
             <h2>Video Source</h2>
             <div class="custom-select" style="width:200px;">
-              <select id="mySelect">
+              <select id="videoSelect">
                 <option value="0">Select device</option>
                 <option value="1">This Device</option>
                 <option value="2">IP Camera</option>
               </select>              
             </div>            
-            <input type="text" id="useripaddress" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">
-            <button class="main-btn" id="confirmDeviceBTN">Confirm</button>            
+            <input type="text" id="useripaddressinput" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">
+            <button class="main-btn" id="confirmvideoBTN">Confirm</button>            
           </div>          
         </div>   
-        <div id="profiletitle"></div><br>
+        <div id="profiletitle"></div>
         <div class="stream-container">
           <div id="video-container">
             <video id="localVideo" autoplay></video>
@@ -86,13 +86,26 @@
         <button class="main-btn" id="endliveBtn">End Live</button>
         <div id="control-panel">
           <h2 id="cph2">Control Panel</h2>            
-          <span id="deviceinfo">No device connected</span>
-          <div class="device-dropdown">
-            <button class="main-btn" id="connectdevice-Btn" onclick="toggleDevices()">Connect</button>
-            <div class="device-dropdown-content">
-                <button class="drop-btn" onclick="deviceSelect('option2')">v0 Robot</button>                  
-            </div>
-          </div>
+          <span id="deviceinfo">No device connected</span>          
+          <button class="main-btn" id="connectdevice-Btn">Connect</button>
+          <div id="modal-device-select" class="modal">
+            <div class="modal-content">
+              <span class="close" id="close-device-select">&times;</span>
+              <h2>Select Device</h2>
+              <div class="custom-select" style="width:200px;">
+                <select id="deviceSelect">
+                  <option value="0">Select device</option>
+                  <option value="1">BLE Server</option>
+                  <option value="2">Web Server</option>                  
+                </select>              
+              </div>
+              <input type="text" id="devicenameinput" placeholder="Devce Name" value="v0_Robot" style="display: none; margin-bottom: 20px; text-align: center;">
+              <input type="text" id="deviceserviceinput" placeholder="Service UUID" value="12345678-1234-1234-1234-123456789012" style="display: none; margin-bottom: 20px; text-align: center;">            
+              <input type="text" id="devicecharinput" placeholder="Characteristic UUID" value="abcdef12-1234-1234-1234-abcdef123456" style="display: none; margin-bottom: 20px; text-align: center;">
+              <input type="text" id="deviceaddressinput" placeholder="Device URL" value="ws://10.0.0.31:8085" style="display: none; margin-bottom: 20px; text-align: center;">
+              <button class="main-btn" id="confirmdeviceBTN">Confirm</button>            
+            </div>          
+          </div>  
           <div class="control-panel-outputs">
             <div class="arrow-container-host">
               <div class="arrow-buttons">
