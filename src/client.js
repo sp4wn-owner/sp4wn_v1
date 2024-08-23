@@ -112,6 +112,8 @@ var otherProfile = document.querySelector('#otherprofile');
 var liveStreams = document.querySelector("#livestreams");
 
 var connectdeviceBtn = document.querySelector('#connectdevice-Btn');
+var connectcontrollerBtn = document.querySelector('#connectcontroller-Btn');
+
 var devicedropBtns = document.querySelector('.device-dropdown-content');
 var arrowBtns = document.querySelector('.arrow-Btns');
 var disconnectdeviceBtn = document.querySelector('#disconnectdevice-Btn');
@@ -191,6 +193,8 @@ function init() {
    xposition = 90;
    yposition = 90;
    deviceaddress = null;
+
+
    
    };
 
@@ -962,63 +966,6 @@ if (username) {
    }
 }
 
-function toggleDevices() {
-   if (connectdeviceBtn.classList.contains("active")) {
-      devicedropBtns.style.display = "none";
-      connectdeviceBtn.classList.remove("active");      
-  } else {
-      devicedropBtns.style.display = "block";
-      connectdeviceBtn.classList.add("active");
-  }
-}
-
-function deviceSelectold(option) {
-   switch(option) {
-      case "option1":
-         devicedropBtns.style.display = "none";
-         connectdeviceBtn.classList.remove("active"); 
-
-         break;
-
-      case "option2":
-         devicedropBtns.style.display = "none";
-         connectdeviceBtn.classList.remove("active"); 
-         //load js
-        // var script = document.createElement("script");
-        // script.src = "APIs/v0-robot/v0-robot.js";  // Path to the external JS file
-        // script.type = "text/javascript";
-        // script.id = "v0-robot-js"
-        // activejs = script.id;
-        // script.onload = function() {
-       //     console.log("Script loaded and executed.");
-       //  };
-       //  document.body.appendChild(script);
-         //load css
-        // var link = document.createElement("link");
-        // link.rel = "stylesheet";
-        // link.type = "text/css";
-       //  link.href = "APIs/v0-robot/v0-robot-styles.css"; 
-       //  link.id = "v0-robot-css";
-       //  activecss = link.id;
-       //  document.head.appendChild(link);
- 
-         //connect to device
-         connectDevice();
-         
-
-         break;
-      
-      case "option3":
-      devicedropBtns.style.display = "none";
-      connectdeviceBtn.classList.remove("active"); 
-
-         break;
-
-      default:
-         console.log(`Error msg: ${expr}.`);
-   }
-}
-
 // disconnect device button
 disconnectdeviceBtn.addEventListener("click", function (event) {
    disconnectDevice();   
@@ -1032,11 +979,12 @@ disconnectdeviceBtn.addEventListener("click", function (event) {
 async function connectDevice() {
    try {
        // Request a Bluetooth device
+       console.log("attempting to connect to: " + BLE_Name);
        device = await navigator.bluetooth.requestDevice({
            filters: [{ name: BLE_Name }],
            optionalServices: [serviceUUID]
        });
-       console.log("attempting to connect to: " + BLE_Name);
+       
        // Connect to the GATT server
        server = await device.gatt.connect();
        // Get the primary service
@@ -1076,6 +1024,31 @@ function handleCharacteristicValueChanged(event) {
  
    console.log('Notification received:', response);
  }
+connectcontrollerBtn.onclick = function() {
+   connectController();
+}
+
+async function connectController() {
+      // Check if the Gamepad API is supported
+   if (navigator.getGamepads) {
+      console.log("Gamepad API is supported in this browser.");
+      // Listen for gamepad connection
+      window.addEventListener("gamepadconnected", (event) => {
+         console.log("Gamepad connected:", event.gamepad);
+         // Start reading the gamepad inputs
+         pollGamepad(event.gamepad.index);
+      });
+
+      // Listen for gamepad disconnection
+      window.addEventListener("gamepaddisconnected", (event) => {
+         console.log("Gamepad disconnected:", event.gamepad);
+      });
+   } else {
+      console.log("Gamepad API is not supported in this browser.");
+}
+  
+}
+
 async function disconnectDevice(params) {
    if (server) {
        server.disconnect();
@@ -1087,7 +1060,7 @@ async function disconnectDevice(params) {
        characteristic = null;
 
        //update buttons
-      connectdeviceBtn.style.display = "block";
+      connectdeviceBtn.style.display = "inline-block";
       controlpaneloutputs.style.display = "none";
    } else {
        console.error('No active connection to disconnect.');
@@ -1103,52 +1076,52 @@ let park = "park";
 
 
 forwardbtn.onpointerdown = function() {
-   sendDC('A');
+   sendDC(forward);
 }
 forwardbtn.onpointerup = function () {
-   setTimeout(sendDC, 200, 'B');
+   setTimeout(sendDC, 200, park);
 }
 turnleftbtn.onpointerdown = function() {
-   sendDC(2001);
+   sendDC(left);
 }
 turnleftbtn.onpointerup = function() {
-   setTimeout(sendDC, 200, 2004);
+   setTimeout(sendDC, 200, park);
 }
 turnrightbtn.onpointerdown = function() {
-   sendDC(2002);
+   sendDC(right);
 }
 turnrightbtn.onpointerup = function() {
-   setTimeout(sendDC, 200, 2004);
+   setTimeout(sendDC, 200, park);
 }
 reversebtn.onpointerdown = function() {
-   sendDC(2003);
+   sendDC(reverse);
 }
 reversebtn.onpointerup = function() {
-   setTimeout(sendDC, 200, 2004);
+   setTimeout(sendDC, 200, park);
 }
 hostforward.onpointerdown = function() {
-   move('a');
+   move(forward);
 }
 hostforward.onpointerup = function () {
-   setTimeout(move, 200, "b");   
+   setTimeout(move, 200, park);   
 }
 hostleft.onpointerdown = function() {
-   move('x');
+   move(left);
 }
 hostleft.onpointerup = function() {
-   setTimeout(move, 200, 'y');   
+   setTimeout(move, 200, park);   
 }
 hostright.onpointerdown = function() {
-   move(2002);
+   move(right);
 }
 hostright.onpointerup = function() {
-   setTimeout(move, 200, 2004);   
+   setTimeout(move, 200, park);   
 }
 hostreverse.onpointerdown = function() {
-   move(2003);
+   move(reverse);
 }
 hostreverse.onpointerup = function() {
-   setTimeout(move, 200, 2004);   
+   setTimeout(move, 200, park);   
 }
 
 function move(string) {
@@ -1253,31 +1226,56 @@ function sendDC(value) {
       console.log(value);
    } catch (e) {
       console.log(e);
-   }
-   
+   }   
 }
 
-async function resetDevice(params) {
-   xposition = 90;
-   yposition = 1090;
-   if (!characteristic) {
-       console.error('No characteristic available. Please connect first.');
-       return;
-   }
+// Poll the gamepad state with timestamp-based throttling
+function pollGamepad(gamepadIndex) {
+   let lastLoggedTime = 0;
+   const logInterval = 300; // Delay in milliseconds (e.g., 500ms)
 
-   try {
-       // Send a message
-       const encoder = new TextEncoder();
-       const messagex = xposition;
-       const messagey = yposition;
-       await characteristic.writeValue(encoder.encode(messagex));
-       await characteristic.writeValue(encoder.encode(messagey));
-       console.log('Message sent!');
-       yposition = 90;
-   } catch (error) {
-       console.error('Error sending message:', error);
-   }
+   const poll = () => {
+       const gamepads = navigator.getGamepads();
+       const gamepad = gamepads[gamepadIndex];
+       const currentTime = Date.now();
+
+       if (gamepad) {
+           if (currentTime - lastLoggedTime >= logInterval) {
+               // Log buttons state
+               gamepad.buttons.forEach((button, index) => {
+                   if (button.pressed) {
+                       console.log(`Button ${index} is pressed`);
+                       if (index == 0) {
+                        console.log("A");
+                       }
+                       
+                   }
+               });
+
+               // Log axes state (joysticks)
+               gamepad.axes.forEach((axis, index) => {
+                  value = Math.round(axis);
+                  if (value != 0) {
+                     console.log(`Axis ${index} value: ${axis}`);
+                  } else if (value == 0) {
+                     console.log("park");
+                  }
+                  while (value == 0) {
+
+                  }
+               });
+               // Update the last logged time
+               lastLoggedTime = currentTime;
+           }
+
+           // Continue polling on the next animation frame
+           requestAnimationFrame(poll);
+       }
+   };
+
+   poll();
 }
+
 
 init();
 
