@@ -8,8 +8,6 @@ var activejs;
 let device;
 let server;
 let characteristic;
-let xposition;
-let yposition;
 let drive;
 let dc;
 let deviceConn;
@@ -190,12 +188,7 @@ function init() {
    infoPage.style.display = "none";
    profilePage.style.display = "none";
    document.getElementsByTagName('header')[0].style.display = "none";
-   xposition = 90;
-   yposition = 90;
-   deviceaddress = null;
-
-
-   
+   deviceaddress = null;   
    };
 
 
@@ -634,6 +627,7 @@ spawnBtn.addEventListener("click", function (event) {
    dcpeerB();
    controlpanel.style.display = "block";
    connectdeviceBtn.style.display = "none";
+   connectcontrollerBtn.style.display = "inline-block";
    disconnectdeviceBtn.style.display = "none";
    resetBtn.style.display = "none";
    cparrowsremote.forEach(cparrowsremote => {
@@ -1003,7 +997,8 @@ async function connectDevice() {
          console.error('Notifications or indications are not supported on this characteristic');
        }
        //enable buttons
-       connectdeviceBtn.style.display = "none";    
+       connectdeviceBtn.style.display = "none";   
+       connectcontrollerBtn.style.display = "inline-block";  
        disconnectdeviceBtn.style.display = "block";          
        controlpaneloutputs.style.display = "block";
        cparrowshost.forEach(cparrowshost => {
@@ -1028,21 +1023,32 @@ connectcontrollerBtn.onclick = function() {
    connectController();
 }
 
+function checkGamepad() {
+   const gamepads = navigator.getGamepads();
+   
+   // Check if any gamepad is detected
+   for (let i = 0; i < gamepads.length; i++) {
+       if (gamepads[i]) {
+         // Start the game loop            
+            console.log(`Gamepad detected: ${gamepads[i].id}`);
+            controlpaneloutputs.style.display = "none";
+            connectcontrollerBtn.style.display = "none";
+            requestAnimationFrame(gameLoop);            
+            return;
+         }
+   }
+   alert("No gamepad detected");
+}
+
 async function connectController() {
       // Check if the Gamepad API is supported
    if (navigator.getGamepads) {
-      console.log("Gamepad API is supported in this browser.");
-      // Listen for gamepad connection
-      window.addEventListener("gamepadconnected", (event) => {
-         console.log("Gamepad connected:", event.gamepad);
-         // Start reading the gamepad inputs
-         pollGamepad(event.gamepad.index);
-      });
-
-      // Listen for gamepad disconnection
+      console.log("Gamepad API is supported in this browser.");  
+          
       window.addEventListener("gamepaddisconnected", (event) => {
          console.log("Gamepad disconnected:", event.gamepad);
       });
+      checkGamepad();
    } else {
       console.log("Gamepad API is not supported in this browser.");
 }
@@ -1127,80 +1133,27 @@ hostreverse.onpointerup = function() {
 function move(string) {
    
    let value = Number(string);
-   //console.log(value);
-   if (value > -100 && value < 100) {
-       xposition = xposition + value;
-       if (xposition < 0) {
-           xposition = 0;
-       } if (xposition > 180){
-           xposition = 180;
-       }
-       sendpos('pan');
-   } if (value < -100 || value > 100 && value < 999) {
-       if (value < -100) {
-           yposition = yposition + (value + 100);
-       } else {
-           yposition = yposition + (value - 100);
-       }
-       if (yposition <= 0) {
-           yposition = 0;
-       } if (yposition >= 180){
-           yposition = 180;
-       }
-       sendpos('tilt');
-   } else {
+   
+   
        drive = string;
        sendpos('drive');
-   }
+   
    
 }
 
 async function sendpos(pantilt) {
    switch (pantilt) {
        case 'pan':
-           console.log('pan: ' + xposition);
-           if (!characteristic) {
-               console.error('No characteristic available. Please connect first.');
-               return;
-           }
-       
-           try {
-               // Send a message
-               const encoder = new TextEncoder();
-               const message = xposition;
-               await characteristic.writeValue(encoder.encode(message));
-       
-               console.log('Message sent to robot for tilt!');
-           } catch (error) {
-               console.error('Error sending message:', error);
-           }
-           break;
+          
+         break;
 
        case 'tilt':
-           console.log('tilt: ' + yposition);
-           let yvalue = yposition + 1000;
-           if (!characteristic) {
-               console.error('No characteristic available. Please connect first.');
-               return;
-           }
-       
-           try {
-               // Send a message
-               const encoder = new TextEncoder();
-               const message = yvalue;
-               await characteristic.writeValue(encoder.encode(message));
-       
-               console.log('Message sent!');
-           } catch (error) {
-               console.error('Error sending message:', error);
-           }
-           break;
+          
+         break;
 
-           case 'drive':
-           console.log('drive: ' + drive);
-           
-           driveBT();
-           break;
+      case 'drive':       
+         driveBT();
+         break;
        
        default:
            console.log(`Sorry, we are out of ${expr}.`);
@@ -1212,7 +1165,7 @@ async function driveBT() {
       const encoder = new TextEncoder();
       const message = drive;
       await characteristic.writeValue(encoder.encode(message));
-      console.log('Message sent!');
+      console.log('Message sent!' + message);
       return;
    } catch (error) {
       console.error('Error sending message:', error);
@@ -1229,53 +1182,58 @@ function sendDC(value) {
    }   
 }
 
-// Poll the gamepad state with timestamp-based throttling
-function pollGamepad(gamepadIndex) {
-   let lastLoggedTime = 0;
-   const logInterval = 300; // Delay in milliseconds (e.g., 500ms)
+// Store previous gamepad state
+let previousGamepadState = null;
+const DEAD_ZONE = 0.05; // Define a small dead zone threshold
+let lastLoggedTime = 0;
+const logInterval = 300;
 
-   const poll = () => {
-       const gamepads = navigator.getGamepads();
-       const gamepad = gamepads[gamepadIndex];
-       const currentTime = Date.now();
+function detectGamepadChanges(gamepad) {
+   const currentTime = Date.now();
 
-       if (gamepad) {
-           if (currentTime - lastLoggedTime >= logInterval) {
-               // Log buttons state
-               gamepad.buttons.forEach((button, index) => {
-                   if (button.pressed) {
-                       console.log(`Button ${index} is pressed`);
-                       if (index == 0) {
-                        console.log("A");
-                       }
-                       
-                   }
-               });
-
-               // Log axes state (joysticks)
-               gamepad.axes.forEach((axis, index) => {
-                  value = Math.round(axis);
-                  if (value != 0) {
-                     console.log(`Axis ${index} value: ${axis}`);
-                  } else if (value == 0) {
-                     console.log("park");
-                  }
-                  while (value == 0) {
-
-                  }
-               });
-               // Update the last logged time
-               lastLoggedTime = currentTime;
-           }
-
-           // Continue polling on the next animation frame
-           requestAnimationFrame(poll);
-       }
-   };
-
-   poll();
+   if (currentTime - lastLoggedTime < logInterval) {
+      return;
+   } 
+   if (!previousGamepadState) {
+      // Initialize the previous state if it's the first time checking
+      previousGamepadState = {
+         buttons: gamepad.buttons.map(button => button.pressed),
+         axes: gamepad.axes.slice(),
+      };
+      return;
+   }
+      // Detect button changes
+      gamepad.buttons.forEach((button, index) => {
+         if (button.pressed && !previousGamepadState.buttons[index]) {
+            console.log(`Button ${index} pressed`);
+         } else if (!button.pressed && previousGamepadState.buttons[index]) {
+            console.log(`Button ${index} released`);
+      }
+   });
+      // Detect changes in axis values
+      gamepad.axes.forEach((axis, index) => {
+         value = Math.round(axis);
+         if (Math.abs(axis - previousGamepadState.axes[index]) > DEAD_ZONE) {
+         console.log(`Axis ${index} value changed to: ${value.toFixed(2)}`);
+      }
+   });
+      // Update the previous state
+      previousGamepadState = {
+         buttons: gamepad.buttons.map(button => button.pressed),
+         axes: gamepad.axes.slice(),
+      };  
+      lastLoggedTime = currentTime;
 }
 
+function gameLoop() {
+   const gamepads = navigator.getGamepads();
+   const gamepad = gamepads[0]; // Checking the first connected gamepad
+   if (gamepad) {
+         detectGamepadChanges(gamepad);
+   }
+
+   requestAnimationFrame(gameLoop); // Continue the loop
+}
 
 init();
 

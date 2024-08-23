@@ -266,6 +266,9 @@ video {
 #reset-Btn:hover {
   background-color: darkblue;
 }
+#connectcontroller-Btn {
+  display: none;
+}
 #disconnectdevice-Btn {
   margin: 0 auto;
   background-color: orangered;
