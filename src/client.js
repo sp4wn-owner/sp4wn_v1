@@ -544,7 +544,7 @@ function opendc() {
 
    dc.onmessage = (event) => {
       console.log("Received from Peer B:", event.data);
-      move(event.data);
+      sendBT(event.data);
       
    };
 
@@ -1037,14 +1037,14 @@ function checkGamepad() {
             return;
          }
    }
-   alert("No gamepad detected");
+   console.log("No gamepad detected");
 }
 
 async function connectController() {
       // Check if the Gamepad API is supported
    if (navigator.getGamepads) {
       console.log("Gamepad API is supported in this browser.");  
-          
+
       window.addEventListener("gamepaddisconnected", (event) => {
          console.log("Gamepad disconnected:", event.gamepad);
       });
@@ -1106,77 +1106,46 @@ reversebtn.onpointerup = function() {
    setTimeout(sendDC, 200, park);
 }
 hostforward.onpointerdown = function() {
-   move(forward);
+   sendBT(forward);
 }
 hostforward.onpointerup = function () {
-   setTimeout(move, 200, park);   
+   setTimeout(sendBT, 200, park);   
 }
 hostleft.onpointerdown = function() {
-   move(left);
+   sendBT(left);
 }
 hostleft.onpointerup = function() {
-   setTimeout(move, 200, park);   
+   setTimeout(sendBT, 200, park);   
 }
 hostright.onpointerdown = function() {
-   move(right);
+   sendBT(right);
 }
 hostright.onpointerup = function() {
-   setTimeout(move, 200, park);   
+   setTimeout(sendBT, 200, park);   
 }
 hostreverse.onpointerdown = function() {
-   move(reverse);
+   sendBT(reverse);
 }
 hostreverse.onpointerup = function() {
-   setTimeout(move, 200, park);   
+   setTimeout(sendBT, 200, park);   
 }
 
-function move(string) {
-   
-   let value = Number(string);
-   
-   
-       drive = string;
-       sendpos('drive');
-   
-   
-}
-
-async function sendpos(pantilt) {
-   switch (pantilt) {
-       case 'pan':
-          
-         break;
-
-       case 'tilt':
-          
-         break;
-
-      case 'drive':       
-         driveBT();
-         break;
-       
-       default:
-           console.log(`Sorry, we are out of ${expr}.`);
-   }
-}
-async function driveBT() {
+async function sendBT(string) {
    try {
-      // Send a message
+      
       const encoder = new TextEncoder();
-      const message = drive;
-      await characteristic.writeValue(encoder.encode(message));
-      console.log('Message sent!' + message);
+      const message = string;
+      await characteristic.writeValue(encoder.encode(message));      
+      console.log('Message sent: ' + message);
       return;
    } catch (error) {
       console.error('Error sending message:', error);
-     }
+     }     
 }
-   
 
 function sendDC(value) {
    try {
       dc.send(value);
-      console.log(value);
    } catch (e) {
       console.log(e);
    }   
@@ -1206,6 +1175,7 @@ function detectGamepadChanges(gamepad) {
       gamepad.buttons.forEach((button, index) => {
          if (button.pressed && !previousGamepadState.buttons[index]) {
             console.log(`Button ${index} pressed`);
+            //sendBT(index);
          } else if (!button.pressed && previousGamepadState.buttons[index]) {
             console.log(`Button ${index} released`);
       }
@@ -1214,7 +1184,8 @@ function detectGamepadChanges(gamepad) {
       gamepad.axes.forEach((axis, index) => {
          value = Math.round(axis);
          if (Math.abs(axis - previousGamepadState.axes[index]) > DEAD_ZONE) {
-         console.log(`Axis ${index} value changed to: ${value.toFixed(2)}`);
+            console.log(`Axis ${index} value changed to: ${value.toFixed(2)}`);
+            toggleAxis(index, value);
       }
    });
       // Update the previous state
@@ -1235,5 +1206,74 @@ function gameLoop() {
    requestAnimationFrame(gameLoop); // Continue the loop
 }
 
+function toggleAxis(index, value) {
+   let msg;
+   switch (index) {
+      case 0:
+         if (value == -1) {
+            console.log("left");
+            msg = "left";
+         }
+         if (value == 1) {
+            console.log("right");
+            msg = "right";
+         }
+         if (value == 0) {
+            console.log("park");
+            msg = "park";
+         }
+         break;
+
+      case 1:
+         if (value == -1) {
+            console.log("forward")
+            msg = "forward";
+         }
+         if (value == 1) {
+            console.log("reverse");
+            msg = "reverse";
+         }
+         if (value == 0) {
+            console.log("park");
+            msg = "park";
+         }
+         break;
+      
+      case 2:
+         if (value == -1) {
+            console.log("right stick left");
+            msg = "rjl";
+         }
+         if (value == 1) {
+            console.log("right stick right");
+            msg = "rjr";
+         }
+         if (value == 0) {
+            console.log("right stick center");
+            msg = "rjc";
+         }
+         break;
+
+      case 3:
+         if (value == -1) {
+            console.log("right stick up");
+            msg = "rju";
+         }
+         if (value == 1) {
+            console.log("right stick down");
+            msg = "rjd";
+         }
+         if (value == 0) {
+            console.log("right stick center")
+            msg = "rjc";
+         }
+         break;
+   }
+   if (liveVideo == 1) {
+      sendBT(msg);
+   } else if (liveremoteVideo == 1) {
+      sendDC(msg);
+   }
+}
 init();
 
