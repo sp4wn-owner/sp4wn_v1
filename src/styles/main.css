@@ -169,6 +169,7 @@ video {
   right: 25%;
   font-size: 25px;
   text-decoration: none;
+  color: black;
 }
 .modal {
   display: none; /* Hidden by default */
