@@ -165,12 +165,14 @@ video {
 }
 #videoicons {
   position: absolute;
-  display: block;
   bottom: 0;
   right: 25%;
   font-size: 25px;
   text-decoration: none;
   color: black;
+}
+#videoicons i {
+  display: block;
 }
 .modal {
   display: none; /* Hidden by default */
