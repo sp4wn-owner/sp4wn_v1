@@ -965,10 +965,7 @@ disconnectdeviceBtn.addEventListener("click", function (event) {
    disconnectDevice();   
 });
 
-// reset device button
-disconnectdeviceBtn.addEventListener("click", function (event) {
-   resetDevice();
-});
+
 
 async function connectDevice() {
    try {
@@ -1068,6 +1065,7 @@ async function disconnectDevice(params) {
        //update buttons
       connectdeviceBtn.style.display = "inline-block";
       controlpaneloutputs.style.display = "none";
+      deviceinfo.innerHTML = "";
    } else {
        console.error('No active connection to disconnect.');
    }
@@ -1273,6 +1271,41 @@ function toggleAxis(index, value) {
       sendBT(msg);
    } else if (liveremoteVideo == 1) {
       sendDC(msg);
+   }
+}
+
+function toggleFullscreen() {
+   let video;
+   if (liveVideo == 1) {
+      video = localVideo;
+   } else if (liveremoteVideo == 1) {
+      video = remoteVideo;
+   }
+   // Check if the document is in fullscreen mode
+   if (!document.fullscreenElement && !document.mozFullScreenElement && 
+      !document.webkitFullscreenElement && !document.msFullscreenElement) {
+      
+      // Enter fullscreen
+      if (video.requestFullscreen) {
+         video.requestFullscreen();
+      } else if (video.mozRequestFullScreen) { // Firefox
+         video.mozRequestFullScreen();
+      } else if (video.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+         video.webkitRequestFullscreen();
+      } else if (video.msRequestFullscreen) { // IE/Edge
+         video.msRequestFullscreen();
+      }
+   } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+         document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) { // Firefox
+         document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) { // Chrome, Safari, and Opera
+         document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) { // IE/Edge
+         document.msExitFullscreen();
+      }
    }
 }
 init();

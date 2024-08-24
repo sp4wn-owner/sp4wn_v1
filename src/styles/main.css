@@ -160,6 +160,16 @@ video {
   width: 50%;
   margin: 0 auto;
 }
+#video-container {
+  position: relative;
+}
+#videoicons {
+  position: absolute;
+  bottom: 0;
+  right: 25%;
+  font-size: 25px;
+  text-decoration: none;
+}
 .modal {
   display: none; /* Hidden by default */
   position: absolute; /* Stay in place */
@@ -435,6 +445,9 @@ footer {
   }
   #localVideo, #remoteVideo {
     width: 100%;
+  }
+  #videoicons {
+    right: 0;
   }
   .footer-links {
     display: none;
