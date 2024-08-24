@@ -396,6 +396,7 @@ confirmVideoBtn.onclick = function() {
      
       //displaying local video stream on the page
       localVideo.srcObject = stream
+      video = localVideo;
 
       stream.getTracks().forEach((track) => {
          yourConn.addTrack(track, stream);
@@ -473,6 +474,7 @@ function drawStream() {
 
    // Set these streams to video elements
    localVideo.srcObject = copiedStream1;
+   video = localVideo;
    captureImageFromVideo();
    
    yourConn = new RTCPeerConnection(configuration);
@@ -621,7 +623,7 @@ spawnBtn.addEventListener("click", function (event) {
    .catch(error => console.error(error.message));
    
    updatelive('remotedelete');
-   
+   video = remoteVideo;
    liveremoteVideo = 1;
    toggleprofile('remote');
    dcpeerB();
@@ -1130,7 +1132,6 @@ hostreverse.onpointerup = function() {
 
 async function sendBT(string) {
    try {
-      
       const encoder = new TextEncoder();
       const message = string;
       await characteristic.writeValue(encoder.encode(message));      
@@ -1169,14 +1170,15 @@ function detectGamepadChanges(gamepad) {
       };
       return;
    }
-      // Detect button changes
-      gamepad.buttons.forEach((button, index) => {
-         if (button.pressed && !previousGamepadState.buttons[index]) {
-            console.log(`Button ${index} pressed`);
-            //sendBT(index);
-         } else if (!button.pressed && previousGamepadState.buttons[index]) {
-            console.log(`Button ${index} released`);
-      }
+   // Detect button changes
+   gamepad.buttons.forEach((button, index) => {      
+      if (button.pressed && !previousGamepadState.buttons[index]) {
+         console.log(`Button ${index} pressed`);
+         toggleButtons(index);
+         
+      } else if (!button.pressed && previousGamepadState.buttons[index]) {
+         console.log(`Button ${index} released`);
+      }      
    });
       // Detect changes in axis values
       gamepad.axes.forEach((axis, index) => {
@@ -1202,6 +1204,80 @@ function gameLoop() {
    }
 
    requestAnimationFrame(gameLoop); // Continue the loop
+}
+
+function toggleButtons(index) {
+   let msg;
+   switch (index) {
+      case 0:
+         msg = "0";
+         break;
+
+      case 1:
+         msg = "1";
+         break;
+      
+      case 2:
+         msg = "2";        
+         break;
+
+      case 3:
+         msg = "3";
+         break;
+
+      case 4:
+         msg = "4";
+         break;
+      
+      case 5:
+         msg = "5";        
+         break;
+
+      case 6:
+         msg = "6";
+         break;
+
+      case 7:
+         msg = "7";
+         break;
+
+      case 8:
+         msg = "8";
+         break;
+      
+      case 9:
+         msg = "9";        
+         break;
+
+      case 10:
+         msg = "10";
+         break;      
+
+      case 11:
+         msg = "11";
+         break;
+
+      case 12:
+         msg = "12";
+         break;
+      
+      case 13:
+         msg = "13";        
+         break;
+
+      case 14:
+         msg = "14";
+         break;
+
+      case 15:
+         msg = "15";
+         break;
+   }
+   if (liveVideo == 1) {
+      sendBT(msg);
+   } else if (liveremoteVideo == 1) {
+      sendDC(msg);
+   }
 }
 
 function toggleAxis(index, value) {
