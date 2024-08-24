@@ -167,8 +167,7 @@ video {
   position: absolute;
   bottom: 0;
   right: 25%;
-  font-size: 25px;
-  padding: 1px 0;
+  font-size: 25px;  
 }
 #videoicons a {
 text-decoration: none;
