@@ -165,6 +165,7 @@ video {
 }
 #videoicons {
   position: absolute;
+  display: block;
   bottom: 0;
   right: 25%;
   font-size: 25px;
