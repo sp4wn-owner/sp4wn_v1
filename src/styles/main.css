@@ -168,10 +168,13 @@ video {
   bottom: 0;
   right: 25%;
   font-size: 25px;
-  text-decoration: none;
-  color: black;
+  padding: 1px 0;
+}
+#videoicons a {
+text-decoration: none;
 }
 #videoicons i {
+  color: #000;
   display: block;
 }
 .modal {
