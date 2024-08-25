@@ -636,7 +636,12 @@ spawnBtn.addEventListener("click", function (event) {
    cparrowsremote.forEach(cparrowsremote => {
       cparrowsremote.style.display = 'inline-block';
     });
+
     ICEstatus();
+
+    window.addEventListener("gamepaddisconnected", (event) => {
+      console.log("Gamepad disconnected:", event.gamepad);
+   });
     
     
 });
@@ -945,7 +950,7 @@ if (username) {
             document.getElementById('deviceinfo').style.display = "none";
             if (liveremoteVideo == 1) {
                spawnBtn.style.display = "none";
-               endotherliveBtn.style.display = "block";
+               //endotherliveBtn.style.display = "block";
             } else {
                spawnBtn.style.display = "block";
                endotherliveBtn.style.display = "none";
@@ -1045,13 +1050,12 @@ async function connectController() {
    if (navigator.getGamepads) {
       console.log("Gamepad API is supported in this browser.");  
 
-      window.addEventListener("gamepaddisconnected", (event) => {
-         console.log("Gamepad disconnected:", event.gamepad);
-      });
+      
       checkGamepad();
    } else {
       console.log("Gamepad API is not supported in this browser.");
-}
+      alert("If controller is connected, press a button and try again");
+   }
   
 }
 
@@ -1181,20 +1185,20 @@ function detectGamepadChanges(gamepad) {
          console.log(`Button ${index} released`);
       }      
    });
-      // Detect changes in axis values
-      gamepad.axes.forEach((axis, index) => {
-         value = Math.round(axis);
-         if (Math.abs(axis - previousGamepadState.axes[index]) > DEAD_ZONE) {
-            console.log(`Axis ${index} value changed to: ${value.toFixed(2)}`);
-            toggleAxis(index, value);
+   // Detect changes in axis values
+   gamepad.axes.forEach((axis, index) => {
+      value = Math.round(axis);
+      if (Math.abs(axis - previousGamepadState.axes[index]) > DEAD_ZONE) {
+         console.log(`Axis ${index} value changed to: ${value.toFixed(2)}`);
+         toggleAxis(index, value);
       }
    });
-      // Update the previous state
-      previousGamepadState = {
-         buttons: gamepad.buttons.map(button => button.pressed),
-         axes: gamepad.axes.slice(),
-      };  
-      lastLoggedTime = currentTime;
+   // Update the previous state
+   previousGamepadState = {
+      buttons: gamepad.buttons.map(button => button.pressed),
+      axes: gamepad.axes.slice(),
+   };  
+   lastLoggedTime = currentTime;
 }
 
 function gameLoop() {
@@ -1405,14 +1409,15 @@ document.addEventListener('DOMContentLoaded', function() {
            }
        });
    } else {
-       // Fallback for browsers that do not support the Screen Orientation API
-       window.addEventListener('resize', function() {
-           if (window.innerWidth > window.innerHeight) {
+
+      // Fallback for browsers that do not support the Screen Orientation API
+      window.addEventListener('resize', function() {
+         if (window.innerWidth > window.innerHeight) {
                enterFullscreen(video);
-           } else {
+         } else {
                exitFullscreen();
-           }
-       });
+         }
+      });
    }
 
    function enterFullscreen(element) {

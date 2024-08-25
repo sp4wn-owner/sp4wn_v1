@@ -100,7 +100,7 @@ button:hover {
   color: lime;
 }
 #homepage {
-  margin-bottom: 50px;
+  margin-bottom: 100px;
 }
 #infopage {
   margin-bottom: 50px;
@@ -251,6 +251,9 @@ text-decoration: none;
 #endliveBtn, #endotherliveBtn {
   margin: 15px auto;
 }
+#endotherliveBtn {
+  display: none;
+}
 
 #watch-streamBtn {
   margin: 0;
@@ -308,7 +311,7 @@ text-decoration: none;
   text-align: center;
 }
 #control-panel {
-  margin-bottom: 50px;
+  margin-bottom: 75px;
 }
 
 .arrow-container-host {
