@@ -175,6 +175,10 @@ text-decoration: none;
 #videoicons i {
   color: #000;
   display: block;
+  opacity: .25;
+}
+#videoicons i:hover {
+  opacity: .75;
 }
 .modal {
   display: none; /* Hidden by default */

@@ -547,6 +547,7 @@ function opendc() {
    dc.onmessage = (event) => {
       console.log("Received from Peer B:", event.data);
       sendBT(event.data);
+      dc.send(event.data);
       
    };
 
