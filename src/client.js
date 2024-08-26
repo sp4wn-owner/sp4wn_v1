@@ -56,7 +56,7 @@ conn.onmessage = function (msg) {
          watchStream(data.name);
          break;
       case "liveusers":
-         handleStreams(data.name);
+         handleStreams(data.name, data.image);
          break;
       case "finalleave":
          handleFinalLeave();
@@ -436,8 +436,6 @@ confirmVideoBtn.onclick = function() {
       }, function (error) {
          console.log(error);
       });
-      
-      
    }
      
    if (selectedValue == "2") {
@@ -864,9 +862,9 @@ function handleFinalLeave() {
 }
 
 
-function handleStreams(liveusers) {
-   var list = liveusers.name;
-   var capturedimages = liveusers.image;
+function handleStreams(liveusers, images) {
+   var list = liveusers;
+   var capturedimages = images;
    //list = Object.values(liveusers);
    //otheruser = "";
    
