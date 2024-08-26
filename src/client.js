@@ -181,8 +181,12 @@ var configuration = {
    ],
  };
 
+ const introtext = "Dawn of Telepresence Robotics";
+ const textContainer = document.getElementById('introtext');
+ let index = 0;
 
 function init() {
+   revealText();
    loginPage.style.display = "block";
    homePage.style.display = "none";
    infoPage.style.display = "none";
@@ -191,7 +195,23 @@ function init() {
    deviceaddress = null;   
    };
 
+function revealText() {
+   
+   if (index < introtext.length) {
+      const span = document.createElement('span');
+      span.textContent = introtext[index];
+      span.classList.add('hidden');
+      textContainer.appendChild(span);
 
+      // Add a small delay before making the character visible
+      setTimeout(() => {
+          span.classList.remove('hidden');
+      }, 50);
+
+      index++;
+      setTimeout(revealText, 100); // Adjust the timing for each character
+  }
+}
 // Login when the user clicks the button
 loginBtn.addEventListener("click", function (event) {
    

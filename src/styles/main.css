@@ -24,13 +24,25 @@ header {
   height: 12%;
 }
 
+.text-container {
+  font-family: Exarros;
+  color: whitesmoke;
+  font-size: 2rem;
+  white-space: pre-wrap; /* Preserve spaces and line breaks */
+  width: 80%;
+  margin: 0 auto;
+}
+.text-container span {
+  font-size: 4.5vw;
+}
+
 .login-container {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 20px;
   width: 400px;
-  margin: 8% auto;
+  margin: 5% auto;
   text-align: center;
 }
 
@@ -470,6 +482,13 @@ footer {
   }
   .login-container {
     width: 70%;
+    margin: 8% auto;
+  }
+  .text-container {
+  width: 90%;
+  }
+  .text-container span {
+    font-size: 8vw;
   }
   #login-page {
     height: 600px;
