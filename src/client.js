@@ -480,6 +480,8 @@ confirmVideoBtn.onclick = function() {
          }
       }
    }
+   // Automatically capture image every 30 seconds (30000 milliseconds)
+   setInterval(captureImage, 30000);
 }
 function drawStream() {
    // Get the canvas context and draw the image onto the canvas
@@ -622,8 +624,7 @@ function stopStreamedVideo(localVideo) {
  }
 
 
-spawnBtn.addEventListener("click", function (event) {
-   
+spawnBtn.addEventListener("click", function (event) {   
 
    retryFunction(async () => {      
       connectedUser = otheruser;
@@ -864,15 +865,17 @@ function handleFinalLeave() {
 
 
 function handleStreams(liveusers) {
-   var list = liveusers;
+   var list = liveusers.name;
+   var capturedimages = liveusers.image;
    //list = Object.values(liveusers);
    //otheruser = "";
    
    for (let i = 0; i < list.length; i++) {
       //var text = list[i].name.toString();
       var text = list[i];
-      liveStreams.innerHTML += "<a href ='#'>" + text + "</a>"; 
-      console.log(text);
+      var cimg = capturedimages[i];
+      liveStreams.innerHTML += "<a href ='#'>" + text + "</a>";
+      liveStreams.innerHTML += "<img >" + cimg + "</img>";  
    }  
    if (list.length < 1) {
       document.getElementById("live-span-public").innerText = "No robots available";
@@ -1460,6 +1463,38 @@ document.addEventListener('DOMContentLoaded', function() {
        }
    }
 });
+
+//const capturedImageArray = [];
+
+function captureImage() {
+   // Create a canvas element to capture the current video frame
+   const canvas = document.createElement('canvas');
+   canvas.width = localVideo.videoWidth;
+   canvas.height = localVideo.videoHeight;
+   const context = canvas.getContext('2d');
+   context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+   // Convert the canvas to a data URL (image format)
+   const imageDataUrl = canvas.toDataURL('image/png');
+
+   // Store the image in the array
+   //capturedImageArray.push(imageDataUrl);
+
+   // Store image on server
+   send({
+      type: "imgcap",
+      image: imageDataUrl,
+      name: username
+   });
+
+   // Display the captured image
+   const imgElement = document.createElement('img');
+   imgElement.src = imageDataUrl;
+   imgElement.style.width = '200px'; // Set thumbnail width
+   imgElement.style.margin = '5px';
+   //capturedImages.appendChild(imgElement);
+}
+
 
 init();
 
