@@ -836,7 +836,7 @@ function handleLeave() {
       updatelive('addlive');
       connectedUser = null;
       dc = null;
-      setInterval(captureImage, imgInterval);
+      stopimagecapture();
    } 
    
    if (liveremoteVideo == 1) {
