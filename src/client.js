@@ -494,7 +494,7 @@ confirmVideoBtn.onclick = function() {
 }
 
 function handleimg() {
-   clearInterval(imgInterval);
+   setInterval(captureImage, 0);
    console.log("interval cleared");
 }
 
@@ -827,6 +827,7 @@ function handleLeave() {
       updatelive('addlive');
       connectedUser = null;
       dc = null;
+      setInterval(captureImage, imgInterval);
    } 
    
    if (liveremoteVideo == 1) {
