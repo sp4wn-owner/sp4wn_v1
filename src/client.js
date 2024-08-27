@@ -18,8 +18,8 @@ let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your s
 let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
 
 //connecting to our signaling server
-//var conn = new WebSocket('ws://localhost:9090');
-var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
+var conn = new WebSocket('ws://localhost:9090');
+//var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
 conn.onopen = function () {
@@ -536,7 +536,8 @@ function beginICE() {
       if (event.candidate) {
          send({
             type: "candidate",
-            candidate: event.candidate
+            candidate: event.candidate,
+            username: username            
          });
       }
    };
@@ -664,7 +665,7 @@ spawnBtn.addEventListener("click", function (event) {
       }            
       send({
          type: "watch",
-         name: username,
+         username: username,
          host: connectedUser
       });
        beginICE();
@@ -751,7 +752,7 @@ function watchStream (name) {
          send({
             type: "offer",
             offer: offer,
-            name: name,
+            username: username,
             host: connectedUser
          });
  
@@ -808,7 +809,7 @@ function handleOffer(offer) {
       send({
          type: "answer",
          answer: answer,
-         name: username,
+         username: username,
          host: connectedUser
       });
     //  document.getElementById('sdp-answer').value = JSON.stringify(answer)
