@@ -114,6 +114,10 @@ button:hover {
 #homepage {
   margin-bottom: 100px;
 }
+#homepage h1 {
+  text-decoration: underline;
+  text-underline-offset: 10px;
+}
 #infopage {
   margin-bottom: 50px;
 }
@@ -129,16 +133,32 @@ button:hover {
 #profiletitle {
   font-size: 35px;
   font-weight: bold;
-  text-transform: uppercase;
+  text-transform: uppercase;  
 }
 
-#livestreams a {
+.live-streams-container {
   display: inline-block;
-  font-size: 35px;
-  padding: 25px;
+  box-shadow: #888;
+  padding: 15px;
   margin: 10px;
-  border: solid;
+  background-color: lightgrey;
+  cursor: pointer;
+  border: 1px solid;
+  box-shadow: 5px 10px;
+}
+
+.live-streams-container:hover {
+  background-color: lightgreen;
+}
+
+.live-streams-names a {
+  font-family: monospace;
+  font-weight: bold;
+  color: black;
+  font-size: 35px;
+  padding: 10px;
   text-decoration: none;
+  text-transform: uppercase;
   
 }
 #getstreamsbtn {

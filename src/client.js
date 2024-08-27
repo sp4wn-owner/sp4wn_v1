@@ -18,7 +18,7 @@ let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your s
 let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
 
 //connecting to our signaling server
-//var conn = new WebSocket('ws://10.0.0.30:9090');
+//var conn = new WebSocket('ws://localhost:9090');
 var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
@@ -56,10 +56,13 @@ conn.onmessage = function (msg) {
          watchStream(data.name);
          break;
       case "liveusers":
-         handleStreams(data.name, data.image);
+         handleStreams(data.images);
          break;
       case "finalleave":
          handleFinalLeave();
+         break;
+      case "error":
+         handleError(data.message);
          break;
       default:
          break;
@@ -107,7 +110,8 @@ var spawnBtn = document.querySelector('#spawnBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
 var getprivatestreamsBtn = document.querySelector('#getprivatestreamsbtn');
 var otherProfile = document.querySelector('#otherprofile');
-var liveStreams = document.querySelector("#livestreams");
+//var liveStreams = document.querySelector("#livestreams");
+var liveStreams = document.querySelector("#main-streams-container");
 
 var connectdeviceBtn = document.querySelector('#connectdevice-Btn');
 var connectcontrollerBtn = document.querySelector('#connectcontroller-Btn');
@@ -147,6 +151,8 @@ var videospan = document.getElementById("close-video-select");
 var devicespan = document.getElementById("close-device-select");
 var confirmVideoBtn = document.querySelector('#confirmvideoBTN');
 var confirmDeviceBtn = document.querySelector('#confirmdeviceBTN');
+
+
 var yourConn;
 var stream;
 var callToUsernameInput;
@@ -478,8 +484,9 @@ confirmVideoBtn.onclick = function() {
          }
       }
    }
+   
    // Automatically capture image every 30 seconds (30000 milliseconds)
-   setInterval(captureImage, 30000);
+   setInterval(captureImage, 10000);
 }
 function drawStream() {
    // Get the canvas context and draw the image onto the canvas
@@ -862,31 +869,41 @@ function handleFinalLeave() {
 }
 
 
-function handleStreams(liveusers, images) {
-   var list = liveusers;
-   var capturedimages = images;
-   //list = Object.values(liveusers);
-   //otheruser = "";
-   
-   for (let i = 0; i < list.length; i++) {
-      //var text = list[i].name.toString();
-      var text = list[i];
-      var cimg = capturedimages[i];
-      liveStreams.innerHTML += "<a href ='#'>" + text + "</a>";
-      liveStreams.innerHTML += "<img >" + cimg + "</img>";  
-   }  
-   if (list.length < 1) {
+function handleStreams(images) {
+   for (let i = 0; i< images.length; i++) {
+      let text = images[i].username;
+      let imgurl = images[i].imageDataUrl;
+      let divElement = document.createElement('div');
+      let divStreamName = document.createElement('div');
+      let imgElement = document.createElement('img');   
+      divElement.classList.add("live-streams-container"); 
+      divStreamName.classList.add("live-streams-names");       
+
+      divStreamName.innerHTML += "<a href ='#'>" + text + "</a>";
+      imgElement.src = imgurl;
+      imgElement.style.width = '250px';
+      imgElement.style.margin = '5px';
+
+      liveStreams.appendChild(divElement);
+      divElement.appendChild(divStreamName);
+      divElement.appendChild(imgElement);
+
+      // Attach the onclick event
+      divElement.onclick = function() {
+         checkProfile(text);
+      };
+   }
+
+   if (images.length < 1) {
       document.getElementById("live-span-public").innerText = "No robots available";
+      liveStreams.style.display = "none";
+   } else {
+      liveStreams.style.display = "inline-block";
    }
 }
 
-liveStreams.addEventListener("click", function (event) {
-   var val = event.target.innerHTML;
-   checkProfile(val);     
-
-});
-
 function checkProfile (userdata) {
+   console.log(userdata);
    otheruser = userdata;   
    toggleprofile('remote');
 }
@@ -1462,8 +1479,6 @@ document.addEventListener('DOMContentLoaded', function() {
    }
 });
 
-//const capturedImageArray = [];
-
 function captureImage() {
    // Create a canvas element to capture the current video frame
    const canvas = document.createElement('canvas');
@@ -1479,18 +1494,20 @@ function captureImage() {
    //capturedImageArray.push(imageDataUrl);
 
    // Store image on server
-   send({
-      type: "imgcap",
-      image: imageDataUrl,
-      name: username
-   });
+   try {
+      send({
+         type: "storeimg",
+         image: imageDataUrl,
+         username: username
+      });
+      console.log("sent image to server");
+   } catch (error) {
+      console.log("failed to send image to server");
+   }      
+}
 
-   // Display the captured image
-   const imgElement = document.createElement('img');
-   imgElement.src = imageDataUrl;
-   imgElement.style.width = '200px'; // Set thumbnail width
-   imgElement.style.margin = '5px';
-   //capturedImages.appendChild(imgElement);
+function handleError(message) {
+   console.log(message);
 }
 
 
