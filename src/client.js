@@ -495,6 +495,7 @@ confirmVideoBtn.onclick = function() {
 
 function handleimg() {
    clearInterval(imgInterval);
+   console.log("interval cleared");
 }
 
 function drawStream() {
@@ -582,6 +583,9 @@ function opendc() {
 
    dc.onmessage = (event) => {
       console.log("Received from Peer B:", event.data);
+      if (event.data == "handleimg") {
+         handleimg();
+      }
       sendBT(event.data);
       dc.send(event.data);
       
@@ -710,7 +714,7 @@ function dcpeerB() {
       dc.onopen = () => {
          console.log("Data channel B is open");
          // Respond to Peer A
-         dc.send("Hello, Peer A!");
+         dc.send("handleimg");
       };
 
       dc.onmessage = (event) => {
