@@ -537,7 +537,7 @@ function beginICE() {
          send({
             type: "candidate",
             candidate: event.candidate,
-            username: username            
+            othername: connectedUser           
          });
       }
    };
@@ -653,11 +653,10 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {   
-
-   retryFunction(async () => {      
-      connectedUser = otheruser;
+   connectedUser = otheruser;
+   retryFunction(async () => {    
       yourConn = new RTCPeerConnection(configuration);
-      stream = new MediaStream();
+      stream = new MediaStream();      
       remoteVideo.srcObject = stream;
       yourConn.onaddstream = function (e) {         
          remoteVideo.srcObject = e.stream;       
