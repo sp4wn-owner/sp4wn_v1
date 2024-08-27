@@ -897,7 +897,7 @@ function handleStreams(images) {
       divElement.classList.add("live-streams-container"); 
       divStreamName.classList.add("live-streams-names");       
 
-      divStreamName.innerHTML += "<a href ='#'>" + text + "</a>";
+      divStreamName.innerHTML = text;
       imgElement.src = imgurl;
       imgElement.style.width = '250px';
       imgElement.style.margin = '5px';
@@ -913,11 +913,9 @@ function handleStreams(images) {
    }
 
    if (images.length < 1) {
-      document.getElementById("live-span-public").style.display = "block";
-      liveStreams.style.display = "none";
+      document.getElementById("live-span-public").style.display = "block";      
    } else {
-      document.getElementById("live-span-public").style.display = "none";
-      liveStreams.style.display = "inline-block";
+      document.getElementById("live-span-public").style.display = "none";      
    }
 }
 

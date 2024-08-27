@@ -151,7 +151,7 @@ button:hover {
   background-color: lightgreen;
 }
 
-.live-streams-names a {
+.live-streams-names {
   font-family: monospace;
   font-weight: bold;
   color: black;
