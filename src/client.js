@@ -18,8 +18,8 @@ let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your s
 let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
 
 //connecting to our signaling server
-var conn = new WebSocket('ws://localhost:9090');
-//var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
+//var conn = new WebSocket('ws://localhost:9090');
+var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
 conn.onopen = function () {
