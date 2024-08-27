@@ -467,6 +467,7 @@ confirmVideoBtn.onclick = function() {
             }
             ICEstatus(); 
             beginICE();
+            captureImage();
          } catch (error) {
             console.log(error);
          }
@@ -480,7 +481,7 @@ confirmVideoBtn.onclick = function() {
                endliveBtn.style.display = "block";
                liveVideo = 1;
                updatelive("addlive");
-               captureImage();
+               
             }
             ICEstatus(); 
             beginICE();
