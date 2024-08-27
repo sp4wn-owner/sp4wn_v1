@@ -394,7 +394,7 @@ image.crossOrigin = 'anonymous'; // Use 'anonymous' or 'use-credentials' dependi
 image.src = ''; // Set the image source to your URL
 
 let intervalID;
-let imgInterval = 10000;
+let imgInterval;
 // Function to update the canvas at a specified interval (frame rate)
 function updateCanvasAtInterval(context, image, canvas, interval) {
    intervalID = setInterval(() => {
@@ -488,13 +488,15 @@ confirmVideoBtn.onclick = function() {
          }
       }
    }
+   imgInterval = setInterval(() => {
+      captureImage();
+  }, 10000);
    
-   // Automatically capture image every 30 seconds (30000 milliseconds)
-   setInterval(captureImage, imgInterval);
+   //setInterval(captureImage, imgInterval);
 }
 
 function handleimg() {
-   setInterval(captureImage, 0);
+   clearInterval(imgInterval);
    console.log("interval cleared");
 }
 
@@ -909,9 +911,10 @@ function handleStreams(images) {
    }
 
    if (images.length < 1) {
-      document.getElementById("live-span-public").innerText = "No robots available";
+      document.getElementById("live-span-public").style.display = "block";
       liveStreams.style.display = "none";
    } else {
+      document.getElementById("live-span-public").style.display = "none";
       liveStreams.style.display = "inline-block";
    }
 }
