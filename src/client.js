@@ -438,9 +438,12 @@ confirmVideoBtn.onclick = function() {
       if(localVideo) {
          goliveBtn.style.display = "none";
          endliveBtn.style.display = "block";
-         liveVideo = 1;
-
+         liveVideo = 1;         
          updatelive("addlive");
+         setTimeout(() => {
+            captureImage();
+         }, 1000);
+         
       }    
 
       }, function (error) {
@@ -467,7 +470,7 @@ confirmVideoBtn.onclick = function() {
             }
             ICEstatus(); 
             beginICE();
-            captureImage();
+            
          } catch (error) {
             console.log(error);
          }
@@ -490,7 +493,7 @@ confirmVideoBtn.onclick = function() {
          }
       }
    }   
-   //setInterval(captureImage, imgInterval);
+
    startimagecapture(15000);
 }
 function startimagecapture(interval) {
