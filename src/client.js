@@ -488,14 +488,16 @@ confirmVideoBtn.onclick = function() {
          }
       }
    }
+   //setInterval(captureImage, imgInterval);
+   startimagecapture(5000);
+}
+function startimagecapture(interval) {
    imgInterval = setInterval(() => {
       captureImage();
-  }, 10000);
-   
-   //setInterval(captureImage, imgInterval);
+  }, interval);
 }
 
-function handleimg() {
+function stopimagecapture() {
    clearInterval(imgInterval);
    console.log("interval cleared");
 }
@@ -586,7 +588,7 @@ function opendc() {
    dc.onmessage = (event) => {
       console.log("Received from Peer B:", event.data);
       if (event.data == "handleimg") {
-         handleimg();
+         stopimagecapture();
       }
       sendBT(event.data);
       dc.send(event.data);
