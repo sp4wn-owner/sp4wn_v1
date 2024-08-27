@@ -64,6 +64,9 @@ conn.onmessage = function (msg) {
       case "error":
          handleError(data.message);
          break;
+      case "stopimg":
+         handleimg();
+         break;
       default:
          break;
    }
@@ -391,6 +394,7 @@ image.crossOrigin = 'anonymous'; // Use 'anonymous' or 'use-credentials' dependi
 image.src = ''; // Set the image source to your URL
 
 let intervalID;
+let imgInterval = 10000;
 // Function to update the canvas at a specified interval (frame rate)
 function updateCanvasAtInterval(context, image, canvas, interval) {
    intervalID = setInterval(() => {
@@ -486,8 +490,13 @@ confirmVideoBtn.onclick = function() {
    }
    
    // Automatically capture image every 30 seconds (30000 milliseconds)
-   setInterval(captureImage, 10000);
+   setInterval(captureImage, imgInterval);
 }
+
+function handleimg() {
+   clearInterval(imgInterval);
+}
+
 function drawStream() {
    // Get the canvas context and draw the image onto the canvas
    const canvas = document.createElement('canvas');
