@@ -62,7 +62,7 @@ conn.onmessage = function (msg) {
          handleFinalLeave();
          break;
       case "error":
-         handleError(data.message);
+         handleError(data.error);
          break;
       case "stopimg":
          handleimg();
@@ -1530,6 +1530,9 @@ function captureImage() {
 
 function handleError(message) {
    console.log(message);
+   if (message == "userconnected") {
+      alert("User is already connected")
+   }
 }
 
 
