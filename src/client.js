@@ -668,29 +668,40 @@ spawnBtn.addEventListener("click", function (event) {
          host: connectedUser
       });
        beginICE();
-   })
-   .catch(error => console.error(error.message));
+   }).catch(error => console.error(error.message));
    
-   updatelive('remotedelete');
-   video = remoteVideo;
-   liveremoteVideo = 1;
-   toggleprofile('remote');
-   dcpeerB();
-   controlpanel.style.display = "block";
-   connectdeviceBtn.style.display = "none";
-   connectcontrollerBtn.style.display = "inline-block";
-   disconnectdeviceBtn.style.display = "none";
-   resetBtn.style.display = "none";
-   cparrowsremote.forEach(cparrowsremote => {
-      cparrowsremote.style.display = 'inline-block';
-    });
-
     ICEstatus();
 
-    window.addEventListener("gamepaddisconnected", (event) => {
-      console.log("Gamepad disconnected:", event.gamepad);
-   });
-    
+    setTimeout(() => {
+      if (yourConn.iceConnectionState === 'connected') {
+         console.log('PeerConnection is connected!');
+         video = remoteVideo;
+         liveremoteVideo = 1;
+         //toggleprofile('remote');
+         spawnBtn.style.display = "none";
+         controlpanel.style.display = "block";
+         connectdeviceBtn.style.display = "none";
+         connectcontrollerBtn.style.display = "inline-block";
+         disconnectdeviceBtn.style.display = "none";
+         resetBtn.style.display = "none";
+         cparrowsremote.forEach(cparrowsremote => {
+            cparrowsremote.style.display = 'inline-block';
+         });
+         window.addEventListener("gamepaddisconnected", (event) => {
+            console.log("Gamepad disconnected:", event.gamepad);
+         });  
+         console.log("right be dcpeerB");  
+         updatelive('remotedelete');   
+         dcpeerB();
+         
+   
+      } else {
+            console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+      }
+      
+   }, 500);
+
+   
     
 });
 
@@ -836,7 +847,7 @@ function handleLeave() {
       updatelive('addlive');
       connectedUser = null;
       dc = null;
-      stopimagecapture();
+      startimagecapture(15000);
    } 
    
    if (liveremoteVideo == 1) {
