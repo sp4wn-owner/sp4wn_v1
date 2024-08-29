@@ -184,7 +184,7 @@ button:hover {
 }
 
 video {
-  background: lightgray;
+  background: #f1f1f1;
   width: 50%;
   height: 380px;
 }
@@ -207,7 +207,7 @@ video {
 text-decoration: none;
 }
 #videoicons i {
-  color: white;
+  color: #f1f1f1;
   display: block;
   opacity: .25;
 }

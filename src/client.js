@@ -509,7 +509,7 @@ function startimagecapture(interval) {
 
 function stopimagecapture() {
    clearInterval(imgInterval);
-   console.log("interval cleared");
+   console.log("Image captured terminated");
 }
 
 function drawStream() {
@@ -713,7 +713,7 @@ spawnBtn.addEventListener("click", function (event) {
             console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
       }
       
-   }, 500);
+   }, 1000);
 
    
     
