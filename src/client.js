@@ -64,9 +64,6 @@ conn.onmessage = function (msg) {
       case "error":
          handleError(data.error);
          break;
-      case "stopimg":
-         handleimg();
-         break;
       default:
          break;
    }
@@ -484,7 +481,9 @@ confirmVideoBtn.onclick = function() {
                endliveBtn.style.display = "block";
                liveVideo = 1;
                updatelive("addlive");
-               
+               setTimeout(() => {
+                  captureImage();
+               }, 1000);               
             }
             ICEstatus(); 
             beginICE();
@@ -521,14 +520,15 @@ function drawStream() {
    // Set these streams to video elements
    localVideo.srcObject = copiedStream1;
    video = localVideo;
-   captureImageFromVideo();
-   
+
    yourConn = new RTCPeerConnection(configuration);
    // Add the video track to your WebRTC peer connection
    yourConn.addTrack(videoTrack, stream);
-
-   // Start updating the canvas at a specific frame rate
+   setTimeout(() => {
+      // Start updating the canvas at a specific frame rate
    updateCanvasAtInterval(context, image, canvas, 1000 / 60); // 60 fps
+  }, 7000);
+   
 }
 function beginICE() {
    // Setup ice handling
@@ -690,7 +690,7 @@ spawnBtn.addEventListener("click", function (event) {
          window.addEventListener("gamepaddisconnected", (event) => {
             console.log("Gamepad disconnected:", event.gamepad);
          });  
-         console.log("right be dcpeerB");  
+         console.log("dcpeerB");  
          updatelive('remotedelete');   
          dcpeerB();
          
@@ -868,8 +868,6 @@ function handleLeave() {
          dc = null;
       }
    }
-
-   
 };
 function handleRemoteLeave() {
    send({
