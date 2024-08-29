@@ -12,6 +12,7 @@ let drive;
 let dc;
 let deviceConn;
 var deviceaddress;
+let deviceType;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
@@ -82,9 +83,13 @@ function send(message) {
    }
    conn.send(JSON.stringify(message));
 };
-function sendtoESP(message) {
-   deviceConn.send(JSON.stringify(message));
-};
+
+function sendtoWSS(message) {
+   //deviceConn.send(JSON.stringify(message));
+   if (deviceConn) {
+       deviceConn.send(message);
+   }
+}
 
 //******
 //UI selectors block
@@ -352,36 +357,54 @@ confirmDeviceBtn.onclick = function() {
       modalDevice.style.display = "none";   
    }
    if (selectedValue == "2") {
-      deviceaddress = deviceaddressinput.value;     
-      deviceConn = new WebSocket('ws://10.0.0.31:8085');
-
-      try {
-         deviceConn.onopen = function(event) {
-            console.log('Socket1 is open');
-            sendtoESP({
-               type: "test",
-               command: '1'
-            });
-         };
-        
-         deviceConn.onmessage = function(event) {
-            console.log('Message from socket1:', event.data);
-         };
-         
-         deviceConn.onclose = function(event) {
-            console.log('Socket1 is closed');
-         };
-         deviceConn.onerror = function (err) {
-            console.log("Got error", err);
-         };
-         modalDevice.style.display = "none";   
-         
-      } catch (error) {
-         console.log(error);
-      }
-      
-
+      connecttoWebServer();      
    }   
+ }
+
+ async function connecttoWebServer() {
+   deviceaddress = deviceaddressinput.value;           
+
+   try {
+      deviceConn = new WebSocket(deviceaddress);
+      deviceConn.onopen = function(event) {
+         console.log('Web server is connected');
+         deviceType = "wss";
+         sendtoWSS("7");
+      };
+      
+      deviceConn.onmessage = function(event) {
+         console.log('Message from web server:', event.data);
+      };
+      
+      deviceConn.onclose = function(event) {
+         console.log('Web server is disconnected');
+      };
+      deviceConn.onerror = function (err) {
+         console.log("Got error", err);
+      };
+      modalDevice.style.display = "none";   
+      
+   } catch (error) {
+      console.log(error);
+   }
+   setTimeout(checkReadyState,300);    
+ }
+ 
+ function checkReadyState() {
+   if (deviceConn.readyState === WebSocket.OPEN) {         
+      // Perform actions if the WebSocket is open
+      //enable buttons
+      connectdeviceBtn.style.display = "none";   
+      connectcontrollerBtn.style.display = "inline-block";  
+      disconnectdeviceBtn.style.display = "block";          
+      controlpaneloutputs.style.display = "block";
+      cparrowshost.forEach(cparrowshost => {
+         cparrowshost.style.display = 'inline-block';
+      });
+      deviceinfo.style.display = "block";
+      deviceinfo.innerHTML = "ESP Web Server";
+      console.log("WebSocket is open and ready for commands");
+   }    
  }
 
 const image = new Image();
@@ -609,7 +632,7 @@ function opendc() {
       if (event.data == "handleimg") {
          stopimagecapture();
       } else {
-         sendBT(event.data);
+         sendtoDevice(event.data);
          dc.send(event.data);
       }
    };
@@ -630,8 +653,6 @@ endliveBtn.addEventListener("click", function (event) {
       username: username,
       othername: connectedUser
    });
-   
-   
    stopStreamedVideo(localVideo);
    toggleprofile('local');
 });
@@ -1063,8 +1084,6 @@ disconnectdeviceBtn.addEventListener("click", function (event) {
    disconnectDevice();   
 });
 
-
-
 async function connectDevice() {
    try {
        // Request a Bluetooth device
@@ -1091,6 +1110,7 @@ async function connectDevice() {
        } else {
          console.error('Notifications or indications are not supported on this characteristic');
        }
+       deviceType = "BT";
        //enable buttons
        connectdeviceBtn.style.display = "none";   
        connectcontrollerBtn.style.display = "inline-block";  
@@ -1150,22 +1170,43 @@ async function connectController() {
 }
 
 async function disconnectDevice(params) {
-   if (server) {
-       server.disconnect();
-       console.log('Disconnected from the device.');
+   switch (deviceType) {
+      case "BT":
+         if (server) {
+            server.disconnect();
+            console.log('Disconnected from the device.');
+     
+            // Clear the references
+            device = null;
+            server = null;
+            characteristic = null;
+     
+            //update buttons
+           connectdeviceBtn.style.display = "inline-block";
+           connectcontrollerBtn.style.display = "none";
+           controlpaneloutputs.style.display = "none";
+           deviceinfo.innerHTML = "";
+         } else {
+            console.error('No active connection to disconnect.');
+         }
+         break;
 
-       // Clear the references
-       device = null;
-       server = null;
-       characteristic = null;
-
-       //update buttons
-      connectdeviceBtn.style.display = "inline-block";
-      controlpaneloutputs.style.display = "none";
-      deviceinfo.innerHTML = "";
-   } else {
-       console.error('No active connection to disconnect.');
+      case "wss":
+         if (deviceConn) {
+            // Close the WebSocket connection
+            deviceConn.close(1000, "Closing normally"); // 1000 is the normal closure status code
+            console.log("WebSocket connection closing...");
+            //update buttons
+            connectdeviceBtn.style.display = "inline-block";
+            connectcontrollerBtn.style.display = "none";
+            controlpaneloutputs.style.display = "none";
+            deviceinfo.innerHTML = "";
+         } else {
+            console.log("WebSocket is not connected.");
+         }
+         break;
    }
+   
 }
 
 //CONTROLS
@@ -1201,28 +1242,28 @@ reversebtn.onpointerup = function() {
    setTimeout(sendDC, 200, park);
 }
 hostforward.onpointerdown = function() {
-   sendBT(forward);
+   sendtoDevice(forward);
 }
 hostforward.onpointerup = function () {
-   setTimeout(sendBT, 200, park);   
+   setTimeout(sendtoDevice, 200, park);   
 }
 hostleft.onpointerdown = function() {
-   sendBT(left);
+   sendtoDevice(left);
 }
 hostleft.onpointerup = function() {
-   setTimeout(sendBT, 200, park);   
+   setTimeout(sendtoDevice, 200, park);   
 }
 hostright.onpointerdown = function() {
-   sendBT(right);
+   sendtoDevice(right);
 }
 hostright.onpointerup = function() {
-   setTimeout(sendBT, 200, park);   
+   setTimeout(sendtoDevice, 200, park);   
 }
 hostreverse.onpointerdown = function() {
-   sendBT(reverse);
+   sendtoDevice(reverse);
 }
 hostreverse.onpointerup = function() {
-   setTimeout(sendBT, 200, park);   
+   setTimeout(sendtoDevice, 200, park);   
 }
 
 async function sendBT(string) {
@@ -1236,7 +1277,20 @@ async function sendBT(string) {
       console.error('Error sending message:', error);
      }     
 }
+function sendtoDevice(value) {
+   console.log("sending value: ", value)
 
+   switch (deviceType) {
+
+      case "BT":
+         sendBT(value);
+         break;
+      
+      case "wss":
+         sendtoWSS(value);
+         break;
+   }
+}
 function sendDC(value) {
    console.log("sending value: ", value)
    try {
@@ -1370,7 +1424,7 @@ function toggleButtons(index) {
          break;
    }
    if (liveVideo == 1) {
-      sendBT(msg);
+      sendtoDevice(msg);
    } else if (liveremoteVideo == 1) {
       sendDC(msg);
    }
@@ -1440,7 +1494,7 @@ function toggleAxis(index, value) {
          break;
    }
    if (liveVideo == 1) {
-      sendBT(msg);
+      sendtoDevice(msg);
    } else if (liveremoteVideo == 1) {
       sendDC(msg);
    }
