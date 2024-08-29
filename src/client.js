@@ -403,6 +403,7 @@ function updateCanvasAtInterval(context, image, canvas, interval) {
          liveVideo = 0;
          updatelive("local");
          alert("Error getting stream. Make sure https is enabled on your IP camera.");
+         stopimagecapture();
          clearInterval(intervalID);
       }
    }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
@@ -535,7 +536,7 @@ function drawStream() {
       setTimeout(() => {
          // Start updating the canvas at a specific frame rate
       updateCanvasAtInterval(context, image, canvas, 1000 / 60); // 60 fps
-  }, 5000);
+  }, 1000);
    } catch (error) {
       console.log(error);
    }
