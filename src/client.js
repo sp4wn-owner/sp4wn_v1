@@ -734,7 +734,7 @@ spawnBtn.addEventListener("click", function (event) {
             console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
       }
       
-   }, 1000);
+   }, 2000);
 
    
     
