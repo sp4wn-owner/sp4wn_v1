@@ -182,7 +182,14 @@ button:hover {
   position: relative;
   margin: 1.5% auto;
 }
-
+/* Hide the progress bar (works in some browsers) */
+video::-webkit-media-controls-playback-rate,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-rewind-button,
+video::-webkit-media-controls-fast-forward-button,
+video::-webkit-media-controls-play-button {
+  display: none !important;
+}
 video {
   background: #f1f1f1;
   width: 50%;
