@@ -621,6 +621,7 @@ function opendc() {
 // stop local stream
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
+   stopimagecapture();
    console.log(username + " is ending stream");
    
    send({
