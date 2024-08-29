@@ -36,7 +36,7 @@ header {
   font-size: 4.5vw;
 }
 .hidden {
-  visibility: hidden;
+  display: none;
 }
 .visible {
   visibility: visible;
@@ -92,10 +92,6 @@ input {
 
 button:hover {
   background-color: #4e0287;
-}
-
-.hidden {
-  display: none;
 }
 
 .top-link-bar ul {
