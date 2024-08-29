@@ -472,7 +472,7 @@ confirmVideoBtn.onclick = function() {
             console.log(error);
          }
       } else {
-         alert("HTTPS is required for IP Cameras unless serving this page locally and getting stream from LAN.");
+         console.log("HTTPS is required for IP Cameras unless serving this page locally and getting stream from LAN.");
          try {
             drawStream();
 
@@ -480,16 +480,21 @@ confirmVideoBtn.onclick = function() {
                goliveBtn.style.display = "none";
                endliveBtn.style.display = "block";
                liveVideo = 1;
-               updatelive("addlive");
-               setTimeout(() => {
-                  captureImage();
-               }, 1000);               
+               if (video) {
+                  updatelive("addlive");
+                  setTimeout(() => {
+                     captureImage();
+                  }, 1000); 
+               }
+               
+                           
             }
             ICEstatus(); 
             beginICE();
          } catch (error) {
             console.log(error);
          }
+          
       }
    }   
 
@@ -507,27 +512,34 @@ function stopimagecapture() {
 }
 
 function drawStream() {
-   // Get the canvas context and draw the image onto the canvas
-   const canvas = document.createElement('canvas');
-   const context = canvas.getContext('2d');
-   context.drawImage(image, 0, 0, canvas.width, canvas.height);
-   const stream = canvas.captureStream();
-   const videoTrack = stream.getVideoTracks()[0];
+
+   try {
+      // Get the canvas context and draw the image onto the canvas
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const stream = canvas.captureStream();
+      const videoTrack = stream.getVideoTracks()[0];
+      
+      // Copy the stream
+      const copiedStream1 = new MediaStream([videoTrack]);
+
+      // Set these streams to video elements
+      localVideo.srcObject = copiedStream1;
+      video = localVideo;
+
+      yourConn = new RTCPeerConnection(configuration);
+      // Add the video track to your WebRTC peer connection
+      yourConn.addTrack(videoTrack, stream);
+       
+      setTimeout(() => {
+         // Start updating the canvas at a specific frame rate
+      updateCanvasAtInterval(context, image, canvas, 1000 / 60); // 60 fps
+  }, 5000);
+   } catch (error) {
+      console.log(error);
+   }
    
-   // Copy the stream
-   const copiedStream1 = new MediaStream([videoTrack]);
-
-   // Set these streams to video elements
-   localVideo.srcObject = copiedStream1;
-   video = localVideo;
-
-   yourConn = new RTCPeerConnection(configuration);
-   // Add the video track to your WebRTC peer connection
-   yourConn.addTrack(videoTrack, stream);
-   setTimeout(() => {
-      // Start updating the canvas at a specific frame rate
-   updateCanvasAtInterval(context, image, canvas, 1000 / 60); // 60 fps
-  }, 7000);
    
 }
 function beginICE() {
