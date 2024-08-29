@@ -119,7 +119,6 @@ var connectcontrollerBtn = document.querySelector('#connectcontroller-Btn');
 var devicedropBtns = document.querySelector('.device-dropdown-content');
 var arrowBtns = document.querySelector('.arrow-Btns');
 var disconnectdeviceBtn = document.querySelector('#disconnectdevice-Btn');
-var resetBtn = document.querySelector('#reset-Btn');
 var controlpaneloutputs = document.querySelector('.control-panel-outputs');
 var cparrowshost = document.querySelectorAll('.arrow-container-host');
 var cparrowsremote = document.querySelectorAll('.arrow-container-remote');
@@ -509,6 +508,7 @@ function startimagecapture(interval) {
 
 function stopimagecapture() {
    clearInterval(imgInterval);
+   updatelive('local');
    console.log("Image captured terminated");
 }
 
@@ -608,10 +608,10 @@ function opendc() {
       console.log("Received from Peer B:", event.data);
       if (event.data == "handleimg") {
          stopimagecapture();
+      } else {
+         sendBT(event.data);
+         dc.send(event.data);
       }
-      sendBT(event.data);
-      dc.send(event.data);
-      
    };
 
    dc.onclose = () => {
@@ -630,7 +630,7 @@ endliveBtn.addEventListener("click", function (event) {
       username: username,
       othername: connectedUser
    });
-   updatelive('local');
+   
    
    stopStreamedVideo(localVideo);
    toggleprofile('local');
@@ -675,38 +675,38 @@ spawnBtn.addEventListener("click", function (event) {
       yourConn.onaddstream = function (e) {         
          remoteVideo.srcObject = e.stream;       
          console.log('Function executed successfully');
-      }            
+      }               
       send({
          type: "watch",
          username: username,
          host: connectedUser
       });
+      dcpeerB();   
        beginICE();
    }).catch(error => console.error(error.message));
    
     ICEstatus();
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (yourConn.iceConnectionState === 'connected') {
-         console.log('PeerConnection is connected!');
-         video = remoteVideo;
-         liveremoteVideo = 1;
-         //toggleprofile('remote');
-         spawnBtn.style.display = "none";
-         controlpanel.style.display = "block";
-         connectdeviceBtn.style.display = "none";
-         connectcontrollerBtn.style.display = "inline-block";
-         disconnectdeviceBtn.style.display = "none";
-         resetBtn.style.display = "none";
-         cparrowsremote.forEach(cparrowsremote => {
-            cparrowsremote.style.display = 'inline-block';
-         });
+         try {            
+            video = remoteVideo;
+            liveremoteVideo = 1;
+            spawnBtn.style.display = "none";
+            controlpanel.style.display = "block";
+            connectdeviceBtn.style.display = "none";
+            connectcontrollerBtn.style.display = "inline-block";
+            cparrowsremote.forEach(cparrowsremote => {
+               cparrowsremote.style.display = 'inline-block';
+            });
+            console.log('PeerConnection is connected!');
+            
+         } catch (error) {
+            console.log(error);
+         }
          window.addEventListener("gamepaddisconnected", (event) => {
             console.log("Gamepad disconnected:", event.gamepad);
-         });  
-         console.log("dcpeerB");  
-         updatelive('remotedelete');   
-         dcpeerB();
+         });        
          
    
       } else {
@@ -861,6 +861,7 @@ function handleLeave() {
       updatelive('addlive');
       connectedUser = null;
       dc = null;
+      captureImage();
       startimagecapture(15000);
    } 
    
@@ -872,6 +873,8 @@ function handleLeave() {
       yourConn.onicecandidate = null;
       yourConn.onaddstream = null;
       toggleprofile('local');
+      setTimeout(togglehome(), 200);
+      togglehome();
       if(connectedUser != null) {
          send({
             type: "leave",
@@ -996,6 +999,8 @@ if (username) {
             remoteVideo.style.display = "none";
             localVideo.style.display = "block";
             spawnBtn.style.display = "none";
+            connectcontrollerBtn.style.display = "none";
+            connectdeviceBtn.style.display = "inline-block";
             endotherliveBtn.style.display = "none";
             disconnectdeviceBtn.style.display = "none";
             controlpaneloutputs.style.display = "none";
@@ -1024,7 +1029,9 @@ if (username) {
             localVideo.style.display = "none";
             goliveBtn.style.display = "none";
             endliveBtn.style.display = "none";
-            controlpanel.style.display = "none";            
+            deviceinfo.style.display = "none";
+            controlpanel.style.display = "none";     
+            disconnectdeviceBtn.style.display = "none";       
             cparrowshost.forEach(cparrowshost => {
                cparrowshost.style.display = 'none';
              });
@@ -1231,6 +1238,7 @@ async function sendBT(string) {
 }
 
 function sendDC(value) {
+   console.log("sending value: ", value)
    try {
       dc.send(value);
    } catch (e) {
