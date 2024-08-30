@@ -30,7 +30,7 @@ header {
   white-space: pre-wrap; /* Preserve spaces and line breaks */
   width: 80%;
   margin: 0 auto;
-  min-height: 180px;
+  min-height: 27%;
 }
 .text-container span {
   font-size: 4.5vw;
