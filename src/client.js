@@ -295,10 +295,12 @@ devicespan.onclick = function() {
 var videoSelect = document.getElementById("videoSelect");
 var deviceSelect = document.getElementById("deviceSelect");
 var useripaddress = document.getElementById("useripaddressinput");
+var streamdescriptioninput = document.getElementById("streamdescinput");
 var deviceserviceinput = document.getElementById("deviceserviceinput");
 var devicecharinput = document.getElementById("devicecharinput");
 var devicenameinput = document.getElementById("devicenameinput");
 var deviceaddressinput = document.getElementById("deviceaddressinput");
+let streamdescription;
 
 // Add an event listener for the 'change' event
 videoSelect.addEventListener("change", function() {
@@ -307,14 +309,17 @@ videoSelect.addEventListener("change", function() {
 
   if (selectedValue == "0") {
    useripaddress.style.display = "none";
+   streamdescriptioninput.style.display = "none";
   }
 
   if (selectedValue == "1") {
    useripaddress.style.display = "none";
+   streamdescriptioninput.style.display = "block";
   }
   
   if (selectedValue == "2") {
    useripaddress.style.display = "block";
+   streamdescriptioninput.style.display = "none";
   }
   
 });
@@ -443,6 +448,7 @@ confirmVideoBtn.onclick = function() {
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
       console.log(username +" is going live using this device");
+      streamdescription = streamdescriptioninput;
       navigator.getUserMedia({ video: true, audio: false }, (stream) => {
       
       yourConn = new RTCPeerConnection(configuration);
@@ -1614,7 +1620,8 @@ function captureImage(customWidth = 640, customHeight = 480) {
       send({
          type: "storeimg",
          image: imageDataUrl,
-         username: username
+         username: username,
+         description: streamdescription
       });
       console.log("sent image to server");
    } catch (error) {
@@ -1628,7 +1635,7 @@ function handleError(message) {
       alert("User is already connected")
    }
 }
-function oldcaptureImage(customWidth = 640, customHeight = 480) {
+function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
    // Check if localVideo element is available
    if (!localVideo || !localVideo.videoWidth || !localVideo.videoHeight) {
       console.error("Video element not available or video not playing.");
