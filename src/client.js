@@ -1614,7 +1614,7 @@ function captureImage(customWidth = 640, customHeight = 480) {
    // Adjust height if needed
    if (drawHeight > customHeight) {
        drawHeight = customHeight;
-       drawWidth = customHeight * aspectRatio;
+       drawWidth = customHeight;
    }
    
    // Center the image on the canvas
