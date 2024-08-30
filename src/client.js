@@ -1601,6 +1601,46 @@ function captureImage(customWidth = 640, customHeight = 480) {
    canvas.height = customHeight;  // Set custom height
    const context = canvas.getContext('2d');
    
+   // Draw the video frame on the canvas with the specified dimensions
+   context.drawImage(localVideo, 0, 0, customWidth, customHeight);
+   
+   // Convert the canvas to a data URL (image format)
+   const imageDataUrl = canvas.toDataURL('image/png');
+   // Convert the canvas to a data URL (image format)
+   //capturedImageArray.push(imageDataUrl);
+
+   // Store image on server
+   try {
+      send({
+         type: "storeimg",
+         image: imageDataUrl,
+         username: username
+      });
+      console.log("sent image to server");
+   } catch (error) {
+      console.log("failed to send image to server");
+   }      
+}
+
+function handleError(message) {
+   console.log(message);
+   if (message == "userconnected") {
+      alert("User is already connected")
+   }
+}
+function oldcaptureImage(customWidth = 640, customHeight = 480) {
+   // Check if localVideo element is available
+   if (!localVideo || !localVideo.videoWidth || !localVideo.videoHeight) {
+      console.error("Video element not available or video not playing.");
+      return;
+   }
+   
+   // Create a canvas element to capture the current video frame
+   const canvas = document.createElement('canvas');
+   canvas.width = customWidth;  // Set custom width
+   canvas.height = customHeight;  // Set custom height
+   const context = canvas.getContext('2d');
+   
    // Ensure video dimensions are available
    const videoWidth = localVideo.videoWidth;
    const videoHeight = localVideo.videoHeight;
@@ -1639,13 +1679,6 @@ function captureImage(customWidth = 640, customHeight = 480) {
    } catch (error) {
       console.log("failed to send image to server");
    }      
-}
-
-function handleError(message) {
-   console.log(message);
-   if (message == "userconnected") {
-      alert("User is already connected")
-   }
 }
 
 
