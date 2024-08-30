@@ -1588,12 +1588,24 @@ document.addEventListener('DOMContentLoaded', function() {
    }
 });
 
-function captureImage() {
+function captureImage(customWidth = 120, customHeight = 120) {
    // Create a canvas element to capture the current video frame
    const canvas = document.createElement('canvas');
-   canvas.width = localVideo.videoWidth;
-   canvas.height = localVideo.videoHeight;
+   canvas.width = customWidth;
+   canvas.height = customHeight;
    const context = canvas.getContext('2d');
+
+   // Calculate aspect ratio to maintain image quality
+   const aspectRatio = localVideo.videoWidth / localVideo.videoHeight;
+   const drawWidth = customWidth;
+   const drawHeight = customWidth / aspectRatio;
+
+   // Adjust height if needed
+   if (drawHeight > customHeight) {
+      drawHeight = customHeight;
+      drawWidth = customHeight * aspectRatio;
+  }
+
    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
    // Convert the canvas to a data URL (image format)
