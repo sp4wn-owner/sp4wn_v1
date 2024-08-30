@@ -1606,9 +1606,10 @@ function captureImage(customWidth = 640, customHeight = 480) {
    const videoHeight = localVideo.videoHeight;
 
    // Calculate aspect ratio to maintain image quality
-   const aspectRatio = videoWidth / videoHeight;
+   //const aspectRatio = videoWidth / videoHeight;
    let drawWidth = customWidth;
    let drawHeight = customWidth / aspectRatio;
+   //let drawHeight = customWidth / aspectRatio;
 
    // Adjust height if needed
    if (drawHeight > customHeight) {
