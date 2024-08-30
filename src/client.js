@@ -1588,17 +1588,43 @@ document.addEventListener('DOMContentLoaded', function() {
    }
 });
 
-function captureImage() {
+function captureImage(customWidth = 640, customHeight = 480) {
+   // Check if localVideo element is available
+   if (!localVideo || !localVideo.videoWidth || !localVideo.videoHeight) {
+      console.error("Video element not available or video not playing.");
+      return;
+   }
+   
    // Create a canvas element to capture the current video frame
    const canvas = document.createElement('canvas');
-   canvas.width = localVideo.videoWidth;
-   canvas.height = localVideo.videoHeight;
+   canvas.width = customWidth;  // Set custom width
+   canvas.height = customHeight;  // Set custom height
    const context = canvas.getContext('2d');
-   context.drawImage(video, 0, 0, canvas.width, canvas.height);
+   
+   // Ensure video dimensions are available
+   const videoWidth = localVideo.videoWidth;
+   const videoHeight = localVideo.videoHeight;
 
+   // Calculate aspect ratio to maintain image quality
+   const aspectRatio = videoWidth / videoHeight;
+   let drawWidth = customWidth;
+   let drawHeight = customWidth / aspectRatio;
+
+   // Adjust height if needed
+   if (drawHeight > customHeight) {
+       drawHeight = customHeight;
+       drawWidth = customHeight * aspectRatio;
+   }
+   
+   // Center the image on the canvas
+   const offsetX = (canvas.width - drawWidth) / 2;
+   const offsetY = (canvas.height - drawHeight) / 2;
+
+   // Draw the video frame on the canvas
+   context.drawImage(localVideo, offsetX, offsetY, drawWidth, drawHeight);
+   
    // Convert the canvas to a data URL (image format)
    const imageDataUrl = canvas.toDataURL('image/png');
-
    // Store the image in the array
    //capturedImageArray.push(imageDataUrl);
 
