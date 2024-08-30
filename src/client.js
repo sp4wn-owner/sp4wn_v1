@@ -201,6 +201,9 @@ function init() {
    homePage.style.display = "none";
    infoPage.style.display = "none";
    profilePage.style.display = "none";
+   profilePage.style.display = "none";
+   infoPage.style.display = "none";
+   liveStreams.innerHTML = "";
    document.getElementsByTagName('header')[0].style.display = "none";
    deviceaddress = null;   
    };
@@ -993,7 +996,6 @@ function togglehome() {
       profileicon.classList.remove("active");
       infoicon.classList.remove("active");
       liveStreams.innerHTML = "";
-    //  getstreamsBtn.click();
       getStreams();
 
    } else {
