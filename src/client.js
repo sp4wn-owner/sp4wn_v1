@@ -236,8 +236,6 @@ loginBtn.addEventListener("click", function (event) {
          name: name
       });
    }
-
-
 });
 
 function handleLogin(success, name) {

@@ -19,10 +19,6 @@ header {
   margin-bottom: 25px;
 }
 
-#login-header {
-  height: 12%;
-}
-
 .text-container {
   font-family: Exarros;
   color: whitesmoke;
@@ -42,6 +38,9 @@ header {
   visibility: visible;
 }
 
+#login-header {
+  height: 12%;
+}
 .login-container {
   background-color: #fff;
   border-radius: 8px;
@@ -185,6 +184,7 @@ button:hover {
   margin: 1.5% auto;
 }
 /* Hide the progress bar (works in some browsers) */
+video::-webkit-media-controls-start-playback-button
 video::-webkit-media-controls-playback-rate,
 video::-webkit-media-controls-volume-slider,
 video::-webkit-media-controls-rewind-button,
@@ -515,9 +515,6 @@ footer {
 @media screen and (max-width:600px) {
   body {
     font-size: 16px;
-  }
-  .login-container {
-    width: 250px;
   }
   #login-header {
     height: 5%;
