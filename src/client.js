@@ -959,7 +959,7 @@ function handleStreams(images) {
       divElement.classList.add("live-streams-container"); 
       divStreamName.classList.add("live-streams-names");
              
-
+      descElement.innerHTML = description;
       divStreamName.innerHTML = text;
       imgElement.src = imgurl;
       imgElement.style.width = '250px';
