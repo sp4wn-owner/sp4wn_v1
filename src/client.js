@@ -953,7 +953,7 @@ function handleFinalLeave() {
 
 
 function handleStreams(images) {
-   const premadeIcon = `<i class="fa fa-location"></i>`
+   const premadeIcon = `<i class="fa fa-map-market-alt"></i>`
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
