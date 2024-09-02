@@ -1,4 +1,3 @@
-//our username
 var name;
 var username;
 var connectedUser;
@@ -13,7 +12,7 @@ let dc;
 let deviceConn;
 var deviceaddress;
 let deviceType;
-let location;
+let mylocation;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
@@ -140,7 +139,7 @@ let homeicon = document.querySelector('#home-icon');
 let infoicon = document.querySelector('#info-icon');
 
 var deviceaddressinput;
-let locationinput = document.getElementById("location");
+let locationinput = document.getElementById("locationinput");
 
 const forwardbtn = document.getElementById("forwardbtn");
 const leftbtn = document.getElementById("turnleftbtn");
@@ -451,7 +450,7 @@ confirmVideoBtn.onclick = function() {
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
       console.log(username +" is going live using this device");
-      location = locationinput.value;
+      mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
       
       navigator.getUserMedia({ video: true, audio: false }, (stream) => {
@@ -1639,7 +1638,7 @@ function captureImage(customWidth = 640, customHeight = 480) {
          type: "storeimg",
          image: imageDataUrl,
          username: username,
-         location: location,
+         location: mylocation,
          description: streamdescription
       });
       console.log("sent image to server");
