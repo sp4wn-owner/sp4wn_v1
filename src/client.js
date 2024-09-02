@@ -247,7 +247,7 @@ function handleLogin(success, name) {
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "block";
-     getStreams();
+      getStreams();
             
     }
 };
@@ -723,6 +723,7 @@ spawnBtn.addEventListener("click", function (event) {
             spawnBtn.style.display = "none";
             controlpanel.style.display = "block";
             connectdeviceBtn.style.display = "none";
+            controlpaneloutputs.style.display = "block";
             connectcontrollerBtn.style.display = "inline-block";
             cparrowsremote.forEach(cparrowsremote => {
                cparrowsremote.style.display = 'inline-block';
@@ -741,7 +742,7 @@ spawnBtn.addEventListener("click", function (event) {
             console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
       }
       
-   }, 2000);
+   }, 1500);
 
    
     
@@ -900,9 +901,9 @@ function handleLeave() {
       yourConn.close();
       yourConn.onicecandidate = null;
       yourConn.onaddstream = null;
-      toggleprofile('local');
-      setTimeout(togglehome(), 200);
-      togglehome();
+      //toggleprofile('local');
+      //setTimeout(togglehome(), 200);
+      //togglehome();
       if(connectedUser != null) {
          send({
             type: "leave",
@@ -1000,7 +1001,7 @@ function togglehome() {
       profileicon.classList.remove("active");
       infoicon.classList.remove("active");
       liveStreams.innerHTML = "";
-      getStreams();
+      setTimeout(getStreams(), 50);
 
    } else {
       init();
