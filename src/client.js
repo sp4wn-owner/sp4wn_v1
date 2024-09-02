@@ -951,11 +951,14 @@ function handleStreams(images) {
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
+      let description = images[i].description;
       let divElement = document.createElement('div');
       let divStreamName = document.createElement('div');
-      let imgElement = document.createElement('img');   
+      let imgElement = document.createElement('img');
+      let descElement = document.createElement('span');
       divElement.classList.add("live-streams-container"); 
-      divStreamName.classList.add("live-streams-names");       
+      divStreamName.classList.add("live-streams-names");
+             
 
       divStreamName.innerHTML = text;
       imgElement.src = imgurl;
@@ -963,8 +966,10 @@ function handleStreams(images) {
       imgElement.style.margin = '5px';
 
       liveStreams.appendChild(divElement);
-      divElement.appendChild(divStreamName);
       divElement.appendChild(imgElement);
+      divElement.appendChild(divStreamName);
+      divElement.appendChild(descElement);
+      
 
       // Attach the onclick event
       divElement.onclick = function() {
