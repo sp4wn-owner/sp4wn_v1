@@ -446,7 +446,7 @@ confirmVideoBtn.onclick = function() {
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
       console.log(username +" is going live using this device");
-      streamdescription = streamdescriptioninput;
+      streamdescription = streamdescriptioninput.value;
       navigator.getUserMedia({ video: true, audio: false }, (stream) => {
       
       yourConn = new RTCPeerConnection(configuration);
@@ -1620,6 +1620,7 @@ function captureImage(customWidth = 640, customHeight = 480) {
    //capturedImageArray.push(imageDataUrl);
 
    // Store image on server
+
    try {
       send({
          type: "storeimg",
