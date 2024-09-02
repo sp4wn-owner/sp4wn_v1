@@ -953,7 +953,7 @@ function handleFinalLeave() {
 
 
 function handleStreams(images) {
-   premadeIcon = `<i class="fa fa-location"></i>`
+   const premadeIcon = `<i class="fa fa-location"></i>`
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
@@ -978,7 +978,7 @@ function handleStreams(images) {
       divElement.appendChild(imgElement);      
       divElement.appendChild(divStreamName);
       divElement.appendChild(divElementIcon);
-      divElementIcon.appendChild(premadeIcon);
+      divElementIcon.innerHTML = premadeIcon;
       divElementIcon.appendChild(locationElement);
       divElement.appendChild(descElement);
       
