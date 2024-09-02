@@ -149,7 +149,9 @@ button:hover {
   background-color: #f1f1f1;
   cursor: pointer;
 }
-
+.live-streams-container i {
+  padding-right: 5px;
+}
 .live-streams-container:hover {
   background-color: lightgreen;
 }
@@ -160,8 +162,7 @@ button:hover {
   color: black;
   font-size: 25px;
   text-decoration: none;
-  text-transform: uppercase;
-  
+  text-transform: uppercase;  
 }
 #getstreamsbtn {
   margin: 25px;

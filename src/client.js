@@ -953,7 +953,8 @@ function handleFinalLeave() {
 
 
 function handleStreams(images) {
-   const premadeIcon = `<i class="fa fa-map-market-alt"></i>`
+   const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
+   const premadeInfoIcon = `<i class="fa fa-info"></i>`;
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
@@ -964,6 +965,7 @@ function handleStreams(images) {
       let divStreamName = document.createElement('div');
       let imgElement = document.createElement('img');
       let locationElement = document.createElement('span');
+      let descContainerElem = document.createElement('div');
       let descElement = document.createElement('span');
       divElement.classList.add("live-streams-container"); 
       divStreamName.classList.add("live-streams-names");
@@ -978,9 +980,11 @@ function handleStreams(images) {
       divElement.appendChild(imgElement);      
       divElement.appendChild(divStreamName);
       divElement.appendChild(divElementIcon);
-      divElementIcon.innerHTML = premadeIcon;
+      divElementIcon.innerHTML = premadeMarkerIcon;
       divElementIcon.appendChild(locationElement);
-      divElement.appendChild(descElement);
+      divElement.appendChild(descContainerElem);
+      descContainerElem.innerHTML = premadeInfoIcon;
+      descContainerElem.appendChild(descElement);
       
 
       // Attach the onclick event
