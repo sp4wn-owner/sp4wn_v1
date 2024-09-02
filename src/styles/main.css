@@ -137,6 +137,11 @@ button:hover {
   text-transform: uppercase;  
 }
 
+#main-streams-container {
+  white-space: pre-wrap;
+  min-height: 300px;
+}
+
 .live-streams-container {
   display: inline-block;
   box-shadow: #888;
