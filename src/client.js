@@ -13,6 +13,7 @@ let dc;
 let deviceConn;
 var deviceaddress;
 let deviceType;
+let location;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
@@ -139,6 +140,7 @@ let homeicon = document.querySelector('#home-icon');
 let infoicon = document.querySelector('#info-icon');
 
 var deviceaddressinput;
+let locationinput = document.getElementById("location");
 
 const forwardbtn = document.getElementById("forwardbtn");
 const leftbtn = document.getElementById("turnleftbtn");
@@ -307,16 +309,19 @@ videoSelect.addEventListener("change", function() {
 
   if (selectedValue == "0") {
    useripaddress.style.display = "none";
-   streamdescriptioninput.style.display = "none";
+   locationinput.style.display = "none";
+   streamdescriptioninput.style.display = "none";   
   }
 
   if (selectedValue == "1") {
    useripaddress.style.display = "none";
-   streamdescriptioninput.style.display = "block";
+   locationinput.style.display = "block";
+   streamdescriptioninput.style.display = "block";   
   }
   
   if (selectedValue == "2") {
    useripaddress.style.display = "block";
+   locationinput.style.display = "none";
    streamdescriptioninput.style.display = "none";
   }
   
@@ -446,9 +451,10 @@ confirmVideoBtn.onclick = function() {
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
       console.log(username +" is going live using this device");
+      location = locationinput.value;
       streamdescription = streamdescriptioninput.value;
-      navigator.getUserMedia({ video: true, audio: false }, (stream) => {
       
+      navigator.getUserMedia({ video: true, audio: false }, (stream) => {
       yourConn = new RTCPeerConnection(configuration);
      
       //displaying local video stream on the page
@@ -948,26 +954,33 @@ function handleFinalLeave() {
 
 
 function handleStreams(images) {
+   premadeIcon = `<i class="fa fa-location"></i>`
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
+      let hostlocation = images[i].location;
       let description = images[i].description;
       let divElement = document.createElement('div');
+      let divElementIcon = document.createElement('div');
       let divStreamName = document.createElement('div');
       let imgElement = document.createElement('img');
+      let locationElement = document.createElement('span');
       let descElement = document.createElement('span');
       divElement.classList.add("live-streams-container"); 
       divStreamName.classList.add("live-streams-names");
-             
+          
+      locationElement.innerHTML = hostlocation;
       descElement.innerHTML = description;
       divStreamName.innerHTML = text;
       imgElement.src = imgurl;
       imgElement.style.width = '250px';
-      imgElement.style.margin = '5px';
 
       liveStreams.appendChild(divElement);
-      divElement.appendChild(imgElement);
+      divElement.appendChild(imgElement);      
       divElement.appendChild(divStreamName);
+      divElement.appendChild(divElementIcon);
+      divElementIcon.appendChild(premadeIcon);
+      divElementIcon.appendChild(locationElement);
       divElement.appendChild(descElement);
       
 
@@ -1626,6 +1639,7 @@ function captureImage(customWidth = 640, customHeight = 480) {
          type: "storeimg",
          image: imageDataUrl,
          username: username,
+         location: location,
          description: streamdescription
       });
       console.log("sent image to server");
