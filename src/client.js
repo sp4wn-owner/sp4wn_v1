@@ -320,8 +320,8 @@ videoSelect.addEventListener("change", function() {
   
   if (selectedValue == "2") {
    useripaddress.style.display = "block";
-   locationinput.style.display = "none";
-   streamdescriptioninput.style.display = "none";
+   locationinput.style.display = "block";
+   streamdescriptioninput.style.display = "block";
   }
   
 });
@@ -532,7 +532,7 @@ confirmVideoBtn.onclick = function() {
           
       }
    }   
-
+   
    startimagecapture(30000);
 }
 function startimagecapture(interval) {
@@ -636,6 +636,7 @@ function opendc() {
       console.log("Data channel A is open");
       // Send a message once the data channel is open
       dc.send("Hello, Peer B!");
+      stopimagecapture();
       controlpaneloutputs.disabled = true;
    };
 
@@ -738,6 +739,7 @@ spawnBtn.addEventListener("click", function (event) {
          } catch (error) {
             console.log(error);
          }
+         addKeyListeners();
          window.addEventListener("gamepaddisconnected", (event) => {
             console.log("Gamepad disconnected:", event.gamepad);
          });        
@@ -902,6 +904,7 @@ function handleLeave() {
    if (liveremoteVideo == 1) {
       liveremoteVideo = 0;
       remoteVideo.srcObject = null;
+      removeKeyListeners();
       disconnectDevice();
       yourConn.close();
       yourConn.onicecandidate = null;
@@ -1149,6 +1152,7 @@ async function connectDevice() {
        });
        deviceinfo.style.display = "block";
        deviceinfo.innerHTML = BLE_Name;
+       addKeyListeners();
        console.log('Connected and ready to send messages.');
    } catch (error) {
        console.error('Connection failed:', error);
@@ -1163,7 +1167,12 @@ function handleCharacteristicValueChanged(event) {
    console.log('Notification received:', response);
  }
 connectcontrollerBtn.onclick = function() {
-   connectController();
+   try {
+      connectController();      
+   } catch (error) {
+      alert("Failed to connect controller. Try again.");
+   }
+   
 }
 
 function checkGamepad() {
@@ -1187,8 +1196,6 @@ async function connectController() {
       // Check if the Gamepad API is supported
    if (navigator.getGamepads) {
       console.log("Gamepad API is supported in this browser.");  
-
-      
       checkGamepad();
    } else {
       console.log("Gamepad API is not supported in this browser.");
@@ -1244,6 +1251,87 @@ let right = "right";
 let left = "left";
 let park = "park";
 
+let activeKey = null;
+let keyIntervalId = null;
+
+function handleKeyDown(event) {
+   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      event.preventDefault(); // Prevent default scrolling
+       if (activeKey !== event.key) {
+           activeKey = event.key;
+           startAction(activeKey);
+       }
+   }
+}
+
+function handleKeyUp(event) {
+   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+       if (activeKey === event.key) {
+           stopAction();
+       }
+   }
+}
+
+function startAction(direction) {
+   updateDirection(direction);
+   keyIntervalId = setInterval(() => {
+       updateDirection(direction);
+   }, 1000); // Adjust the interval for continuous action
+}
+
+function stopAction() {
+   clearInterval(keyIntervalId);
+   keyIntervalId = null;
+   activeKey = null;
+   updateDirection(park);
+   console.log("key up");
+}
+
+function updateDirection(direction) {
+   let msg;
+   msg = "command unkown";
+   switch (direction) {
+      case 'ArrowUp':
+         msg = forward;
+         console.log("UP");
+         break;
+      case 'ArrowDown':
+         msg = reverse;
+         console.log("DOWN");
+         break;
+      case 'ArrowLeft':
+         msg = left;
+         console.log("LEFT");
+         break;
+      case 'ArrowRight':
+         msg = right;
+         console.log("RIGHT");
+         break;
+      case 'park':
+         msg = park;
+         console.log("Park");
+         break;
+      default:
+         break;
+   }
+   if (liveVideo == 1) {
+      sendtoDevice(msg);
+   } else if (liveremoteVideo == 1) {
+      sendDC(msg);
+   }
+}
+
+function addKeyListeners() {
+   document.addEventListener('keyup', handleKeyUp);
+   document.addEventListener('keydown', handleKeyDown);
+   console.log('Event listeners added.');
+}
+
+function removeKeyListeners() {
+   document.addEventListener('keyup', handleKeyUp);
+   document.addEventListener('keydown', handleKeyDown);
+   console.log('Event listeners removed.');
+}
 
 forwardbtn.onpointerdown = function() {
    sendDC(forward);
