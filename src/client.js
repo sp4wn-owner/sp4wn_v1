@@ -1221,6 +1221,7 @@ async function disconnectDevice(params) {
            connectcontrollerBtn.style.display = "none";
            controlpaneloutputs.style.display = "none";
            deviceinfo.innerHTML = "";
+           removeKeyListeners();
          } else {
             console.error('No active connection to disconnect.');
          }
@@ -1256,11 +1257,14 @@ let keyIntervalId = null;
 
 function handleKeyDown(event) {
    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-      event.preventDefault(); // Prevent default scrolling
+      event.preventDefault();
        if (activeKey !== event.key) {
-           activeKey = event.key;
-           startAction(activeKey);
-       }
+         if (activeKey) {
+             stopAction();
+         }
+         activeKey = event.key;
+         startAction(activeKey);
+     }
    }
 }
 
