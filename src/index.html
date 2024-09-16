@@ -142,12 +142,15 @@
       <div id="infopage">
         <h1>Getting Started</h1><br>
         <h2>Parts</h2><br>
-        <div class="text-block">1x 2W Robot Chassis <br>
-          1x ESP32 WROOM 32D microcontroller <a href="https://www.aliexpress.us/item/3256806553795646.html?spm=a2g0o.cart.0.0.760338da41wOGF&mp=1&_gl=1*rzka3p*_gcl_aw*R0NMLjE3MjY0NzAzMjQuQ2owS0NRandycC0zQmhEZ0FSSXNBRVdKNlN3RVlBcnVoSllMcXMtenhRQlBxVmRuWlF4MWFSMk50SHF4bHZVWnp4dE9EQURTU19Zb2p1Y2FBdXlyRUFMd193Y0I.*_gcl_dc*R0NMLjE3MjU4NjYzNTYuQ2p3S0NBand1ZnEyQmhBbUVpd0FuWnF3OGdnT3hIT2RQM0xXcTkzbm5SdUUtaTNJNzFvREpkVW1IQktITmx0QTJ5QVhHQkoxNUFvWTRSb0Nwd0lRQXZEX0J3RQ..*_gcl_au*MTkxNDY2Njc0NS4xNzI1NDE5MTIy*_ga*MzA1NDAxMTc1MTEyMDMyLjE3MjU0MTkxMTgzMDc.*_ga_VED1YSGNC7*MTcyNjQ2NTg3Ni45LjEuMTcyNjQ3MDMyMy41OS4wLjA.&gatewayAdapt=glo2usa" target="_blank">aliexpress</a><br>
-          1x L293D motor driver <br>
-          1x Breadboard <br>
-          1x Phone mount (1/4-20 x 3/4" Truss Head Machine Screws + 1/4-20 Inch Wingnuts) <a href="https://www.ebay.com/itm/335118194262">ebay</a><br>
-          Jumper wires <br>
+        <div class="text-block">
+          <ul>
+            <li>2W Robot Chassis</li>
+            <li>ESP32 WROOM 32D microcontroller <a href="https://www.aliexpress.us/item/3256806553795646.html?spm=a2g0o.cart.0.0.760338da41wOGF&mp=1&_gl=1*rzka3p*_gcl_aw*R0NMLjE3MjY0NzAzMjQuQ2owS0NRandycC0zQmhEZ0FSSXNBRVdKNlN3RVlBcnVoSllMcXMtenhRQlBxVmRuWlF4MWFSMk50SHF4bHZVWnp4dE9EQURTU19Zb2p1Y2FBdXlyRUFMd193Y0I.*_gcl_dc*R0NMLjE3MjU4NjYzNTYuQ2p3S0NBand1ZnEyQmhBbUVpd0FuWnF3OGdnT3hIT2RQM0xXcTkzbm5SdUUtaTNJNzFvREpkVW1IQktITmx0QTJ5QVhHQkoxNUFvWTRSb0Nwd0lRQXZEX0J3RQ..*_gcl_au*MTkxNDY2Njc0NS4xNzI1NDE5MTIy*_ga*MzA1NDAxMTc1MTEyMDMyLjE3MjU0MTkxMTgzMDc.*_ga_VED1YSGNC7*MTcyNjQ2NTg3Ni45LjEuMTcyNjQ3MDMyMy41OS4wLjA.&gatewayAdapt=glo2usa" target="_blank">aliexpress</a></li>
+            <li>L293D motor driver</li>
+            <li>Breadboard</li>
+            <li>Phone mount (1/4-20 x 3/4" Truss Head Machine Screws + 1/4-20 Inch Wingnuts) <a href="https://www.ebay.com/itm/335118194262">ebay</a></li>
+            <li>Jumper wires</li>
+          </ul>
         </div>
         <div class="break"></div>
         <h2>Step 1</h2><br>
@@ -166,7 +169,7 @@
         <img src="resources/images/photo_2024-09-16_01-03-03.jpg" alt="" style="width: 350px;">
         <div class="break"></div>
         <h2>Step 4</h2><br>  
-        <div class="text-block">Click "connect". Your robot should pop up on your list of Bluetooth devices". Once connected, test using the controls then click "go live". Now your robot can be controlled from anywhere, by anyone! <br>
+        <div class="text-block">Click "Connect". Your robot should pop up on your list of Bluetooth devices. Once connected, test using the controls then click "go live". Now your robot can be controlled from anywhere, by anyone! <br>
           <br>The esp32 can be powered through the micro USB or through the 5v pin (voltage above 3.3 will be stepped down through this pin since the board operates at 3.3v). If the motors are connected to the same power source they may cause the board to reset if not properly regulated. <br>
           <br>Feel free to edit the Arduino code and make your robot do whatever you want when it receives certain messages. <br>
           <br>**If Bluetooth is not enabled you will need to go to chrome://flags to enable it
