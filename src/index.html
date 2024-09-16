@@ -20,7 +20,7 @@
     <!--<script src="https://kit.fontawesome.com/16193e6209.js" crossorigin="anonymous"></script>
     -->
 
-    <title>Sp4wn</title>
+    <title>SPAWN</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
   </head>
 
@@ -141,16 +141,34 @@
 
       <div id="infopage">
         <h1>Getting Started</h1><br>
-        <h3>Step 1</h3><br>
+        <h2>Parts</h2><br>
+        <div class="text-block">1x 2W Robot Chassis <br>
+          1x ESP32 WROOM 32D microcontroller <a href="https://www.aliexpress.us/item/3256806553795646.html?spm=a2g0o.cart.0.0.760338da41wOGF&mp=1&_gl=1*rzka3p*_gcl_aw*R0NMLjE3MjY0NzAzMjQuQ2owS0NRandycC0zQmhEZ0FSSXNBRVdKNlN3RVlBcnVoSllMcXMtenhRQlBxVmRuWlF4MWFSMk50SHF4bHZVWnp4dE9EQURTU19Zb2p1Y2FBdXlyRUFMd193Y0I.*_gcl_dc*R0NMLjE3MjU4NjYzNTYuQ2p3S0NBand1ZnEyQmhBbUVpd0FuWnF3OGdnT3hIT2RQM0xXcTkzbm5SdUUtaTNJNzFvREpkVW1IQktITmx0QTJ5QVhHQkoxNUFvWTRSb0Nwd0lRQXZEX0J3RQ..*_gcl_au*MTkxNDY2Njc0NS4xNzI1NDE5MTIy*_ga*MzA1NDAxMTc1MTEyMDMyLjE3MjU0MTkxMTgzMDc.*_ga_VED1YSGNC7*MTcyNjQ2NTg3Ni45LjEuMTcyNjQ3MDMyMy41OS4wLjA.&gatewayAdapt=glo2usa" target="_blank">aliexpress</a><br>
+          1x L293D motor driver <br>
+          1x Breadboard <br>
+          1x Phone mount (1/4-20 x 3/4" Truss Head Machine Screws + 1/4-20 Inch Wingnuts) <a href="https://www.ebay.com/itm/335118194262">ebay</a><br>
+          Jumper wires <br>
+        </div>
+        <div class="break"></div>
+        <h2>Step 1</h2><br>
         <p>Assemble robot chassis</p><br>
         <iframe width="560" height="315" src="https://www.youtube.com/embed/lgCERugoVL4?si=FhcxmQkJGBR6iOa-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        <h3>Step 2</h3><br>      
-        <p>Attach wires. Pics coming soon. I'll also be putting together a kit that includes the ESP32, phone mount, wires, etc.</p><br>
-        <h3>Step 3</h3><br>
-        <p>Flash ESP32 using the Arduino IDE with respective code from our github: <a href="https://github.com/sp4wn-owner/microcontrollers/tree/main/Body" target="_blank">Link</a><br>
-        If using your phone as the camera then flash ESP32 with ESP32_BLE_Dev_Module. Ensure wires are properly hooked up to the correct pins.</p><br>
-        <h3>Step 4</h3><br>  
-        <p>Go to profile > click connect (if Bluetooth is not enabled you will need to go to chrome://flags to enable it) > Go live > Select "This Device" > Confirm</p>
+        <div class="break"></div>
+        <h2>Step 2</h2><br>
+        <div class="text-block">Flash ESP32 using the Arduino IDE with respective code (ESP32_BLE_Dev_Module) from our <a href="https://github.com/sp4wn-owner/microcontrollers/tree/main/Body" target="_blank">github</a><br>
+        </div>
+        <div class="break"></div>
+        <h2>Step 3</h2><br>      
+          <p>Attach wires and secure phone mount</p><br>   
+        <img src="resources/images/photo_2024-09-16_01-03-03.jpg" alt="" style="width: 350px;">
+        <div class="break"></div>
+        <h2>Step 4</h2><br>  
+        <div class="text-block">Click "connect". Your robot should pop up on your list of Bluetooth devices". Once connected, test using the controls then click "go live". Now your robot can be controlled from anywhere, by anyone! <br>
+          <br>The esp32 can be powered through the micro USB or through the 5v pin (voltage above 3.3 will be stepped down through this pin since the board operates at 3.3v). If the motors are connected to the same power source they may cause the board to reset if not properly regulated. <br>
+          <br>Feel free to edit the Arduino code and make your robot do whatever you want when it receives certain messages. <br>
+          <br>**If Bluetooth is not enabled you will need to go to chrome://flags to enable it
+        </div><br>
+          <img src="resources/images/photo_2024-09-16_01-02-23.jpg" alt="" style="width: 350px;"><br>
       </div>
       
       <footer>
@@ -158,7 +176,7 @@
             <div class="footer-content">
                 <div class="footer-logo">
                   <div class="footer-logo-name">
-                    SP4WN
+                    SPAWN
                   </div>
                     <p><i>Bleep bleep...</i></p>
                 </div>

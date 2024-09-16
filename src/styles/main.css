@@ -488,6 +488,26 @@ footer {
 #login-page {
   height: 800px;
 }
+#infopage {
+  margin: 0 auto;
+  padding-bottom: 50px;
+}
+.break {
+  border-bottom: 5px dotted black;
+  width: 50%;
+  margin: 50px auto;
+}
+
+.text-block {
+  width: 600px; 
+  padding: 20px; 
+  margin: 0 auto; 
+  text-align: justify; 
+  line-height: 1.5; 
+  border: 1px solid #ccc; 
+  background-color: #f9f9f9; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
 
 @media screen and (max-width:1100px) {
   .text-container {
@@ -512,6 +532,9 @@ footer {
 @media screen and (max-width:750px) {
   .text-container span {
     font-size: 6vw;
+  }
+  .text-block {
+    width: 90%;
   }
 }
 
