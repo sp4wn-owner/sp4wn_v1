@@ -453,7 +453,7 @@ confirmVideoBtn.onclick = function() {
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
       
-      navigator.getUserMedia({ video: true, audio: false }, (stream) => {
+      navigator.getUserMedia({ video: true, audio: true }, (stream) => {
       yourConn = new RTCPeerConnection(configuration);
      
       //displaying local video stream on the page
@@ -544,7 +544,7 @@ function startimagecapture(interval) {
 function stopimagecapture() {
    clearInterval(imgInterval);
    updatelive('local');
-   console.log("Image captured terminated");
+   console.log("Image capture terminated");
 }
 
 function drawStream() {
@@ -898,7 +898,7 @@ function handleLeave() {
       connectedUser = null;
       dc = null;
       captureImage();
-      startimagecapture(30000);
+      startimagecapture(14000);
    } 
    
    if (liveremoteVideo == 1) {
