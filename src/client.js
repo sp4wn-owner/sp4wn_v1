@@ -533,7 +533,7 @@ confirmVideoBtn.onclick = function() {
       }
    }   
    
-   startimagecapture(30000);
+   startimagecapture(14000);
 }
 function startimagecapture(interval) {
    imgInterval = setInterval(() => {
