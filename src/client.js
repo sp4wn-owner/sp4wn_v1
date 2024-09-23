@@ -123,7 +123,20 @@ function sendtoWSS(message) {
 function handlecheck(name) {
    console.log("server says your username is: " + name);
    if (liveVideo = 1) {
-      confirmVideoBtn.click();
+      stream.getTracks().forEach((track) => {
+         yourConn.addTrack(track, stream);
+      });
+
+      beginICE();
+      ICEstatus();
+
+      if(localVideo) {      
+         updatelive("addlive");
+         setTimeout(() => {
+            captureImage();
+         }, 1000);
+         
+      }    
    }
    if (liveremoteVideo = 1) {
       spawnBtn.click();
