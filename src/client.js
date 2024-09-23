@@ -127,17 +127,9 @@ function handlecheck(name) {
       stream.getTracks().forEach((track) => {
          yourConn.addTrack(track, stream);
       });
-
       beginICE();
       ICEstatus();
       updatelive("addlive");
-      if(localVideo) {      
-         
-         setTimeout(() => {
-            captureImage();
-         }, 1000);
-         
-      }    
    }
    if (liveremoteVideo == 1) {
       spawnBtn.click();
