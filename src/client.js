@@ -123,6 +123,7 @@ function sendtoWSS(message) {
 function handlecheck(name) {
    console.log("server says your username is: " + name);
    if (liveVideo = 1) {
+      yourConn = new RTCPeerConnection(configuration);
       stream.getTracks().forEach((track) => {
          yourConn.addTrack(track, stream);
       });
