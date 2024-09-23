@@ -126,7 +126,7 @@ function handlecheck(name) {
       confirmVideoBtn.click();
    }
    if (liveremoteVideo = 1) {
-      spawnBtnBtn.click();
+      spawnBtn.click();
    }
 }
 
