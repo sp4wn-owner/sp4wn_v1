@@ -37,7 +37,8 @@ function connect() {
         reconnectAttempts = 0;
         if (username) {
          send({
-            type: "checkname"
+            type: "checkname",
+            username: username
          });
       }
     };
@@ -121,6 +122,9 @@ function sendtoWSS(message) {
 
 function handlecheck(name) {
    console.log("server says your username is: " + name);
+   if (liveVideo = 1) {
+      updatelive("addlive");
+   }
 }
 
 //******
@@ -749,7 +753,7 @@ spawnBtn.addEventListener("click", function (event) {
          host: connectedUser
       });
       dcpeerB();   
-       beginICE();
+      beginICE();
    }).catch(error => console.error(error.message));
    
     ICEstatus();
