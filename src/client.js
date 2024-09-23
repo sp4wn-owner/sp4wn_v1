@@ -132,7 +132,7 @@ function handlecheck(name) {
       updatelive("addlive");
    }
    if (liveremoteVideo == 1) {
-      spawnBtn.click();
+      togglehome();
    }
 }
 
