@@ -94,8 +94,6 @@ function connect() {
 
     conn.onclose = () => {
          console.log('Connection closed, attempting to reconnect...');
-         connectedUser = null;
-         dc = null;
         if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
             setTimeout(connect, reconnectDelay * reconnectAttempts);
@@ -124,18 +122,7 @@ function sendtoWSS(message) {
 
 function handlecheck(name) {
    console.log("server says your username is: " + name);
-   if (liveVideo == 1) {
-      yourConn = new RTCPeerConnection(configuration);
-      stream.getTracks().forEach((track) => {
-         yourConn.addTrack(track, stream);
-      });
-      beginICE();
-      ICEstatus();
-      updatelive("addlive");
-   }
-   if (liveremoteVideo == 1) {
-      togglehome();
-   }
+   handleLeave();
 }
 
 //******
