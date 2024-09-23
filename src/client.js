@@ -93,7 +93,9 @@ function connect() {
     };
 
     conn.onclose = () => {
-        console.log('Connection closed, attempting to reconnect...');
+         console.log('Connection closed, attempting to reconnect...');
+         connectedUser = null;
+         dc = null;
         if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
             setTimeout(connect, reconnectDelay * reconnectAttempts);
@@ -205,7 +207,8 @@ var confirmDeviceBtn = document.querySelector('#confirmdeviceBTN');
 
 var yourConn;
 var stream;
-var callToUsernameInput;
+var call
+var ToUsernameInput;
 let liveVideo = 0;
 let liveremoteVideo = 0;
 
