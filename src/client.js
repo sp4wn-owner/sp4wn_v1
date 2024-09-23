@@ -26,7 +26,7 @@ let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with
 let url = 'https://sp4wn-signaling-server.onrender.com';
 let conn;
 let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
+const maxReconnectAttempts = 10;
 const reconnectDelay = 1000;
 
 function connect() {
