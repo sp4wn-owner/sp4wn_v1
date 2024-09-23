@@ -35,6 +35,12 @@ function connect() {
     conn.onopen = () => {
         console.log('Connected to the server');
         reconnectAttempts = 0;
+        if (username) {
+         send({
+            type: "login",
+            name: username
+         });
+      }
     };
 
     conn.onmessage = function (msg) {
