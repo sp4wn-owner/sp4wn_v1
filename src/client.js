@@ -122,10 +122,10 @@ function sendtoWSS(message) {
 
 function handlecheck(name) {
    console.log("server says your username is: " + name);
-   if (liveVideo = 1) {
+   if (liveVideo == 1) {
       yourConn = new RTCPeerConnection(configuration);
-      stream.getTracks().forEach((track) => {
-         yourConn.addTrack(track, stream);
+      localVideo.getTracks().forEach((track) => {
+         yourConn.addTrack(track, localVideo);
       });
 
       beginICE();
@@ -139,7 +139,7 @@ function handlecheck(name) {
          
       }    
    }
-   if (liveremoteVideo = 1) {
+   if (liveremoteVideo == 1) {
       spawnBtn.click();
    }
 }
@@ -510,7 +510,6 @@ confirmVideoBtn.onclick = function() {
       navigator.getUserMedia({ video: true, audio: true }, (stream) => {
       yourConn = new RTCPeerConnection(configuration);
      
-      //displaying local video stream on the page
       localVideo.srcObject = stream
       video = localVideo;
 
@@ -942,8 +941,6 @@ function handleAnswer(answer) {
 function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
-
-//hang up
 
 function handleLeave() {   
 
