@@ -37,8 +37,7 @@ function connect() {
         reconnectAttempts = 0;
         if (username) {
          send({
-            type: "login",
-            name: username
+            type: "checkname"
          });
       }
     };
@@ -76,6 +75,9 @@ function connect() {
             break;
          case "finalleave":
             handleFinalLeave();
+            break;
+         case "handlecheck":
+            handlecheck(data.name);
             break;
          case "error":
             handleError(data.error);
@@ -115,6 +117,10 @@ function sendtoWSS(message) {
    if (deviceConn) {
        deviceConn.send(message);
    }
+}
+
+function handlecheck(name) {
+   console.log("server says your username is: " + name);
 }
 
 //******
