@@ -123,7 +123,10 @@ function sendtoWSS(message) {
 function handlecheck(name) {
    console.log("server says your username is: " + name);
    if (liveVideo = 1) {
-      updatelive("addlive");
+      confirmVideoBtn.click();
+   }
+   if (liveremoteVideo = 1) {
+      spawnBtnBtn.click();
    }
 }
 
@@ -783,7 +786,7 @@ spawnBtn.addEventListener("click", function (event) {
          
    
       } else {
-            console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+         console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
       }
       
    }, 1500);
