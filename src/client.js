@@ -533,7 +533,7 @@ confirmVideoBtn.onclick = function() {
       }
    }   
    
-   startimagecapture(14000);
+   startimagecapture(10000);
 }
 function startimagecapture(interval) {
    imgInterval = setInterval(() => {
@@ -898,7 +898,7 @@ function handleLeave() {
       connectedUser = null;
       dc = null;
       captureImage();
-      startimagecapture(14000);
+      startimagecapture(10000);
    } 
    
    if (liveremoteVideo == 1) {
