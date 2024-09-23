@@ -124,8 +124,8 @@ function handlecheck(name) {
    console.log("server says your username is: " + name);
    if (liveVideo == 1) {
       yourConn = new RTCPeerConnection(configuration);
-      localVideo.getTracks().forEach((track) => {
-         yourConn.addTrack(track, localVideo);
+      stream.getTracks().forEach((track) => {
+         yourConn.addTrack(track, stream);
       });
 
       beginICE();
@@ -509,7 +509,7 @@ confirmVideoBtn.onclick = function() {
       
       navigator.getUserMedia({ video: true, audio: true }, (stream) => {
       yourConn = new RTCPeerConnection(configuration);
-     
+         
       localVideo.srcObject = stream
       video = localVideo;
 
