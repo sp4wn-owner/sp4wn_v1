@@ -20,59 +20,79 @@ let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with
 
 //connecting to our signaling server
 //var conn = new WebSocket('ws://localhost:9090');
-var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
+//var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
-conn.onopen = function () {
-   console.log("Connected to the signaling server");
-};
+let url = 'https://sp4wn-signaling-server.onrender.com';
+let conn;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 5;
+const reconnectDelay = 1000;
 
-//when we got a message from a signaling server
-conn.onmessage = function (msg) {
-   console.log("Got message", msg.data);
+function connect() {
+    conn = new WebSocket(url);
 
-   var data = JSON.parse(msg.data);
+    conn.onopen = () => {
+        console.log('Connected to the server');
+        reconnectAttempts = 0;
+    };
 
-   switch(data.type) {
-      case "login":
-         handleLogin(data.success, data.name);
-         break;   
-      case "offer":
-         handleOffer(data.offer, data.name, data.host);
-         break;
-      case "answer":
-         handleAnswer(data.answer);
-         break;
-      case "candidate":
-         console.log("handling candidate");
-         handleCandidate(data.candidate);
-         break;
-      case "leave":
-         handleLeave();
-         break;
-      case "remoteleave":
-         handleRemoteLeave();
-         break;
-      case "watch":
-         watchStream(data.name);
-         break;
-      case "liveusers":
-         handleStreams(data.images);
-         break;
-      case "finalleave":
-         handleFinalLeave();
-         break;
-      case "error":
-         handleError(data.error);
-         break;
-      default:
-         break;
-   }
-};
+    conn.onmessage = function (msg) {
+      console.log("Got message", msg.data);
+   
+      var data = JSON.parse(msg.data);
+   
+      switch(data.type) {
+         case "login":
+            handleLogin(data.success, data.name);
+            break;   
+         case "offer":
+            handleOffer(data.offer, data.name, data.host);
+            break;
+         case "answer":
+            handleAnswer(data.answer);
+            break;
+         case "candidate":
+            console.log("handling candidate");
+            handleCandidate(data.candidate);
+            break;
+         case "leave":
+            handleLeave();
+            break;
+         case "remoteleave":
+            handleRemoteLeave();
+            break;
+         case "watch":
+            watchStream(data.name);
+            break;
+         case "liveusers":
+            handleStreams(data.images);
+            break;
+         case "finalleave":
+            handleFinalLeave();
+            break;
+         case "error":
+            handleError(data.error);
+            break;
+         default:
+            break;
+      }
+   };
 
-conn.onerror = function (err) {
-   console.log("Got error", err);
-};
+    conn.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    conn.onclose = () => {
+        console.log('Connection closed, attempting to reconnect...');
+        if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            setTimeout(connect, reconnectDelay * reconnectAttempts);
+        } else {
+            console.log('Max reconnect attempts reached. Please refresh the page.');
+        }
+    };
+}
 
 //alias for sending JSON encoded messages
 function send(message) {
@@ -197,6 +217,7 @@ var configuration = {
  let index = 0;
 
 function init() {
+   connect();
    revealText();
    loginPage.style.display = "block";
    homePage.style.display = "none";
