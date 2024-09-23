@@ -130,9 +130,9 @@ function handlecheck(name) {
 
       beginICE();
       ICEstatus();
-
+      updatelive("addlive");
       if(localVideo) {      
-         updatelive("addlive");
+         
          setTimeout(() => {
             captureImage();
          }, 1000);
