@@ -743,58 +743,48 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {   
-   connectedUser = otheruser;
-   retryFunction(async () => {         
-      yourConn = new RTCPeerConnection(configuration);       
-      stream = new MediaStream();           
-      remoteVideo.srcObject = stream;
-      yourConn.onaddstream = function (e) {         
-         remoteVideo.srcObject = e.stream;       
-         console.log('Function executed successfully');
-      }               
-      send({
-         type: "watch",
-         username: username,
-         host: connectedUser
-      });
-      dcpeerB();   
-      beginICE(); 
-      
-      console.log("attempt");     
-   }).catch(error => console.error(error.message));
-      
+   connectedUser = otheruser;      
+   yourConn = new RTCPeerConnection(configuration);       
+   stream = new MediaStream();           
+   remoteVideo.srcObject = stream;
+   yourConn.onaddstream = function (e) {         
+      remoteVideo.srcObject = e.stream;       
+      console.log('Function executed successfully');
+   }               
+   send({
+      type: "watch",
+      username: username,
+      host: connectedUser
+   });
+   dcpeerB();   
+   beginICE(); 
+   
    ICEstatus();
     
 
-    setTimeout(async () => {
-      if (yourConn.iceConnectionState === 'connected') {
-         try {            
-            video = remoteVideo;
-            liveremoteVideo = 1;
-            spawnBtn.style.display = "none";
-            controlpanel.style.display = "block";
-            connectdeviceBtn.style.display = "none";
-            controlpaneloutputs.style.display = "block";
-            connectcontrollerBtn.style.display = "inline-block";
-            cparrowsremote.forEach(cparrowsremote => {
-               cparrowsremote.style.display = 'inline-block';
-            });
-            console.log('PeerConnection is connected!');
-            
-         } catch (error) {
-            console.log(error);
-         }
-         addKeyListeners();
-         window.addEventListener("gamepaddisconnected", (event) => {
-            console.log("Gamepad disconnected:", event.gamepad);
-         });        
+    retryFunction(async () => {
+      try {            
+         video = remoteVideo;
+         liveremoteVideo = 1;
+         spawnBtn.style.display = "none";
+         controlpanel.style.display = "block";
+         connectdeviceBtn.style.display = "none";
+         controlpaneloutputs.style.display = "block";
+         connectcontrollerBtn.style.display = "inline-block";
+         cparrowsremote.forEach(cparrowsremote => {
+            cparrowsremote.style.display = 'inline-block';
+         });
+         console.log('PeerConnection is connected!');
          
-   
-      } else {
-         console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+      } catch (error) {
+         console.log(error);
       }
+      addKeyListeners();
+      window.addEventListener("gamepaddisconnected", (event) => {
+         console.log("Gamepad disconnected:", event.gamepad);
+      });                 
       
-   }, 5000);
+   }).catch(error => console.error(error.message));;
 
    
     
@@ -807,9 +797,12 @@ async function retryFunction(fn, retries = 3, delay = 1000) {
 
    for (let i = 0; i < retries; i++) {
        try {
-         console.log("attemptfunction");
+         console.log("attempt retry function");
+         if(yourConn.iceConnectionState === 'connected') {
+            return await fn();
+         }
          
-         return await fn();
+         
        } catch (error) {
            console.error(`Attempt ${i + 1} failed: ${error.message}`);
            if (i < retries - 1) {
