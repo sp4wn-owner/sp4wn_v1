@@ -763,47 +763,52 @@ spawnBtn.addEventListener("click", function (event) {
             
       console.log("attempt");     
 
-      async function checkICEStatus() {
-
-         await new Promise(resolve => setTimeout(resolve, 1500));
+      async function checkICEStatus(maxRetries = 5, delay = 1500) {
+         for (let retries = 0; retries < maxRetries; retries++) {
+             await new Promise(resolve => setTimeout(resolve, delay));
      
-         ICEstatus();
-         console.log(yourConn.iceConnectionState);
-         
-         if (yourConn.iceConnectionState === 'connected') {
-             try {
-                 // Directly using a Promise to simulate some async operation
-                 await new Promise(resolve => {
-                     setTimeout(() => {
-                         resolve("Data received!");
-                     }, 2000);
-                 });
-
-                 video = remoteVideo;
-                 liveremoteVideo = 1;
-                 spawnBtn.style.display = "none";
-                 controlpanel.style.display = "block";
-                 connectdeviceBtn.style.display = "none";
-                 controlpaneloutputs.style.display = "block";
-                 connectcontrollerBtn.style.display = "inline-block";
-                 cparrowsremote.forEach(cparrowsremote => {
-                     cparrowsremote.style.display = 'inline-block';
-                 });
-                 console.log('PeerConnection is connected!');
-             } catch (error) {
-                 console.log(error);
+             ICEstatus();
+             console.log(yourConn.iceConnectionState);
+     
+             if (yourConn.iceConnectionState === 'connected') {
+                 try {
+                     await new Promise(resolve => {
+                         setTimeout(() => {
+                             resolve("Data received!");
+                         }, 2000);
+                     });
+     
+                     video = remoteVideo;
+                     liveremoteVideo = 1;
+                     spawnBtn.style.display = "none";
+                     controlpanel.style.display = "block";
+                     connectdeviceBtn.style.display = "none";
+                     controlpaneloutputs.style.display = "block";
+                     connectcontrollerBtn.style.display = "inline-block";
+                     cparrowsremote.forEach(cparrowsremote => {
+                         cparrowsremote.style.display = 'inline-block';
+                     });
+                     console.log('PeerConnection is connected!');
+     
+                     addKeyListeners();
+                     window.addEventListener("gamepaddisconnected", (event) => {
+                         console.log("Gamepad disconnected:", event.gamepad);
+                     });
+     
+                     return; // Exit the function once connected
+                 } catch (error) {
+                     console.log(error);
+                 }
+             } else {
+                 console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
              }
-     
-             addKeyListeners();
-             window.addEventListener("gamepaddisconnected", (event) => {
-                 console.log("Gamepad disconnected:", event.gamepad);
-             });
-         } else {
-             console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
          }
+     
+         console.error('Max retries reached. ICE connection is still not connected.');
      }
-
+     
      checkICEStatus();
+     
    
 });
 
