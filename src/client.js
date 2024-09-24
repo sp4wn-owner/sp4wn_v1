@@ -743,64 +743,74 @@ function stopStreamedVideo(localVideo) {
 
 
 spawnBtn.addEventListener("click", function (event) {   
-   connectedUser = otheruser;      
-   yourConn = new RTCPeerConnection(configuration);       
-   stream = new MediaStream();           
-   remoteVideo.srcObject = stream;
-   yourConn.onaddstream = function (e) {         
-      remoteVideo.srcObject = e.stream;       
-      console.log('Function executed successfully');
-   }               
-   send({
-      type: "watch",
-      username: username,
-      host: connectedUser
-   });
-   dcpeerB();   
-   beginICE(); 
    
-   ICEstatus();
-    
+   connectedUser = otheruser;
+        
+      yourConn = new RTCPeerConnection(configuration);       
+      stream = new MediaStream();           
+      remoteVideo.srcObject = stream;
+      yourConn.onaddstream = function (e) {         
+         remoteVideo.srcObject = e.stream;       
+         console.log('Function executed successfully');
+      }               
+      send({
+         type: "watch",
+         username: username,
+         host: connectedUser
+      });
+      dcpeerB();  
+      beginICE(); 
+            
+      console.log("attempt");     
 
-    retryFunction(async () => {
-      try {            
-         video = remoteVideo;
-         liveremoteVideo = 1;
-         spawnBtn.style.display = "none";
-         controlpanel.style.display = "block";
-         connectdeviceBtn.style.display = "none";
-         controlpaneloutputs.style.display = "block";
-         connectcontrollerBtn.style.display = "inline-block";
-         cparrowsremote.forEach(cparrowsremote => {
-            cparrowsremote.style.display = 'inline-block';
-         });
-         console.log('PeerConnection is connected!');
+    setTimeout(async () => {
+      ICEstatus();
+      if (yourConn.iceConnectionState === 'connected') {
+         try {            
+            video = remoteVideo;
+            liveremoteVideo = 1;
+            spawnBtn.style.display = "none";
+            controlpanel.style.display = "block";
+            connectdeviceBtn.style.display = "none";
+            controlpaneloutputs.style.display = "block";
+            connectcontrollerBtn.style.display = "inline-block";
+            cparrowsremote.forEach(cparrowsremote => {
+               cparrowsremote.style.display = 'inline-block';
+            });
+            console.log('PeerConnection is connected!');
+            
+         } catch (error) {
+            console.log(error);
+         }
+         addKeyListeners();
+         window.addEventListener("gamepaddisconnected", (event) => {
+            console.log("Gamepad disconnected:", event.gamepad);
+         });        
          
-      } catch (error) {
-         console.log(error);
+   
+      } else {
+         console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
       }
-      addKeyListeners();
-      window.addEventListener("gamepaddisconnected", (event) => {
-         console.log("Gamepad disconnected:", event.gamepad);
-      });                 
       
-   }).catch(error => console.error(error.message));;
+   }, 5000);
 
    
     
 });
 
-async function retryFunction(fn, retries = 3, delay = 1000) {
+let isdcOpen = false;
+
+async function retryFunction(fn, retries = 3, delay = 2000) {
    if (typeof fn !== 'function') {
        throw new TypeError('Expected fn to be a function');
    }
 
    for (let i = 0; i < retries; i++) {
        try {
-         console.log("attempt retry function");
-         if(yourConn.iceConnectionState === 'connected') {
+         if (isdcOpen === true) {
             return await fn();
          }
+         console.log("attemptfunction");
          
          
        } catch (error) {
@@ -823,6 +833,7 @@ function dcpeerB() {
       // Set up event handlers for Peer B's data channel
       dc.onopen = () => {
          console.log("Data channel B is open");
+         isdcOpen = true;
          // Respond to Peer A
          dc.send("handleimg");
       };
