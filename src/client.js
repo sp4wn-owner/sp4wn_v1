@@ -123,7 +123,7 @@ function sendtoWSS(message) {
 function handlecheck(name) {
    console.log("server says your username is: " + name);
    handleLeave();
-   beginICE();
+   //beginICE();
 }
 
 //******
