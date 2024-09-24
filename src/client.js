@@ -763,40 +763,48 @@ spawnBtn.addEventListener("click", function (event) {
             
       console.log("attempt");     
 
-    setTimeout(async () => {
-      ICEstatus();
-      console.log(yourConn.iceConnectionState);
-      if (yourConn.iceConnectionState === 'connected') {
-         try {            
-            video = remoteVideo;
-            liveremoteVideo = 1;
-            spawnBtn.style.display = "none";
-            controlpanel.style.display = "block";
-            connectdeviceBtn.style.display = "none";
-            controlpaneloutputs.style.display = "block";
-            connectcontrollerBtn.style.display = "inline-block";
-            cparrowsremote.forEach(cparrowsremote => {
-               cparrowsremote.style.display = 'inline-block';
-            });
-            console.log('PeerConnection is connected!');
-            
-         } catch (error) {
-            console.log(error);
-         }
-         addKeyListeners();
-         window.addEventListener("gamepaddisconnected", (event) => {
-            console.log("Gamepad disconnected:", event.gamepad);
-         });        
-         
-   
-      } else {
-         console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
-      }
-      
-   }, 1500);
+      async function checkICEStatus() {
 
+         await new Promise(resolve => setTimeout(resolve, 1500));
+     
+         ICEstatus();
+         console.log(yourConn.iceConnectionState);
+         
+         if (yourConn.iceConnectionState === 'connected') {
+             try {
+                 // Directly using a Promise to simulate some async operation
+                 await new Promise(resolve => {
+                     setTimeout(() => {
+                         resolve("Data received!");
+                     }, 2000);
+                 });
+
+                 video = remoteVideo;
+                 liveremoteVideo = 1;
+                 spawnBtn.style.display = "none";
+                 controlpanel.style.display = "block";
+                 connectdeviceBtn.style.display = "none";
+                 controlpaneloutputs.style.display = "block";
+                 connectcontrollerBtn.style.display = "inline-block";
+                 cparrowsremote.forEach(cparrowsremote => {
+                     cparrowsremote.style.display = 'inline-block';
+                 });
+                 console.log('PeerConnection is connected!');
+             } catch (error) {
+                 console.log(error);
+             }
+     
+             addKeyListeners();
+             window.addEventListener("gamepaddisconnected", (event) => {
+                 console.log("Gamepad disconnected:", event.gamepad);
+             });
+         } else {
+             console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+         }
+     }
+
+     checkICEStatus();
    
-    
 });
 
 
