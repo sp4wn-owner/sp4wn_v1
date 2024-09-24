@@ -94,7 +94,7 @@ function connect() {
 
     conn.onclose = () => {
          console.log('Connection closed, attempting to reconnect...');
-        if (reconnectAttempts < maxReconnectAttempts) {
+         if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
             setTimeout(connect, reconnectDelay * reconnectAttempts);
         } else {
@@ -123,7 +123,8 @@ function sendtoWSS(message) {
 function handlecheck(name) {
    console.log("server says your username is: " + name);
    handleLeave();
-   //beginICE();
+   
+   beginICE();
 }
 
 //******
