@@ -616,6 +616,7 @@ function drawStream() {
 function beginICE() {
    // Setup ice handling
    yourConn.onicecandidate = function (event) {
+      console.log("setting up ice");
       if (event.candidate) {
          send({
             type: "candidate",
@@ -737,9 +738,9 @@ function stopStreamedVideo(localVideo) {
 
 spawnBtn.addEventListener("click", function (event) {   
    connectedUser = otheruser;
-   retryFunction(async () => {    
-      yourConn = new RTCPeerConnection(configuration);
-      stream = new MediaStream();      
+   retryFunction(async () => {         
+      yourConn = new RTCPeerConnection(configuration);       
+      stream = new MediaStream();           
       remoteVideo.srcObject = stream;
       yourConn.onaddstream = function (e) {         
          remoteVideo.srcObject = e.stream;       
@@ -751,10 +752,13 @@ spawnBtn.addEventListener("click", function (event) {
          host: connectedUser
       });
       dcpeerB();   
-      beginICE();
+      beginICE(); 
+      
+      console.log("attempt");     
    }).catch(error => console.error(error.message));
-   
-    ICEstatus();
+      
+   ICEstatus();
+    
 
     setTimeout(async () => {
       if (yourConn.iceConnectionState === 'connected') {
@@ -797,7 +801,9 @@ async function retryFunction(fn, retries = 3, delay = 1000) {
 
    for (let i = 0; i < retries; i++) {
        try {
-           return await fn();
+         console.log("attemptfunction");
+         
+         return await fn();
        } catch (error) {
            console.error(`Attempt ${i + 1} failed: ${error.message}`);
            if (i < retries - 1) {
