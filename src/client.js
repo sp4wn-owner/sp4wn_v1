@@ -765,6 +765,7 @@ spawnBtn.addEventListener("click", function (event) {
 
     setTimeout(async () => {
       ICEstatus();
+      console.log(yourConn.iceConnectionState);
       if (yourConn.iceConnectionState === 'connected') {
          try {            
             video = remoteVideo;
@@ -792,13 +793,12 @@ spawnBtn.addEventListener("click", function (event) {
          console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
       }
       
-   }, 5000);
+   }, 1500);
 
    
     
 });
 
-let isdcOpen = false;
 
 async function retryFunction(fn, retries = 3, delay = 2000) {
    if (typeof fn !== 'function') {
@@ -833,7 +833,6 @@ function dcpeerB() {
       // Set up event handlers for Peer B's data channel
       dc.onopen = () => {
          console.log("Data channel B is open");
-         isdcOpen = true;
          // Respond to Peer A
          dc.send("handleimg");
       };
