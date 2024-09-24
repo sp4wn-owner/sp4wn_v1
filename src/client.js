@@ -203,7 +203,10 @@ let liveremoteVideo = 0;
 
 var configuration = {
    iceServers: [
-      {
+       {
+         urls: "stun:stun2.1.google.com:19302",
+       },
+       {
          urls: "stun:stun.relay.metered.ca:80",
        },
        {
