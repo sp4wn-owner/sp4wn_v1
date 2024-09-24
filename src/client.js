@@ -123,6 +123,7 @@ function sendtoWSS(message) {
 function handlecheck(name) {
    console.log("server says your username is: " + name);
    handleLeave();
+   beginICE();
 }
 
 //******
@@ -650,6 +651,7 @@ function ICEstatus() {
          case 'failed':
             console.error('ICE Connection has failed.');
             // Potentially restart ICE or alert the user
+            yourConn.restartIce();
             break;
          case 'disconnected':
             console.warn('ICE Connection is disconnected.');
