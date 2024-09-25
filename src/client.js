@@ -573,7 +573,7 @@ confirmVideoBtn.onclick = function() {
       }
    }   
    
-   startimagecapture(10000);
+   startimagecapture(15000);
 }
 function startimagecapture(interval) {
    imgInterval = setInterval(() => {
@@ -952,14 +952,19 @@ function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
+function handleClientDisconnect() {
+   sendBT("off");
+}
+
 function handleLeave() {   
 
    if (liveVideo == 1) {
       updatelive('addlive');
       connectedUser = null;
       dc = null;
+      handleClientDisconnect();
       captureImage();
-      startimagecapture(10000);
+      startimagecapture(15000);
    } 
    
    if (liveremoteVideo == 1) {
