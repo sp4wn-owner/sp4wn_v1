@@ -866,32 +866,33 @@ function dcpeerB() {
 }
 
 function watchStream (name) {
-   if (iceConnectionState === "closed") {      
+   if (yourConn.iceConnectionState === "closed") {  
+      console.log("ice closed");
       beginICE();
-   }
-   opendc();
-   clientName = name;
-   var callToUsername = clientName;
- 
-   if (callToUsername.length > 0) {
- 
-      connectedUser = callToUsername;
- 
-      // create an offer
-      yourConn.createOffer(function (offer) {
-         send({
-            type: "offer",
-            offer: offer,
-            username: username,
-            host: connectedUser
+   } else {
+      opendc();
+      clientName = name;
+      var callToUsername = clientName;
+
+      if (callToUsername.length > 0) {
+
+         connectedUser = callToUsername;
+
+         // create an offer
+         yourConn.createOffer(function (offer) {
+            send({
+               type: "offer",
+               offer: offer,
+               username: username,
+               host: connectedUser
+            });
+
+            yourConn.setLocalDescription(offer);
+         }, function (error) {
+            alert("Error when creating an offer");
          });
- 
-         yourConn.setLocalDescription(offer);
-      }, function (error) {
-         alert("Error when creating an offer");
-      });
- 
-   }
+      }  
+   }   
  }
 
  function updatelive(msg) {
