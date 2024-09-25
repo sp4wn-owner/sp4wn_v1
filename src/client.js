@@ -774,7 +774,7 @@ spawnBtn.addEventListener("click", function (event) {
             ICEstatus();
             console.log(yourConn.iceConnectionState);
    
-            if (yourConn.iceConnectionState === 'connected' && isDataChannelOpen()) {
+            if (yourConn.iceConnectionState === 'connected') {
                try {
                   await new Promise(resolve => {
                         setTimeout(() => {
@@ -798,6 +798,9 @@ spawnBtn.addEventListener("click", function (event) {
                   window.addEventListener("gamepaddisconnected", (event) => {
                         console.log("Gamepad disconnected:", event.gamepad);
                   });
+                  if (isDataChannelOpen()) {
+                     console.log("data channel is open");
+                  } else retryFunction(dcpeerB);
    
                   return;
                } catch (error) {
@@ -806,28 +809,29 @@ spawnBtn.addEventListener("click", function (event) {
             } else {
                console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
             }
+
+            
       }
    
       console.error('Max retries reached. ICE connection is still not connected.');
    }
    
-   checkICEStatus();
+   checkICEStatus();  
    
 });
 
 
-async function retryFunction(fn, retries = 3, delay = 2000) {
+async function retryFunction(fn, retries = 3, delay = 1000) {
    if (typeof fn !== 'function') {
        throw new TypeError('Expected fn to be a function');
    }
 
    for (let i = 0; i < retries; i++) {
        try {
-         if (isdcOpen === true) {
+         if (isDataChannelOpen()) {
             return await fn();
          }
-         console.log("attemptfunction");
-         
+         console.log("data channel not open. Retrying");        
          
        } catch (error) {
            console.error(`Attempt ${i + 1} failed: ${error.message}`);
@@ -839,7 +843,6 @@ async function retryFunction(fn, retries = 3, delay = 2000) {
 
    throw new Error(`Function failed after ${retries} attempts`);
 }
-
 
 function dcpeerB() {
    yourConn.ondatachannel = (event) => {
@@ -862,7 +865,7 @@ function dcpeerB() {
 }
 
 function isDataChannelOpen() {
-   return dc.readyState === "open";
+   return dc ? dc.readyState === "open" : false;
 }
 
 function watchStream (name) {
