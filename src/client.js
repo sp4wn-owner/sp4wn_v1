@@ -866,6 +866,9 @@ function dcpeerB() {
 }
 
 function watchStream (name) {
+   if (iceConnectionState === "closed") {      
+      beginICE();
+   }
    opendc();
    clientName = name;
    var callToUsername = clientName;
