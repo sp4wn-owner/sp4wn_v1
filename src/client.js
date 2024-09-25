@@ -464,7 +464,7 @@ image.crossOrigin = 'anonymous'; // Use 'anonymous' or 'use-credentials' dependi
 image.src = ''; // Set the image source to your URL
 
 let intervalID;
-let imgInterval;
+
 // Function to update the canvas at a specified interval (frame rate)
 function updateCanvasAtInterval(context, image, canvas, interval) {
    intervalID = setInterval(() => {
@@ -575,16 +575,21 @@ confirmVideoBtn.onclick = function() {
    
    startimagecapture(15000);
 }
-function startimagecapture(interval) {
-   imgInterval = setInterval(() => {
-      captureImage();
-  }, interval);
-}
 
+let imgInterval;
+let intervalIds = [];
+
+function startimagecapture(interval) {
+   const intervalId = setInterval(captureImage(), interval);
+   intervalIds.push(intervalId);
+   console.log(`Started interval #${intervalIds.length - 1}`);
+}
 function stopimagecapture() {
-   clearInterval(imgInterval);
-   updatelive('local');
-   console.log("Image capture terminated");
+   while (intervalIds.length > 0) {
+       clearInterval(intervalIds.pop());
+       updatelive('local');
+   }
+   console.log("All image captures terminated.");
 }
 
 function drawStream() {
@@ -676,16 +681,15 @@ function opendc() {
    // Set up event handlers
    dc.onopen = () => {
       console.log("Data channel A is open");
-      // Send a message once the data channel is open
       dc.send("Hello, Peer B!");
       stopimagecapture();
-      controlpaneloutputs.disabled = true;
+      controlpaneloutputs.style.display = "none";
    };
 
    dc.onmessage = (event) => {
       console.log("Received from Peer B:", event.data);
       if (event.data == "handleimg") {
-         stopimagecapture();
+         //stopimagecapture();
       } else {
          sendtoDevice(event.data);
          dc.send(event.data);
