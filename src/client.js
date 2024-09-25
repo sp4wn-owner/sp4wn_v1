@@ -13,6 +13,7 @@ let deviceConn;
 var deviceaddress;
 let deviceType;
 let mylocation;
+let isCopyEnabled = false;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
@@ -192,7 +193,7 @@ var videospan = document.getElementById("close-video-select");
 var devicespan = document.getElementById("close-device-select");
 var confirmVideoBtn = document.querySelector('#confirmvideoBTN');
 var confirmDeviceBtn = document.querySelector('#confirmdeviceBTN');
-
+const controlbuttons = document.querySelectorAll(".nocopy");
 
 var yourConn;
 var stream;
@@ -746,73 +747,71 @@ function stopStreamedVideo(localVideo) {
  }
 
 
-spawnBtn.addEventListener("click", function (event) {   
-   
+spawnBtn.addEventListener("click", function (event) {      
    connectedUser = otheruser;
         
-      yourConn = new RTCPeerConnection(configuration);       
-      stream = new MediaStream();           
-      remoteVideo.srcObject = stream;
-      yourConn.onaddstream = function (e) {         
-         remoteVideo.srcObject = e.stream;       
-         console.log('Function executed successfully');
-      }               
-      send({
-         type: "watch",
-         username: username,
-         host: connectedUser
-      });
-      dcpeerB();  
-      beginICE(); 
-            
-      console.log("attempt");     
+   yourConn = new RTCPeerConnection(configuration);       
+   stream = new MediaStream();           
+   remoteVideo.srcObject = stream;
+   yourConn.onaddstream = function (e) {         
+      remoteVideo.srcObject = e.stream;       
+      console.log('Added stream successfully');
+   }               
+   send({
+      type: "watch",
+      username: username,
+      host: connectedUser
+   });
+   dcpeerB();  
+   beginICE(); 
+         
+   console.log("attempt to connect");     
 
-      async function checkICEStatus(maxRetries = 5, delay = 1500) {
-         for (let retries = 0; retries < maxRetries; retries++) {
-             await new Promise(resolve => setTimeout(resolve, delay));
-     
-             ICEstatus();
-             console.log(yourConn.iceConnectionState);
-     
-             if (yourConn.iceConnectionState === 'connected') {
-                 try {
-                     await new Promise(resolve => {
-                         setTimeout(() => {
-                             resolve("Data received!");
-                         }, 2000);
-                     });
-     
-                     video = remoteVideo;
-                     liveremoteVideo = 1;
-                     spawnBtn.style.display = "none";
-                     controlpanel.style.display = "block";
-                     connectdeviceBtn.style.display = "none";
-                     controlpaneloutputs.style.display = "block";
-                     connectcontrollerBtn.style.display = "inline-block";
-                     cparrowsremote.forEach(cparrowsremote => {
-                         cparrowsremote.style.display = 'inline-block';
-                     });
-                     console.log('PeerConnection is connected!');
-     
-                     addKeyListeners();
-                     window.addEventListener("gamepaddisconnected", (event) => {
-                         console.log("Gamepad disconnected:", event.gamepad);
-                     });
-     
-                     return; // Exit the function once connected
-                 } catch (error) {
-                     console.log(error);
-                 }
-             } else {
-                 console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
-             }
-         }
-     
-         console.error('Max retries reached. ICE connection is still not connected.');
-     }
-     
-     checkICEStatus();
-     
+   async function checkICEStatus(maxRetries = 5, delay = 1500) {
+      for (let retries = 0; retries < maxRetries; retries++) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+   
+            ICEstatus();
+            console.log(yourConn.iceConnectionState);
+   
+            if (yourConn.iceConnectionState === 'connected' && isDataChannelOpen()) {
+               try {
+                  await new Promise(resolve => {
+                        setTimeout(() => {
+                           resolve("Data received!");
+                        }, 2000);
+                  });
+   
+                  video = remoteVideo;
+                  liveremoteVideo = 1;
+                  spawnBtn.style.display = "none";
+                  controlpanel.style.display = "block";
+                  connectdeviceBtn.style.display = "none";
+                  controlpaneloutputs.style.display = "block";
+                  connectcontrollerBtn.style.display = "inline-block";
+                  cparrowsremote.forEach(cparrowsremote => {
+                        cparrowsremote.style.display = 'inline-block';
+                  });
+                  console.log('PeerConnection is connected!');
+   
+                  addKeyListeners();
+                  window.addEventListener("gamepaddisconnected", (event) => {
+                        console.log("Gamepad disconnected:", event.gamepad);
+                  });
+   
+                  return;
+               } catch (error) {
+                  console.log(error);
+               }
+            } else {
+               console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+            }
+      }
+   
+      console.error('Max retries reached. ICE connection is still not connected.');
+   }
+   
+   checkICEStatus();
    
 });
 
@@ -843,14 +842,11 @@ async function retryFunction(fn, retries = 3, delay = 2000) {
 
 
 function dcpeerB() {
-   // Listen for the data channel event
    yourConn.ondatachannel = (event) => {
       dc = event.channel;
 
-      // Set up event handlers for Peer B's data channel
       dc.onopen = () => {
          console.log("Data channel B is open");
-         // Respond to Peer A
          dc.send("handleimg");
       };
 
@@ -863,6 +859,10 @@ function dcpeerB() {
          console.log("Data channel B has been closed");
      };
    };
+}
+
+function isDataChannelOpen() {
+   return dc.readyState === "open";
 }
 
 function watchStream (name) {
@@ -1133,7 +1133,16 @@ if (username) {
             deviceinfo.style.display = "none";
             cparrowsremote.forEach(cparrowsremote => {
                cparrowsremote.style.display = 'none';
-             });
+            });
+            controlbuttons.forEach(button => {
+               button.addEventListener("click", () => {
+                  //isCopyEnabled = !isCopyEnabled;
+                  //const content = document.getElementById("content");
+                  content.style.userSelect = isCopyEnabled ? 'text' : 'none'; // Enable or disable text selection
+                  content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; // Disable interactions
+               });
+            });
+             
             
             if (liveVideo == 1) {
                goliveBtn.style.display = "none";
