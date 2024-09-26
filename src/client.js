@@ -580,6 +580,7 @@ confirmVideoBtn.onclick = function() {
 let intervalIds = [];
 
 function startimagecapture(interval) {
+   stopimagecapture();
    const intervalId = setInterval(() => {
       captureImage(); 
     }, interval);
