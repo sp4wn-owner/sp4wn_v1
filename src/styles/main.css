@@ -88,7 +88,11 @@ input {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
+button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
 button:hover {
   background-color: #4e0287;
 }
