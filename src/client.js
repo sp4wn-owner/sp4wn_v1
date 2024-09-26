@@ -577,11 +577,12 @@ confirmVideoBtn.onclick = function() {
    startimagecapture(15000);
 }
 
-let imgInterval;
 let intervalIds = [];
 
 function startimagecapture(interval) {
-   const intervalId = setInterval(captureImage(), interval);
+   const intervalId = setInterval(() => {
+      captureImage(); 
+    }, interval);
    intervalIds.push(intervalId);
    console.log(`Started interval #${intervalIds.length - 1}`);
 }
