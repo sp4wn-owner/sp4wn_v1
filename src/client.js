@@ -629,7 +629,7 @@ function drawStream() {
 function beginICE() {
    // Setup ice handling
    yourConn.onicecandidate = function (event) {
-      console.log("setting up ice");
+      console.log("received ice candidate");
       if (event.candidate) {
          send({
             type: "candidate",
@@ -774,7 +774,7 @@ spawnBtn.addEventListener("click", function (event) {
             await new Promise(resolve => setTimeout(resolve, delay));
    
             ICEstatus();
-            console.log(yourConn.iceConnectionState);
+            console.log("ice status is ", yourConn.iceConnectionState);
    
             if (yourConn.iceConnectionState === 'connected') {
                try {
@@ -802,8 +802,7 @@ spawnBtn.addEventListener("click", function (event) {
                   });
                   if (isDataChannelOpen()) {
                      console.log("data channel is open");
-                  } else retryFunction(dcpeerB);
-   
+                  } else {retryFunction(dcpeerB);}   
                   return;
                } catch (error) {
                   console.log(error);
@@ -852,7 +851,7 @@ function dcpeerB() {
 
       dc.onopen = () => {
          console.log("Data channel B is open");
-         dc.send("handleimg");
+         dc.send("Hello from peer B");
       };
 
       dc.onmessage = (event) => {
@@ -875,7 +874,11 @@ function watchStream (name) {
       console.log("ice closed");
       beginICE();
    } else {
-      opendc();
+      console.log("sending offer");
+      if (isDataChannelOpen()) {
+         console.log("data channel is open");
+      } else {opendc();}   
+
       clientName = name;
       var callToUsername = clientName;
 
@@ -1889,7 +1892,6 @@ function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
       console.log("failed to send image to server");
    }      
 }
-
 
 init();
 
