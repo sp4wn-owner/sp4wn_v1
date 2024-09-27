@@ -622,8 +622,7 @@ function drawStream() {
   }, 1000);
    } catch (error) {
       console.log(error);
-   }
-   
+   }  
    
 }
 function beginICE() {

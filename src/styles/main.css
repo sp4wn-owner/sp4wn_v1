@@ -212,6 +212,10 @@ video {
 #video-container {
   position: relative;
 }
+.youtube-video-container iframe {
+  width: 560px;
+  height: 315px;
+}
 #videoicons {
   position: absolute;
   bottom: 0;
@@ -558,6 +562,9 @@ footer {
   }
   #videoicons {
     right: 0;
+  }
+  .youtube-video-container iframe {
+    width: 100%;
   }
   .footer-links {
     display: none;
