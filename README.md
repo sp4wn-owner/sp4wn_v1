@@ -6,14 +6,14 @@ TODO:
 
 -user registration/authentication system
 
--webrtc implementation for raspberry pi (automatically connects to our platform once set up)
+-webrtc implementation for raspberry pi (fully integrated robot)
 
 -payment system that enables owners to charge for access to their robot
 
   &nbsp;&nbsp;&nbsp;&nbsp; ~most likely a token-based system (users buys tokens | owners charge x amount of tokens per min)
   
-  &nbsp;&nbsp;&nbsp;&nbsp;~potentially a cryptocurrency-based system using javascript frameworks
+  &nbsp;&nbsp;&nbsp;&nbsp;~potentially a cryptocurrency-based system using javascript frameworks (plus robot to robot payments using NFC?)
   
 -bigger & better telepresence robots
 
-  &nbsp;&nbsp;&nbsp;&nbsp;~Sythentic muscles?
+  &nbsp;&nbsp;&nbsp;&nbsp;~Explore sythentic muscles applications/capabilities
