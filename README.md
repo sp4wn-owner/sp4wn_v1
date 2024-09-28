@@ -6,7 +6,7 @@ TODO:
 
 -user registration/authentication system
 
--webrtc implementation for raspberry pi for quick deployment and easy customization
+-webrtc implementation for raspberry pi (automatically connects to our platform once set up)
 
 -payment system that enables owners to charge for access to their robot
 
