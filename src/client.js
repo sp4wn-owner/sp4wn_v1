@@ -1,5 +1,5 @@
 var name;
-var username;
+let username;
 var connectedUser;
 var otheruser;
 var activecss;
@@ -16,15 +16,14 @@ let mylocation;
 let isCopyEnabled = false;
 
 let BLE_Name = 'v0_Robot';
-let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
-let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
+let serviceUUID = '12345678-1234-1234-1234-123456789012';
+let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456';
 
-//connecting to our signaling server
 //var conn = new WebSocket('ws://localhost:9090');
 //var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
-let url = 'https://sp4wn-signaling-server.onrender.com';
+let url = 'ws://sp4wn-signaling-server.onrender.com';
 let conn;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
@@ -104,12 +103,10 @@ function connect() {
     };
 }
 
-//alias for sending JSON encoded messages
+
 function send(message) {
-   //attach the other peer username to our messages
    if (connectedUser) {
       message.name = otheruser;
-     // message.name = connectedUser;
    }
    conn.send(JSON.stringify(message));
 };
@@ -123,14 +120,9 @@ function sendtoWSS(message) {
 
 function handlecheck(name) {
    console.log("server says your username is: " + name);
-   handleLeave();
-   
+   handleLeave();   
    beginICE();
 }
-
-//******
-//UI selectors block
-//******
 
 var loginPage = document.querySelector('#login-page');
 var usernameInput = document.querySelector('#usernameInput');
@@ -152,7 +144,6 @@ var spawnBtn = document.querySelector('#spawnBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
 var getprivatestreamsBtn = document.querySelector('#getprivatestreamsbtn');
 var otherProfile = document.querySelector('#otherprofile');
-//var liveStreams = document.querySelector("#livestreams");
 var liveStreams = document.querySelector("#main-streams-container");
 
 var connectdeviceBtn = document.querySelector('#connectdevice-Btn');
@@ -260,16 +251,15 @@ function revealText() {
       span.classList.add('hidden');
       textContainer.appendChild(span);
 
-      // Add a small delay before making the character visible
       setTimeout(() => {
           span.classList.remove('hidden');
       }, 50);
 
       index++;
-      setTimeout(revealText, 100); // Adjust the timing for each character
+      setTimeout(revealText, 100);
   }
 }
-// Login when the user clicks the button
+
 loginBtn.addEventListener("click", function (event) {
    
    name = usernameInput.value;
@@ -333,7 +323,6 @@ devicespan.onclick = function() {
    }
 }
 
-// Get the select element
 var videoSelect = document.getElementById("videoSelect");
 var deviceSelect = document.getElementById("deviceSelect");
 var useripaddress = document.getElementById("useripaddressinput");
@@ -344,9 +333,7 @@ var devicenameinput = document.getElementById("devicenameinput");
 var deviceaddressinput = document.getElementById("deviceaddressinput");
 let streamdescription;
 
-// Add an event listener for the 'change' event
 videoSelect.addEventListener("change", function() {
-  // Get the selected value
   var selectedValue = videoSelect.value;
 
   if (selectedValue == "0") {
@@ -370,7 +357,6 @@ videoSelect.addEventListener("change", function() {
 });
 
 deviceSelect.addEventListener("change", function() {
-   // Get the selected value
    var selectedValue = deviceSelect.value;
  
    if (selectedValue == "0") {
@@ -445,8 +431,6 @@ confirmDeviceBtn.onclick = function() {
  
  function checkReadyState() {
    if (deviceConn.readyState === WebSocket.OPEN) {         
-      // Perform actions if the WebSocket is open
-      //enable buttons
       connectdeviceBtn.style.display = "none";   
       connectcontrollerBtn.style.display = "inline-block";  
       disconnectdeviceBtn.style.display = "block";          
@@ -481,7 +465,7 @@ function updateCanvasAtInterval(context, image, canvas, interval) {
          stopimagecapture();
          clearInterval(intervalID);
       }
-   }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
+   }, interval); 
  }
 
 function getMediaStream(constraints) {
@@ -520,7 +504,7 @@ function createPeerConnection() {
        resolve(yourConn);
    });
 }
-// Create and send offer
+
 function createOffer() {
    return new Promise((resolve, reject) => {
        yourConn.createOffer()
@@ -619,7 +603,6 @@ async function initiateConn() {
 
       yourConn = await createPeerConnection();
       await addStreamToPeerConnection(localStream);
-      //await createOffer();
       await afterlocalVideo();
       
   } catch (error) {

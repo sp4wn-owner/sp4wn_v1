@@ -16,10 +16,9 @@ let mylocation;
 let isCopyEnabled = false;
 
 let BLE_Name = 'v0_Robot';
-let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
-let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456'; // Replace with your characteristic UUID
+let serviceUUID = '12345678-1234-1234-1234-123456789012';
+let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456';
 
-//connecting to our signaling server
 //var conn = new WebSocket('ws://localhost:9090');
 //var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
@@ -104,12 +103,10 @@ function connect() {
     };
 }
 
-//alias for sending JSON encoded messages
+
 function send(message) {
-   //attach the other peer username to our messages
    if (connectedUser) {
       message.name = otheruser;
-     // message.name = connectedUser;
    }
    conn.send(JSON.stringify(message));
 };
@@ -123,14 +120,9 @@ function sendtoWSS(message) {
 
 function handlecheck(name) {
    console.log("server says your username is: " + name);
-   handleLeave();
-   
+   handleLeave();   
    beginICE();
 }
-
-//******
-//UI selectors block
-//******
 
 var loginPage = document.querySelector('#login-page');
 var usernameInput = document.querySelector('#usernameInput');
@@ -152,7 +144,6 @@ var spawnBtn = document.querySelector('#spawnBtn');
 var getstreamsBtn = document.querySelector('#getstreamsbtn');
 var getprivatestreamsBtn = document.querySelector('#getprivatestreamsbtn');
 var otherProfile = document.querySelector('#otherprofile');
-//var liveStreams = document.querySelector("#livestreams");
 var liveStreams = document.querySelector("#main-streams-container");
 
 var connectdeviceBtn = document.querySelector('#connectdevice-Btn');
@@ -231,6 +222,7 @@ var configuration = {
          credential: "1YAoI8sksn13VTSc",
        },
    ],
+   'sdpSemantics': 'unified-plan',
  };
 
  const introtext = "Dawn of Telepresence Robotics";
@@ -259,16 +251,15 @@ function revealText() {
       span.classList.add('hidden');
       textContainer.appendChild(span);
 
-      // Add a small delay before making the character visible
       setTimeout(() => {
           span.classList.remove('hidden');
       }, 50);
 
       index++;
-      setTimeout(revealText, 100); // Adjust the timing for each character
+      setTimeout(revealText, 100);
   }
 }
-// Login when the user clicks the button
+
 loginBtn.addEventListener("click", function (event) {
    
    name = usernameInput.value;
@@ -332,7 +323,6 @@ devicespan.onclick = function() {
    }
 }
 
-// Get the select element
 var videoSelect = document.getElementById("videoSelect");
 var deviceSelect = document.getElementById("deviceSelect");
 var useripaddress = document.getElementById("useripaddressinput");
@@ -343,9 +333,7 @@ var devicenameinput = document.getElementById("devicenameinput");
 var deviceaddressinput = document.getElementById("deviceaddressinput");
 let streamdescription;
 
-// Add an event listener for the 'change' event
 videoSelect.addEventListener("change", function() {
-  // Get the selected value
   var selectedValue = videoSelect.value;
 
   if (selectedValue == "0") {
@@ -369,7 +357,6 @@ videoSelect.addEventListener("change", function() {
 });
 
 deviceSelect.addEventListener("change", function() {
-   // Get the selected value
    var selectedValue = deviceSelect.value;
  
    if (selectedValue == "0") {
@@ -444,8 +431,6 @@ confirmDeviceBtn.onclick = function() {
  
  function checkReadyState() {
    if (deviceConn.readyState === WebSocket.OPEN) {         
-      // Perform actions if the WebSocket is open
-      //enable buttons
       connectdeviceBtn.style.display = "none";   
       connectcontrollerBtn.style.display = "inline-block";  
       disconnectdeviceBtn.style.display = "block";          
@@ -480,8 +465,150 @@ function updateCanvasAtInterval(context, image, canvas, interval) {
          stopimagecapture();
          clearInterval(intervalID);
       }
-   }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
+   }, interval); 
  }
+
+function getMediaStream(constraints) {
+   return new Promise((resolve, reject) => {
+       navigator.mediaDevices.getUserMedia(constraints)
+           .then(stream => resolve(stream))
+           .catch(err => reject(err));
+   });
+}
+function addStreamToPeerConnection(stream) {
+   return new Promise((resolve, reject) => {
+       stream.getTracks().forEach(track => {
+           yourConn.addTrack(track, stream);
+       });
+       resolve();
+   });
+}
+function createPeerConnection() {
+   return new Promise((resolve, reject) => {
+       const yourConn = new RTCPeerConnection(configuration);
+
+       // Handle ICE candidates
+       yourConn.onicecandidate = event => {
+         if (event.candidate) {
+             console.log('New ICE candidate: ', event.candidate);
+             // Send the candidate to the remote peer here
+             if (event.candidate) {
+               send({
+                  type: "candidate",
+                  candidate: event.candidate,
+                  othername: connectedUser           
+               });
+            }
+         }
+     };
+       resolve(yourConn);
+   });
+}
+
+function createOffer() {
+   return new Promise((resolve, reject) => {
+       yourConn.createOffer()
+           .then(offer => {
+               //console.log('Original SDP:', offer.sdp);
+               //const modifiedSdp = disableCompressionCodecs(offer.sdp);
+               //console.log('Modified SDP:', modifiedSdp);
+               //return yourConn.setLocalDescription(new RTCSessionDescription({ type: offer.type, sdp: modifiedSdp }))
+               return yourConn.setLocalDescription(offer)
+               .then(() => offer);
+            })
+           .then(offer => {               
+               send({
+                  type: "offer",
+                  offer: offer,
+                  username: username,
+                  host: connectedUser
+               });
+               console.log('Offer created and sent.');
+               resolve();
+           })
+           .catch(err => reject(err));
+   });
+}
+
+async function watchStream(name) {
+   connectedUser = name;
+   if (yourConn.iceConnectionState === "closed") {  
+      console.log("ice closed");
+      beginICE();
+   } else {
+      console.log("sending offer");
+      if (isDataChannelOpen()) {
+         console.log("data channel is open");
+      } else {opendc();}  
+   }
+   await createOffer();
+}
+// Function to disable compression codecs in SDP
+function disableCompressionCodecs(sdp) {
+   const lines = sdp.split('\r\n');
+
+   // Keep track of media lines and codec lines
+   const modifiedLines = [];
+   let mediaLinesFound = false;
+
+   for (const line of lines) {
+       // Check if this is a media line
+       if (line.startsWith('m=')) {
+           mediaLinesFound = true; // Found a media line
+       }
+
+       // Remove specific codec entries while keeping the media line intact
+       if (!line.startsWith('a=rtpmap:') || !line.includes('VP8') && !line.includes('H264')) {
+           modifiedLines.push(line);
+       }
+   }
+
+   if (!mediaLinesFound) {
+       throw new Error('Invalid SDP: No media lines found.');
+   }
+
+    // Join the lines back into a single SDP string
+    const modifiedSdp = modifiedLines.join('\r\n');
+
+    // Validate the modified SDP
+    if (!isValidSdp(modifiedSdp)) {
+      throw new Error('Invalid SDP after modification.');
+  }
+  return modifiedSdp;
+}
+
+// Function to validate the SDP structure
+function isValidSdp(sdp) {
+   return sdp.includes('m=') && sdp.includes('a=rtpmap:');
+}
+
+async function afterlocalVideo() {
+   if(localVideo) {
+      goliveBtn.style.display = "none";
+      endliveBtn.style.display = "block";
+      liveVideo = 1;         
+      updatelive("addlive");
+      setTimeout(() => {
+         captureImage();
+      }, 1000);
+      
+   }   
+}
+
+async function initiateConn() {
+   try {
+      localStream = await getMediaStream({ video: true, audio: true });
+      localVideo.srcObject = localStream;
+      video = localVideo;
+
+      yourConn = await createPeerConnection();
+      await addStreamToPeerConnection(localStream);
+      await afterlocalVideo();
+      
+  } catch (error) {
+      console.error('Error in starting call:', error);
+  }
+}
 
 confirmVideoBtn.onclick = function() {
    var selectedValue = videoSelect.value;
@@ -494,34 +621,9 @@ confirmVideoBtn.onclick = function() {
       console.log(username +" is going live using this device");
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
-      
-      navigator.getUserMedia({ video: true, audio: true }, (stream) => {
-      yourConn = new RTCPeerConnection(configuration);
-         
-      localVideo.srcObject = stream
-      video = localVideo;
 
-      stream.getTracks().forEach((track) => {
-         yourConn.addTrack(track, stream);
-      });
+      initiateConn();
 
-      beginICE();
-      ICEstatus();
-
-      if(localVideo) {
-         goliveBtn.style.display = "none";
-         endliveBtn.style.display = "block";
-         liveVideo = 1;         
-         updatelive("addlive");
-         setTimeout(() => {
-            captureImage();
-         }, 1000);
-         
-      }    
-
-      }, function (error) {
-         console.log(error);
-      });
    }
      
    if (selectedValue == "2") {
@@ -867,40 +969,6 @@ function dcpeerB() {
 function isDataChannelOpen() {
    return dc ? dc.readyState === "open" : false;
 }
-
-function watchStream (name) {
-   if (yourConn.iceConnectionState === "closed") {  
-      console.log("ice closed");
-      beginICE();
-   } else {
-      console.log("sending offer");
-      if (isDataChannelOpen()) {
-         console.log("data channel is open");
-      } else {opendc();}   
-
-      clientName = name;
-      var callToUsername = clientName;
-
-      if (callToUsername.length > 0) {
-
-         connectedUser = callToUsername;
-
-         // create an offer
-         yourConn.createOffer(function (offer) {
-            send({
-               type: "offer",
-               offer: offer,
-               username: username,
-               host: connectedUser
-            });
-
-            yourConn.setLocalDescription(offer);
-         }, function (error) {
-            alert("Error when creating an offer");
-         });
-      }  
-   }   
- }
 
  function updatelive(msg) {
    var data = msg;
