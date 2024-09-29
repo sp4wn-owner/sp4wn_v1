@@ -14,7 +14,6 @@ var deviceaddress;
 let deviceType;
 let mylocation;
 let isCopyEnabled = false;
-let peerConnection;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
@@ -232,6 +231,7 @@ var configuration = {
          credential: "1YAoI8sksn13VTSc",
        },
    ],
+   'sdpSemantics': 'unified-plan',
  };
 
  const introtext = "Dawn of Telepresence Robotics";
@@ -525,11 +525,14 @@ function createOffer() {
    return new Promise((resolve, reject) => {
        yourConn.createOffer()
            .then(offer => {
+               //console.log('Original SDP:', offer.sdp);
+               //const modifiedSdp = disableCompressionCodecs(offer.sdp);
+               //console.log('Modified SDP:', modifiedSdp);
+               //return yourConn.setLocalDescription(new RTCSessionDescription({ type: offer.type, sdp: modifiedSdp }))
                return yourConn.setLocalDescription(offer)
                .then(() => offer);
             })
-           .then(offer => {
-               // Send the offer to the remote peer here
+           .then(offer => {               
                send({
                   type: "offer",
                   offer: offer,
@@ -542,6 +545,7 @@ function createOffer() {
            .catch(err => reject(err));
    });
 }
+
 async function watchStream(name) {
    connectedUser = name;
    if (yourConn.iceConnectionState === "closed") {  
@@ -554,6 +558,44 @@ async function watchStream(name) {
       } else {opendc();}  
    }
    await createOffer();
+}
+// Function to disable compression codecs in SDP
+function disableCompressionCodecs(sdp) {
+   const lines = sdp.split('\r\n');
+
+   // Keep track of media lines and codec lines
+   const modifiedLines = [];
+   let mediaLinesFound = false;
+
+   for (const line of lines) {
+       // Check if this is a media line
+       if (line.startsWith('m=')) {
+           mediaLinesFound = true; // Found a media line
+       }
+
+       // Remove specific codec entries while keeping the media line intact
+       if (!line.startsWith('a=rtpmap:') || !line.includes('VP8') && !line.includes('H264')) {
+           modifiedLines.push(line);
+       }
+   }
+
+   if (!mediaLinesFound) {
+       throw new Error('Invalid SDP: No media lines found.');
+   }
+
+    // Join the lines back into a single SDP string
+    const modifiedSdp = modifiedLines.join('\r\n');
+
+    // Validate the modified SDP
+    if (!isValidSdp(modifiedSdp)) {
+      throw new Error('Invalid SDP after modification.');
+  }
+  return modifiedSdp;
+}
+
+// Function to validate the SDP structure
+function isValidSdp(sdp) {
+   return sdp.includes('m=') && sdp.includes('a=rtpmap:');
 }
 
 async function afterlocalVideo() {
@@ -944,40 +986,6 @@ function dcpeerB() {
 function isDataChannelOpen() {
    return dc ? dc.readyState === "open" : false;
 }
-
-function watchStreamOLD (name) {
-   if (yourConn.iceConnectionState === "closed") {  
-      console.log("ice closed");
-      beginICE();
-   } else {
-      console.log("sending offer");
-      if (isDataChannelOpen()) {
-         console.log("data channel is open");
-      } else {opendc();}   
-
-      clientName = name;
-      var callToUsername = clientName;
-
-      if (callToUsername.length > 0) {
-
-         connectedUser = callToUsername;
-
-         // create an offer
-         yourConn.createOffer(function (offer) {
-            send({
-               type: "offer",
-               offer: offer,
-               username: username,
-               host: connectedUser
-            });
-
-            yourConn.setLocalDescription(offer);
-         }, function (error) {
-            alert("Error when creating an offer");
-         });
-      }  
-   }   
- }
 
  function updatelive(msg) {
    var data = msg;
