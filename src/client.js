@@ -1,5 +1,4 @@
 var name;
-let username;
 var connectedUser;
 var otheruser;
 var activecss;
@@ -14,6 +13,7 @@ var deviceaddress;
 let deviceType;
 let mylocation;
 let isCopyEnabled = false;
+let globalUsername = null;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012';
@@ -27,20 +27,15 @@ let url = 'https://sp4wn-signaling-server.onrender.com';
 let conn;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
-const reconnectDelay = 1000;
+const reconnectDelay = 2000;
 
-function connect() {
+function connect(username, token) {
     conn = new WebSocket(url);
 
     conn.onopen = () => {
-        console.log('Connected to the server');
-        reconnectAttempts = 0;
-        if (username) {
-         send({
-            type: "checkname",
-            username: username
-         });
-      }
+      console.log('Connected to the server');
+      reconnectAttempts = 0;        
+      conn.send(JSON.stringify({ type: 'authenticate', username, token }));
     };
 
     conn.onmessage = function (msg) {
@@ -49,8 +44,8 @@ function connect() {
       var data = JSON.parse(msg.data);
    
       switch(data.type) {
-         case "login":
-            handleLogin(data.success, data.name);
+         case "authenticated":
+            handleAuth(data.success);
             break;   
          case "offer":
             handleOffer(data.offer, data.name, data.host);
@@ -96,7 +91,7 @@ function connect() {
          console.log('Connection closed, attempting to reconnect...');
          if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
-            setTimeout(connect, reconnectDelay * reconnectAttempts);
+            setTimeout(autoLogin, reconnectDelay * reconnectAttempts);
         } else {
             console.log('Max reconnect attempts reached. Please refresh the page.');
         }
@@ -126,6 +121,7 @@ function handlecheck(name) {
 
 var loginPage = document.querySelector('#login-page');
 var usernameInput = document.querySelector('#usernameInput');
+var pwInput = document.querySelector('#pwInput');
 var loginBtn = document.querySelector('#loginBtn');
 
 var streamPage = document.querySelector('#stream-page');
@@ -230,17 +226,8 @@ var configuration = {
  let index = 0;
 
 function init() {
-   connect();
-   revealText();
-   loginPage.style.display = "block";
-   homePage.style.display = "none";
-   infoPage.style.display = "none";
-   profilePage.style.display = "none";
-   profilePage.style.display = "none";
-   infoPage.style.display = "none";
-   liveStreams.innerHTML = "";
-   document.getElementsByTagName('header')[0].style.display = "none";
-   deviceaddress = null;   
+   autoLogin();
+   
    };
 
 function revealText() {
@@ -261,46 +248,130 @@ function revealText() {
 }
 
 loginBtn.addEventListener("click", function (event) {
-   
-   name = usernameInput.value;
-
-   if (name.length > 0) {
-      send({
-         type: "login",
-         name: name
-      });
-   }
+   const username = usernameInput.value;
+   const password = pwInput.value;
+   loginAndConnectToWebSocket(username, password);
 });
 
-function handleLogin(success, name) {
+function handleAuth(success) {
    if (success === false) {
-      alert("Ooops...try a different username");
+      alert("Unable to authenticate user");
    } else {
-      username = name;
+      checkUsername();
       loginPage.style.display = "none";
       homePage.style.display = "block";
       liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "block";
-      getStreams();
-            
+      getStreams();            
     }
 };
 
+async function loginAndConnectToWebSocket(username, password) {   
+   const response = await fetch('https://sp4wn-signaling-server.onrender.com/login', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({ username, password })
+   });
+   
+   const data = await response.json();
+
+   if (data.success) {
+       const token = data.token;
+       localStorage.setItem('jwt', token);
+       connect(username, token);
+   } else {
+       console.log("Login failed:", data.message);
+   }
+}
+
+async function autoLogin() {
+   console.log("Attempting auto login");
+   if (hasToken()) {
+       console.log("Token exists in localStorage.");
+       const token = localStorage.getItem('jwt');
+       const username = await getUsernameFromToken(token);
+       globalUsername = username;
+       console.log(username);
+       if (token) {
+           console.log("Verifying token");
+           const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
+               method: 'GET',
+               headers: {
+                   'Authorization': 'Bearer ' + token
+               }
+           });
+
+           if (response.ok) {
+               alert('Auto-login successful!');
+               connect(username, token);
+           } else {
+               alert('Auto-login failed: ' + (await response.json()).message);
+               
+            }
+       }
+   } else {
+       console.log("No token found in localStorage.");
+       revealText();
+      loginPage.style.display = "block";
+      homePage.style.display = "none";
+      infoPage.style.display = "none";
+      profilePage.style.display = "none";
+      profilePage.style.display = "none";
+      infoPage.style.display = "none";
+      liveStreams.innerHTML = "";
+      document.getElementsByTagName('header')[0].style.display = "none";
+      deviceaddress = null;   
+   }
+   
+}
+
+function logout() {
+   // Clear the token from localStorage
+   localStorage.removeItem('jwt');
+   alert('You have been logged out.');
+
+   // Optionally, close the WebSocket connection if needed
+   if (ws) {
+       ws.close();
+   }
+
+   // You may want to redirect the user or refresh the page
+   window.location.reload(); // Refresh the page or redirect to login page
+}
+async function getUsername() {
+   if (hasToken()) {
+      console.log("Token exists in localStorage.");
+      const token = localStorage.getItem('jwt');
+      const username = await getUsernameFromToken(token);
+        globalUsername = username;
+        return globalUsername;
+  } else {
+      console.log("No token found in localStorage.");
+  }
+}
+function getUsernameFromToken(token) {
+   const decodedToken = jwt_decode(token); 
+   return decodedToken.username; 
+}
+function hasToken() {
+   const token = localStorage.getItem('jwt'); 
+   return token !== null;
+}
 function getStreams() {
    liveStreams.innerHTML = "";
 
       if(connectedUser != null) {
          send({
             type: "leave",
-            othername: connectedUser,
-            username: username
+            othername: connectedUser
          });
          handleLeave();
       }
    
       send({
-         type: "streams",
-         username: username
+         type: "streams"
       });
 }
 
@@ -618,7 +689,6 @@ confirmVideoBtn.onclick = function() {
    deviceIPsrc = enteredIP;
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
-      console.log(username +" is going live using this device");
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
 
@@ -627,7 +697,6 @@ confirmVideoBtn.onclick = function() {
    }
      
    if (selectedValue == "2") {
-      console.log(username +" is going live with IP Camera");
       image.src = deviceIPsrc;
       const prefix = deviceIPsrc.slice(0,8);
       console.log(prefix);
@@ -972,24 +1041,25 @@ function isDataChannelOpen() {
 
  function updatelive(msg) {
    var data = msg;
-   
    switch(data) {
+      
       case "addlive":
+         
          send({
             type: "addlive",
-            username: username
+            username: globalUsername
          });
-      break;
+         break;
       case "addremotelive":
          send({
             type: "addlive",
             username: connectedUser
          });
-      break;
+         break;
       case "local":
          send({
             type: "updatelive",
-            username: username
+            username: globalUsername
          });
          break;
 
@@ -1001,6 +1071,7 @@ function isDataChannelOpen() {
       break;
       
    }
+
  }
 
 //when somebody sends us an offer
@@ -1166,7 +1237,7 @@ function toggleinfo() {
    profileicon.classList.remove("active");
 }
 function togglehome() {
-   if (username) {
+   if (globalUsername) {
       homePage.style.display = "block";
       profilePage.style.display = "none";
       infoPage.style.display = "none";
@@ -1183,7 +1254,8 @@ function togglehome() {
 }
 
 function toggleprofile(msg) {
-if (username) {
+   const username = globalUsername;
+
    var data = msg;
    profilePage.style.display = "block";
    homePage.style.display = "none";
@@ -1262,10 +1334,7 @@ if (username) {
       default:
          console.log(`Error msg: ${expr}.`);
       }
-      
-   } else {
-      init();
-   }
+
 }
 
 // disconnect device button
@@ -1886,12 +1955,13 @@ function captureImage(customWidth = 640, customHeight = 480) {
    //capturedImageArray.push(imageDataUrl);
 
    // Store image on server
+   checkUsername();
 
    try {
       send({
          type: "storeimg",
          image: imageDataUrl,
-         username: username,
+         username: globalUsername,
          location: mylocation,
          description: streamdescription
       });
@@ -1959,6 +2029,8 @@ function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
       console.log("failed to send image to server");
    }      
 }
-
+async function checkUsername() {
+   await getUsername();
+   console.log("Current Username:", globalUsername);
+}
 init();
-
