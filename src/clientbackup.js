@@ -14,7 +14,6 @@ var deviceaddress;
 let deviceType;
 let mylocation;
 let isCopyEnabled = false;
-let peerConnection;
 
 let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012'; // Replace with your service UUID
@@ -484,107 +483,6 @@ function updateCanvasAtInterval(context, image, canvas, interval) {
    }, interval); // interval in milliseconds, e.g., 1000 / 15 for 15 fps
  }
 
-function getMediaStream(constraints) {
-   return new Promise((resolve, reject) => {
-       navigator.mediaDevices.getUserMedia(constraints)
-           .then(stream => resolve(stream))
-           .catch(err => reject(err));
-   });
-}
-function addStreamToPeerConnection(stream) {
-   return new Promise((resolve, reject) => {
-       stream.getTracks().forEach(track => {
-           yourConn.addTrack(track, stream);
-       });
-       resolve();
-   });
-}
-function createPeerConnection() {
-   return new Promise((resolve, reject) => {
-       const yourConn = new RTCPeerConnection(configuration);
-
-       // Handle ICE candidates
-       yourConn.onicecandidate = event => {
-         if (event.candidate) {
-             console.log('New ICE candidate: ', event.candidate);
-             // Send the candidate to the remote peer here
-             if (event.candidate) {
-               send({
-                  type: "candidate",
-                  candidate: event.candidate,
-                  othername: connectedUser           
-               });
-            }
-         }
-     };
-       resolve(yourConn);
-   });
-}
-// Create and send offer
-function createOffer() {
-   return new Promise((resolve, reject) => {
-       yourConn.createOffer()
-           .then(offer => {
-               return yourConn.setLocalDescription(offer)
-               .then(() => offer);
-            })
-           .then(offer => {
-               // Send the offer to the remote peer here
-               send({
-                  type: "offer",
-                  offer: offer,
-                  username: username,
-                  host: connectedUser
-               });
-               console.log('Offer created and sent.');
-               resolve();
-           })
-           .catch(err => reject(err));
-   });
-}
-async function watchStream(name) {
-   connectedUser = name;
-   if (yourConn.iceConnectionState === "closed") {  
-      console.log("ice closed");
-      beginICE();
-   } else {
-      console.log("sending offer");
-      if (isDataChannelOpen()) {
-         console.log("data channel is open");
-      } else {opendc();}  
-   }
-   await createOffer();
-}
-
-async function afterlocalVideo() {
-   if(localVideo) {
-      goliveBtn.style.display = "none";
-      endliveBtn.style.display = "block";
-      liveVideo = 1;         
-      updatelive("addlive");
-      setTimeout(() => {
-         captureImage();
-      }, 1000);
-      
-   }   
-}
-
-async function initiateConn() {
-   try {
-      localStream = await getMediaStream({ video: true, audio: true });
-      localVideo.srcObject = localStream;
-      video = localVideo;
-
-      yourConn = await createPeerConnection();
-      await addStreamToPeerConnection(localStream);
-      //await createOffer();
-      await afterlocalVideo();
-      
-  } catch (error) {
-      console.error('Error in starting call:', error);
-  }
-}
-
 confirmVideoBtn.onclick = function() {
    var selectedValue = videoSelect.value;
    //const urlprefix = "https://";
@@ -596,9 +494,34 @@ confirmVideoBtn.onclick = function() {
       console.log(username +" is going live using this device");
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
+      
+      navigator.getUserMedia({ video: true, audio: true }, (stream) => {
+      yourConn = new RTCPeerConnection(configuration);
+         
+      localVideo.srcObject = stream
+      video = localVideo;
 
-      initiateConn();
+      stream.getTracks().forEach((track) => {
+         yourConn.addTrack(track, stream);
+      });
 
+      beginICE();
+      ICEstatus();
+
+      if(localVideo) {
+         goliveBtn.style.display = "none";
+         endliveBtn.style.display = "block";
+         liveVideo = 1;         
+         updatelive("addlive");
+         setTimeout(() => {
+            captureImage();
+         }, 1000);
+         
+      }    
+
+      }, function (error) {
+         console.log(error);
+      });
    }
      
    if (selectedValue == "2") {
@@ -945,7 +868,7 @@ function isDataChannelOpen() {
    return dc ? dc.readyState === "open" : false;
 }
 
-function watchStreamOLD (name) {
+function watchStream (name) {
    if (yourConn.iceConnectionState === "closed") {  
       console.log("ice closed");
       beginICE();
