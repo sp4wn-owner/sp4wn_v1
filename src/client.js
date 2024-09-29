@@ -19,11 +19,11 @@ let BLE_Name = 'v0_Robot';
 let serviceUUID = '12345678-1234-1234-1234-123456789012';
 let characteristicUUID = 'abcdef12-1234-1234-1234-abcdef123456';
 
-//var conn = new WebSocket('ws://localhost:9090');
+//var conn = new WebSocket('ws://localhost:8765');
 //var conn = new WebSocket('https://sp4wn-signaling-server.onrender.com');
 //var conn = new WebSocket('https://sp4wn-429514.uk.r.appspot.com');
 
-let url = 'ws://sp4wn-signaling-server.onrender.com';
+let url = 'https://sp4wn-signaling-server.onrender.com';
 let conn;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
