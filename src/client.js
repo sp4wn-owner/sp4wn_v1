@@ -1319,8 +1319,8 @@ function toggleprofile(msg) {
             });
             controlbuttons.forEach(button => {
                button.addEventListener("click", () => {
-                  isCopyEnabled = !isCopyEnabled;
-                  const content = document.getElementById("content");
+                  //isCopyEnabled = !isCopyEnabled;
+                  const content = document.querySelectorAll(".nocopy");
                   content.style.userSelect = isCopyEnabled ? 'text' : 'none'; 
                   content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; 
                });
