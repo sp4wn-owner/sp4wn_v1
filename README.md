@@ -4,16 +4,12 @@ A platform where you can share access to your telepresence robot without worryin
 
 TODO:
 
--user registration/authentication system
-
--webrtc implementation for raspberry pi (fully integrated robot)
-
 -payment system that enables owners to charge for access to their robot
 
   &nbsp;&nbsp;&nbsp;&nbsp; ~most likely a token-based system (users buys tokens | owners charge x amount of tokens per min)
   
   &nbsp;&nbsp;&nbsp;&nbsp;~potentially a cryptocurrency-based system using javascript frameworks (plus robot to robot payments using NFC?)
   
--bigger & better telepresence robots
+-webrtc client implementation for Raspberry Pi
 
-  &nbsp;&nbsp;&nbsp;&nbsp;~Explore sythentic muscles applications/capabilities
+-bigger & better telepresence robots
