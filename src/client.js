@@ -381,19 +381,20 @@ async function autoLogin() {
 }
 
 async function refreshAccessToken() {
-   const response = await fetch('/token', {
+   const response = await fetch('https://sp4wn-signaling-server.onrender.com/token', {
        method: 'POST',
        headers: { 'Content-Type': 'application/json' },
        body: JSON.stringify({ refreshToken: getRefreshTokenFromCookie() }), // Implement this function to retrieve refresh token from cookie
    });
 
    if (response.ok) {
+      console.log(data);
        const data = await response.json();
-       // Store new access token
        localStorage.setItem('accessToken', data.accessToken);
-       // Optionally, store the new refresh token
+       localStorage.setItem('refreshToken', data.refreshToken);
    } else {
-       // Handle token refresh error (e.g., redirect to login)
+      console.log("no refresh token available");
+       logout();
    }
 }
 
