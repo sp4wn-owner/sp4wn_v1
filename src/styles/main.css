@@ -7,7 +7,7 @@
    src: url(../resources/fonts/Exarros-GOn9q.ttf);
 }
 body {
-  visibility: hidden;
+  display: none;
   background-color: #f1f1f1;
   font-family: 'Roboto', sans-serif;
   width: 100%;
@@ -57,13 +57,13 @@ header {
   flex-direction: column;
 }
 
-.login-form a {
+#login-page a {
   color: grey;
   padding-top: 10px;
   text-decoration: none;
 }
 
-.login-form a:hover {
+#login-page a:hover {
   color: black;
 }
 .form-group {
@@ -110,25 +110,41 @@ button:hover {
 #registerform {
   display: none;
 }
-
-.top-link-bar ul {
-  text-align: right;
-  padding: 25px;
-  list-style: none;
-  position: relative;
-  text-align: center;
+.top-link-bar {
+  display: flex;
+  padding: 10px; /* Adjust padding as needed */
+  font-size: 30px;
 }
-.top-link-bar ul li {
-  font-size: 35px;
-  display: inline-block;
-  padding: 0 25px;
-  
+
+.left-icons {
+  display: flex; /* Align icons in a row */  
+  margin-left: 15px;
+}
+
+.center-icons {
+  display: flex; /* Align center icons in a row */
+  justify-content: center; /* Center the icons */
+  flex-grow: 1; /* Allow this container to grow */
+}
+
+.left-icons li, .center-icons li, .right-icons li {
+  list-style: none; /* Removes bullets from lists */
+  padding: 0; /* Reset padding */
+  margin: 0 15px; /* Space between icons */
+}
+
+.right-icons {
+  display: flex; /* Align right icons in a row */
+  margin-right: 15px;
 }
 .top-link-bar li a {
   color: white;
 }
 .top-link-bar li a:hover {
   color: lime;
+}
+#homepage, #profilepage, #infopage {
+  display: none;
 }
 #homepage {
   margin-bottom: 100px;
@@ -137,6 +153,7 @@ button:hover {
   text-decoration: underline;
   text-underline-offset: 10px;
 }
+
 #infopage {
   margin-bottom: 50px;
 }

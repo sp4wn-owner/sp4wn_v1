@@ -12,7 +12,6 @@
     </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preload" href="resources/images/meshbots.jpg" as="image">
     <meta property="og:title" content="Spawn">
     <meta property="og:description" content="Telepresence Robots">
     <meta property="og:image" content="https://sp4wn.com/resources/images/meshbots.jpg">
@@ -31,10 +30,15 @@
   <body>
     <header>
       <div id="toplinkbar" class="top-link-bar">
-        <ul>
+        <ul class="left-icons">
           <li><a href="#" id="home-icon" onclick="togglehome()"><i class="fa fa-home"></i></a></li>
-          <li><a href="#" id="profile-icon" onclick="toggleprofile('local')"><i class="fa fa-user"></i></a></li>          
-          <li><a href="#" id="info-icon" onclick="toggleinfo()"><i class="fa fa-info"></i></a></li>        
+        </ul>
+        <ul class="center-icons">          
+          <li><a href="#" id="profile-icon" onclick="toggleprofile('local')"><i class="fa fa-user"></i></a></li>
+          <li><a href="#" id="info-icon" onclick="toggleinfo()"><i class="fa fa-info"></i></a></li>
+        </ul>
+        <ul class="right-icons">
+          <li><a href="#" id="logout-icon" onclick="logout()"><i class="fa fa-sign-out"></i></a></li>
         </ul>
       </div>
     </header> 
@@ -47,7 +51,7 @@
             <h1>Login</h1>
             <div class="form-group">
               <label>Username</label>
-              <input type="text" id="usernameInput" maxlength="15" placeholder="use a/a or b/b for now">
+              <input type="text" id="usernameInput" maxlength="15" placeholder="username">
             </div>
             <div class="form-group">
               <label>Password</label>
@@ -62,13 +66,14 @@
             <h1>Register</h1>
             <div class="form-group">
               <label>Username</label>
-              <input type="text" id="regusernameInput" maxlength="15" placeholder="use a/a or b/b for now">
+              <input type="text" id="regusernameInput" maxlength="15" placeholder="username">
             </div>
             <div class="form-group">
               <label>Password</label>
               <input type="text" id="regpwInput" maxlength="15" placeholder="password">
             </div>
             <button class="main-btn" id="registerBtn">Register</button>
+            <a href="#" onclick="loginform();">login</a>
           </div>
         </div>
       </div>
@@ -78,10 +83,10 @@
         <span id="live-span-public">No robots available</span>
         <div id="main-streams-container"></div>     
         <div style="height: 85px;"></div>      
-        <hr>
-        <h1 style="margin-top: 35px;">Private</h1><br>
+        <div class="break"></div>
+        <h2 style="margin-top: 35px;">DIY Robot</h2><br>
         <div id="livestreams"></div>
-        <span id="live-span-private" style="margin-bottom: 20px;">Feature coming soon!</span><br>         
+        <span id="live-span-private" style="margin-bottom: 20px; padding: 25px;">Build your own telepresence robot in no time by following our quick <a href="#" onclick="toggleinfo()">tutorial</a></span><br>         
       </div>
   
       <div id="profilepage">

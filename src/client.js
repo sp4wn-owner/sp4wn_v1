@@ -222,7 +222,7 @@ var configuration = {
  
 document.addEventListener("DOMContentLoaded", function() {
    displayContent();
-   document.body.style.visibility = "visible";
+   document.body.style.display = "block";
 });
 
 function init() {
@@ -259,6 +259,10 @@ function displayContent() {
 function registerform() {
    document.getElementById("loginform").style.display = "none";
    document.getElementById("registerform").style.display = "block";
+}
+function loginform() {
+   document.getElementById("loginform").style.display = "block";
+   document.getElementById("registerform").style.display = "none";
 }
 function revealText() {
    
@@ -394,18 +398,39 @@ async function refreshAccessToken() {
 }
 
 async function logout() {
-   await fetch('/logout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: getRefreshTokenFromCookie() }),
-  });
-  localStorage.removeItem('accessToken');
-   
-   if (ws) {
-       ws.close();
+   const refreshToken = localStorage.getItem('refreshToken'); // Or get it from cookies
+
+   if (!refreshToken) {
+       console.error('No refresh token found');
+       return;
    }
-   alert('You have been logged out.');
-   window.location.reload(); 
+
+   await fetch('https://sp4wn-signaling-server.onrender.com/logout', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({ refreshToken }),
+   })
+   .then(response => {
+      if (response.ok) {
+         localStorage.removeItem('accessToken');
+         localStorage.removeItem('refreshToken');
+         
+         if (conn) {
+            conn.close();
+         }
+
+         alert('You are logged out. Please log back in.');
+         window.location.reload();
+      } else {
+         console.error('Logout failed:', response.statusText);
+     }
+   });
+
+   
+   
+    
 }
 async function getUsername() {
    if (hasToken()) {
