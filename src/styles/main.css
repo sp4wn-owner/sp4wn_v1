@@ -57,6 +57,15 @@ header {
   flex-direction: column;
 }
 
+.login-form a {
+  color: grey;
+  padding-top: 10px;
+  text-decoration: none;
+}
+
+.login-form a:hover {
+  color: black;
+}
 .form-group {
   margin-bottom: 20px;
 }
@@ -96,6 +105,10 @@ button {
 }
 button:hover {
   background-color: #4e0287;
+}
+
+#registerform {
+  display: none;
 }
 
 .top-link-bar ul {

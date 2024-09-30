@@ -117,6 +117,7 @@ var loginPage = document.querySelector('#login-page');
 var usernameInput = document.querySelector('#usernameInput');
 var pwInput = document.querySelector('#pwInput');
 var loginBtn = document.querySelector('#loginBtn');
+var registerBtn = document.querySelector('#registerBtn');
 
 var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
@@ -246,6 +247,8 @@ function displayContent() {
    } else {
       revealText();
       loginPage.style.display = "block";
+      document.getElementById("loginform").style.display = "block";
+      document.getElementById("registerform").style.display = "none";
       homePage.style.display = "none";
       infoPage.style.display = "none";
       profilePage.style.display = "none";
@@ -253,7 +256,10 @@ function displayContent() {
       document.getElementsByTagName('header')[0].style.display = "none"; 
    }
 }
-
+function registerform() {
+   document.getElementById("loginform").style.display = "none";
+   document.getElementById("registerform").style.display = "block";
+}
 function revealText() {
    
    if (index < introtext.length) {
@@ -276,6 +282,32 @@ loginBtn.addEventListener("click", function (event) {
    const password = pwInput.value;
    loginAndConnectToWebSocket(username, password);
 });
+
+registerBtn.addEventListener("click", function (event) {
+   const username = document.getElementById("regusernameInput").value;
+   const password = document.getElementById("regpwInput").value;
+   registerUser(username, password);
+});
+
+async function registerUser(username, password) {   
+   const response = await fetch('https://sp4wn-signaling-server.onrender.com/register', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({ username, password })
+   });
+   
+   const data = await response.json();
+
+   if (data.success) {
+      alert("Account created. Please login.")
+      displayContent();
+   } else {
+      alert("Registration failed. Username unavailable")
+      console.log("registration failed:", data.message);
+   }
+}
 
 function handleAuth(success) {
    if (success === false) {
@@ -303,13 +335,13 @@ async function loginAndConnectToWebSocket(username, password) {
    const data = await response.json();
 
    if (data.success) {
-
       const { accessToken, refreshToken } = data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       connect(username, accessToken);
    } else {
       console.log("Login failed:", data.message);
+      alert("Login failed");
    }
 }
 
