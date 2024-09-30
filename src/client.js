@@ -48,7 +48,7 @@ function connect(username, token) {
             handleAuth(data.success);
             break;   
          case "offer":
-            handleOffer(data.offer, data.name, data.host);
+            handleOffer(data.offer, data.username, data.host);
             break;
          case "answer":
             handleAnswer(data.answer);
@@ -111,12 +111,6 @@ function sendtoWSS(message) {
    if (deviceConn) {
        deviceConn.send(message);
    }
-}
-
-function handlecheck(name) {
-   console.log("server says your username is: " + name);
-   handleLeave();   
-   beginICE();
 }
 
 var loginPage = document.querySelector('#login-page');
@@ -224,11 +218,41 @@ var configuration = {
  const introtext = "Dawn of Telepresence Robotics";
  const textContainer = document.getElementById('introtext');
  let index = 0;
+ 
+document.addEventListener("DOMContentLoaded", function() {
+   displayContent();
+   document.body.style.visibility = "visible";
+});
 
 function init() {
-   autoLogin();
-   
-   };
+   //displayContent();   
+};
+
+function isLoggedIn() {
+   const token = localStorage.getItem('jwt');
+   return token && !isTokenExpired(token);
+}
+
+function isTokenExpired(token) {
+   const decoded = jwt_decode(token);
+   return decoded.exp * 1000 < Date.now(); 
+}
+
+function displayContent() {
+   if (isLoggedIn()) {
+      loginPage.style.display = "none";
+      document.getElementsByTagName('header')[0].style.display = "block";
+      autoLogin();
+   } else {
+      revealText();
+      loginPage.style.display = "block";
+      homePage.style.display = "none";
+      infoPage.style.display = "none";
+      profilePage.style.display = "none";
+      liveStreams.innerHTML = "";
+      document.getElementsByTagName('header')[0].style.display = "none"; 
+   }
+}
 
 function revealText() {
    
@@ -256,13 +280,12 @@ loginBtn.addEventListener("click", function (event) {
 function handleAuth(success) {
    if (success === false) {
       alert("Unable to authenticate user");
+      logout();
    } else {
-      checkUsername();
       loginPage.style.display = "none";
-      homePage.style.display = "block";
-      liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "block";
-      getStreams();            
+      togglehome();
+      checkUsername();          
     }
 };
 
@@ -304,7 +327,7 @@ async function autoLogin() {
            });
 
            if (response.ok) {
-               alert('Auto-login successful!');
+               console.log('Auto-login successful!');
                connect(username, token);
            } else {
                alert('Auto-login failed: ' + (await response.json()).message);
@@ -313,16 +336,7 @@ async function autoLogin() {
        }
    } else {
        console.log("No token found in localStorage.");
-       revealText();
-      loginPage.style.display = "block";
-      homePage.style.display = "none";
-      infoPage.style.display = "none";
-      profilePage.style.display = "none";
-      profilePage.style.display = "none";
-      infoPage.style.display = "none";
-      liveStreams.innerHTML = "";
-      document.getElementsByTagName('header')[0].style.display = "none";
-      deviceaddress = null;   
+       
    }
    
 }
@@ -365,7 +379,8 @@ function getStreams() {
       if(connectedUser != null) {
          send({
             type: "leave",
-            othername: connectedUser
+            othername: connectedUser,
+            username: globalUsername
          });
          handleLeave();
       }
@@ -591,7 +606,7 @@ function createOffer() {
                send({
                   type: "offer",
                   offer: offer,
-                  username: username,
+                  username: globalUsername,
                   host: connectedUser
                });
                console.log('Offer created and sent.');
@@ -603,6 +618,7 @@ function createOffer() {
 
 async function watchStream(name) {
    connectedUser = name;
+   console.log(connectedUser);
    if (yourConn.iceConnectionState === "closed") {  
       console.log("ice closed");
       beginICE();
@@ -878,11 +894,11 @@ function opendc() {
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
    stopimagecapture();
-   console.log(username + " is ending stream");
+   console.log(globalUsername + " is ending stream");
    
    send({
       type: "leave",
-      username: username,
+      username: globalUsername,
       othername: connectedUser
    });
    stopStreamedVideo(localVideo);
@@ -919,19 +935,18 @@ function stopStreamedVideo(localVideo) {
  }
 
 
-spawnBtn.addEventListener("click", function (event) {      
-   connectedUser = otheruser;
+spawnBtn.addEventListener("click", function (event) {   
+   connectedUser = otheruser;   
         
    yourConn = new RTCPeerConnection(configuration);       
    stream = new MediaStream();           
    remoteVideo.srcObject = stream;
    yourConn.onaddstream = function (e) {         
       remoteVideo.srcObject = e.stream;       
-      console.log('Added stream successfully');
    }               
    send({
       type: "watch",
-      username: username,
+      username: globalUsername,
       host: connectedUser
    });
    dcpeerB();  
@@ -1040,6 +1055,7 @@ function isDataChannelOpen() {
 }
 
  function updatelive(msg) {
+   const username = globalUsername;
    var data = msg;
    switch(data) {
       
@@ -1047,7 +1063,7 @@ function isDataChannelOpen() {
          
          send({
             type: "addlive",
-            username: globalUsername
+            username: username
          });
          break;
       case "addremotelive":
@@ -1059,7 +1075,7 @@ function isDataChannelOpen() {
       case "local":
          send({
             type: "updatelive",
-            username: globalUsername
+            username: username
          });
          break;
 
@@ -1086,7 +1102,7 @@ function handleOffer(offer) {
       send({
          type: "answer",
          answer: answer,
-         username: username,
+         username: globalUsername,
          host: connectedUser
       });
     //  document.getElementById('sdp-answer').value = JSON.stringify(answer)
@@ -1136,7 +1152,7 @@ function handleLeave() {
          send({
             type: "leave",
             othername: connectedUser,
-            username: username
+            username: globalUsername
          });
          connectedUser = null;
          dc = null;
@@ -1146,7 +1162,7 @@ function handleLeave() {
 function handleRemoteLeave() {
    send({
       type: "leave",
-      username: username,
+      username: globalUsername,
       othername: connectedUser
    });
    if (dc === open) {
@@ -1224,8 +1240,8 @@ function handleStreams(images) {
 }
 
 function checkProfile (userdata) {
-   console.log(userdata);
-   otheruser = userdata;   
+   otheruser = userdata;
+   connectedUser = otheruser;   
    toggleprofile('remote');
 }
 function toggleinfo() {
@@ -1236,26 +1252,38 @@ function toggleinfo() {
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
 }
-function togglehome() {
-   if (globalUsername) {
-      homePage.style.display = "block";
-      profilePage.style.display = "none";
-      infoPage.style.display = "none";
-      homeicon.classList.add("active");
-      profileicon.classList.remove("active");
-      infoicon.classList.remove("active");
-      liveStreams.innerHTML = "";
-      setTimeout(getStreams(), 50);
 
-   } else {
-      init();
-   }
- 
+let streamInterval;
+
+function startStreamInterval(interval) {
+   stopStreamInterval();
+   streamInterval = setInterval(() => {
+      getStreams();
+   }, interval);
+}
+
+function stopStreamInterval() {
+   clearInterval(streamInterval);   
+   console.log("Stream interval terminated");
+}
+
+function togglehome() {   
+   homePage.style.display = "block";
+   profilePage.style.display = "none";
+   infoPage.style.display = "none";
+   homeicon.classList.add("active");
+   profileicon.classList.remove("active");
+   infoicon.classList.remove("active");
+   liveStreams.innerHTML = "";
+
+   setTimeout(getStreams(), 50);
+
+   startStreamInterval(10000);
+   
 }
 
 function toggleprofile(msg) {
-   const username = globalUsername;
-
+   stopStreamInterval();
    var data = msg;
    profilePage.style.display = "block";
    homePage.style.display = "none";
@@ -1268,7 +1296,7 @@ function toggleprofile(msg) {
          if (liveremoteVideo == 1) {
             toggleprofile('remote');
          } else {            
-            profileTitle.innerHTML = username;
+            profileTitle.innerHTML = globalUsername;
             remoteVideo.style.display = "none";
             localVideo.style.display = "block";
             spawnBtn.style.display = "none";
@@ -1283,10 +1311,10 @@ function toggleprofile(msg) {
             });
             controlbuttons.forEach(button => {
                button.addEventListener("click", () => {
-                  //isCopyEnabled = !isCopyEnabled;
-                  //const content = document.getElementById("content");
-                  content.style.userSelect = isCopyEnabled ? 'text' : 'none'; // Enable or disable text selection
-                  content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; // Disable interactions
+                  isCopyEnabled = !isCopyEnabled;
+                  const content = document.getElementById("content");
+                  content.style.userSelect = isCopyEnabled ? 'text' : 'none'; 
+                  content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; 
                });
             });
              
@@ -1303,7 +1331,7 @@ function toggleprofile(msg) {
          break;
 
       case "remote":
-         if (otheruser == username) {
+         if (otheruser == globalUsername) {
             toggleprofile('local');
          } else {
             profileTitle.innerHTML = otheruser;
@@ -1955,7 +1983,6 @@ function captureImage(customWidth = 640, customHeight = 480) {
    //capturedImageArray.push(imageDataUrl);
 
    // Store image on server
-   checkUsername();
 
    try {
       send({
@@ -2022,7 +2049,7 @@ function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
       send({
          type: "storeimg",
          image: imageDataUrl,
-         username: username
+         username: globalUsername
       });
       console.log("sent image to server");
    } catch (error) {

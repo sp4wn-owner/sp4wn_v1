@@ -7,6 +7,7 @@
    src: url(../resources/fonts/Exarros-GOn9q.ttf);
 }
 body {
+  visibility: hidden;
   background-color: #f1f1f1;
   font-family: 'Roboto', sans-serif;
   width: 100%;
