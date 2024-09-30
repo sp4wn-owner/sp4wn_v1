@@ -51,11 +51,11 @@
             <h1>Login</h1>
             <div class="form-group">
               <label>Username</label>
-              <input type="text" id="usernameInput" maxlength="15" placeholder="username">
+              <input type="text" name="username" id="usernameInput" maxlength="15" placeholder="username" autocomplete="username" required>
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="text" id="pwInput" maxlength="15" placeholder="password">
+              <input type="text" name="password" id="pwInput" maxlength="15" placeholder="password" autocomplete="current-password" required>
             </div>
             <button class="main-btn" id="loginBtn">Login</button>
             <a href="#" onclick="registerform();">create account</a>
@@ -86,7 +86,7 @@
         <div class="break"></div>
         <h2 style="margin-top: 35px;">DIY Robot</h2><br>
         <div id="livestreams"></div>
-        <span id="live-span-private" style="margin-bottom: 20px; padding: 25px;">Build your own telepresence robot in no time by following our quick <a href="#" onclick="toggleinfo()">tutorial</a></span><br>         
+        <span id="live-span-private" style="margin-bottom: 20px; padding: 25px;">Build your own telepresence robot by following our quick <a href="#" onclick="toggleinfo()">tutorial</a></span><br>         
       </div>
   
       <div id="profilepage">
