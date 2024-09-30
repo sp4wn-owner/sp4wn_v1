@@ -39,7 +39,7 @@ function connect(username, accessToken) {
     };
 
     conn.onmessage = function (msg) {
-      console.log("Got message", msg.data);
+      //console.log("Got message", msg.data);
    
       var data = JSON.parse(msg.data);
    
@@ -282,7 +282,9 @@ function handleAuth(success) {
       alert("Unable to authenticate user");
       logout();
    } else {
-      console.log("Logged in as:", globalUsername);
+      if (globalUsername == null) {
+         checkUsername();
+      }      
       loginPage.style.display = "none";
       document.getElementsByTagName('header')[0].style.display = "block";
       togglehome();      
@@ -301,6 +303,7 @@ async function loginAndConnectToWebSocket(username, password) {
    const data = await response.json();
 
    if (data.success) {
+
       const { accessToken, refreshToken } = data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
@@ -313,13 +316,9 @@ async function loginAndConnectToWebSocket(username, password) {
 async function autoLogin() {
    console.log("Attempting auto login");
    if (hasToken()) {
-       console.log("Token exists in localStorage.");
        const accessToken = localStorage.getItem('accessToken');
        const username = await getUsernameFromToken(accessToken);
-       globalUsername = username;
-       console.log(username);
-       if (accessToken) {
-           console.log("Verifying token");
+       if (accessToken) {           
            const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
                method: 'GET',
                headers: {
@@ -378,7 +377,6 @@ async function logout() {
 }
 async function getUsername() {
    if (hasToken()) {
-      console.log("Token exists in localStorage.");
       const accessToken = localStorage.getItem('accessToken');
       const username = await getUsernameFromToken(accessToken);
         globalUsername = username;
@@ -1261,7 +1259,11 @@ function toggleinfo() {
 let streamInterval;
 
 function startStreamInterval(interval) {
-   stopStreamInterval();
+   if(streamInterval) {
+      stopStreamInterval();
+   }
+   
+   console.log("Stream interval initiated");
    streamInterval = setInterval(() => {
       getStreams();
    }, interval);
@@ -1269,6 +1271,7 @@ function startStreamInterval(interval) {
 
 function stopStreamInterval() {
    clearInterval(streamInterval);   
+   streamInterval = null;
    console.log("Stream interval terminated");
 }
 
@@ -2063,6 +2066,6 @@ function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
 }
 async function checkUsername() {
    await getUsername();
-   console.log("Current Username:", globalUsername);
+   console.log("Username:", globalUsername);
 }
 init();
