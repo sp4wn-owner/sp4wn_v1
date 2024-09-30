@@ -29,13 +29,13 @@ let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
 const reconnectDelay = 2000;
 
-function connect(username, token) {
+function connect(username, accessToken) {
     conn = new WebSocket(url);
 
     conn.onopen = () => {
       console.log('Connected to the server');
       reconnectAttempts = 0;        
-      conn.send(JSON.stringify({ type: 'authenticate', username, token }));
+      conn.send(JSON.stringify({ type: 'authenticate', username, token: accessToken }));
     };
 
     conn.onmessage = function (msg) {
@@ -229,7 +229,7 @@ function init() {
 };
 
 function isLoggedIn() {
-   const token = localStorage.getItem('jwt');
+   const token = localStorage.getItem('accessToken');
    return token && !isTokenExpired(token);
 }
 
@@ -282,10 +282,10 @@ function handleAuth(success) {
       alert("Unable to authenticate user");
       logout();
    } else {
+      console.log("Logged in as:", globalUsername);
       loginPage.style.display = "none";
       document.getElementsByTagName('header')[0].style.display = "block";
-      togglehome();
-      checkUsername();          
+      togglehome();      
     }
 };
 
@@ -301,11 +301,12 @@ async function loginAndConnectToWebSocket(username, password) {
    const data = await response.json();
 
    if (data.success) {
-       const token = data.token;
-       localStorage.setItem('jwt', token);
-       connect(username, token);
+      const { accessToken, refreshToken } = data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      connect(username, accessToken);
    } else {
-       console.log("Login failed:", data.message);
+      console.log("Login failed:", data.message);
    }
 }
 
@@ -313,64 +314,85 @@ async function autoLogin() {
    console.log("Attempting auto login");
    if (hasToken()) {
        console.log("Token exists in localStorage.");
-       const token = localStorage.getItem('jwt');
-       const username = await getUsernameFromToken(token);
+       const accessToken = localStorage.getItem('accessToken');
+       const username = await getUsernameFromToken(accessToken);
        globalUsername = username;
        console.log(username);
-       if (token) {
+       if (accessToken) {
            console.log("Verifying token");
            const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
                method: 'GET',
                headers: {
-                   'Authorization': 'Bearer ' + token
+                   'Authorization': `Bearer ${accessToken}`
                }
            });
-
+           
            if (response.ok) {
                console.log('Auto-login successful!');
-               connect(username, token);
-           } else {
+               connect(username, accessToken); // Use accessToken here
+         } else if (response.status === 401) {
+               // Handle unauthorized access (possibly refresh token)
+               console.log('Unauthorized access. Attempting to refresh token...');
+               await refreshAccessToken();
+         } else {
                alert('Auto-login failed: ' + (await response.json()).message);
-               
-            }
-       }
+         }
+      } else {
+         console.log("No access token found.");
+      }
    } else {
-       console.log("No token found in localStorage.");
-       
+      console.log("No token found in localStorage.");
    }
-   
 }
 
-function logout() {
-   // Clear the token from localStorage
-   localStorage.removeItem('jwt');
-   alert('You have been logged out.');
+async function refreshAccessToken() {
+   const response = await fetch('/token', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ refreshToken: getRefreshTokenFromCookie() }), // Implement this function to retrieve refresh token from cookie
+   });
 
-   // Optionally, close the WebSocket connection if needed
+   if (response.ok) {
+       const data = await response.json();
+       // Store new access token
+       localStorage.setItem('accessToken', data.accessToken);
+       // Optionally, store the new refresh token
+   } else {
+       // Handle token refresh error (e.g., redirect to login)
+   }
+}
+
+async function logout() {
+   await fetch('/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: getRefreshTokenFromCookie() }),
+  });
+  localStorage.removeItem('accessToken');
+   
    if (ws) {
        ws.close();
    }
-
-   // You may want to redirect the user or refresh the page
-   window.location.reload(); // Refresh the page or redirect to login page
+   alert('You have been logged out.');
+   window.location.reload(); 
 }
 async function getUsername() {
    if (hasToken()) {
       console.log("Token exists in localStorage.");
-      const token = localStorage.getItem('jwt');
-      const username = await getUsernameFromToken(token);
+      const accessToken = localStorage.getItem('accessToken');
+      const username = await getUsernameFromToken(accessToken);
         globalUsername = username;
         return globalUsername;
   } else {
       console.log("No token found in localStorage.");
   }
 }
-function getUsernameFromToken(token) {
-   const decodedToken = jwt_decode(token); 
+function getUsernameFromToken(accessToken) {
+   const decodedToken = jwt_decode(accessToken); 
    return decodedToken.username; 
 }
 function hasToken() {
-   const token = localStorage.getItem('jwt'); 
+   const token = localStorage.getItem('accessToken'); 
    return token !== null;
 }
 function getStreams() {
@@ -848,12 +870,10 @@ function ICEstatus() {
             break;
          case 'failed':
             console.error('ICE Connection has failed.');
-            // Potentially restart ICE or alert the user
             yourConn.restartIce();
             break;
          case 'disconnected':
             console.warn('ICE Connection is disconnected.');
-            // May indicate a temporary network issue
             break;
          case 'closed':
             console.log('ICE Connection has closed.');
@@ -867,7 +887,6 @@ function ICEstatus() {
 //open datachannel as Peer A
 function opendc() {
    dc = yourConn.createDataChannel("PeerA");
-   // Set up event handlers
    dc.onopen = () => {
       console.log("Data channel A is open");
       dc.send("Hello, Peer B!");
@@ -890,7 +909,6 @@ function opendc() {
   };
 }
 
-// stop local stream
 endliveBtn.addEventListener("click", function (event) {
    liveVideo = 0;
    stopimagecapture();
@@ -904,20 +922,7 @@ endliveBtn.addEventListener("click", function (event) {
    stopStreamedVideo(localVideo);
    toggleprofile('local');
 });
-// stop remote stream
-endotherliveBtn.addEventListener("click", function (event) {
-   if (liveremoteVideo == 1) {
-      liveremoteVideo = 0;
-      updatelive('addremotelive');
-      handleRemoteLeave();
-      toggleprofile('remote');
-   } else {
-      updatelive('addremotelive');
-      
-   }
-});
 
-// stop local stream
 function stopStreamedVideo(localVideo) {
    try {
       const stream = localVideo.srcObject;
