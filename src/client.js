@@ -72,6 +72,9 @@ function connect(username, accessToken) {
          case "handlecheck":
             handlecheck(data.name);
             break;
+         case "tokenupdate":
+            checkBalance(data.username);
+            break;
          case "error":
             handleError(data.error);
             break;
@@ -322,6 +325,7 @@ function handleAuth(success) {
       }      
       loginPage.style.display = "none";
       document.getElementsByTagName('header')[0].style.display = "block";
+      tokenBalanceDisplay.style.display = "block";
       togglehome();      
     }
 };
@@ -399,7 +403,7 @@ async function refreshAccessToken() {
 }
 
 async function logout() {
-   const refreshToken = localStorage.getItem('refreshToken'); // Or get it from cookies
+   const refreshToken = localStorage.getItem('refreshToken');
 
    if (!refreshToken) {
        console.error('No refresh token found');
@@ -454,26 +458,106 @@ function getStreams() {
       type: "streams"
    });
 }
-redeemButton.addEventListener('click', async () => {
+
+stopredeemButton = document.getElementById("stop-redeem-tokens");
+
+redeemButton.onclick = function() {
+   console.log("starting auto redeem");
+   startAutoRedeem();
+}
+stopredeemButton.onclick = function() {
+   console.log("stopping auto redeem");
+   stopAutoRedeem();
+}
+
+let autoRedeemInterval;
+let tokensToRedeemPerMinute = 1;
+const redemptionInterval = 10 * 1000;
+
+async function redeemTokens(tokens) {
+   connectedUser = "admin";
+   console.log(connectedUser);
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/redeem', {
-       method: 'POST',
-       headers: {
-           'Content-Type': 'application/json'
-       },
-       body: JSON.stringify({ username: globalUsername })
-   });
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ host: connectedUser, username: globalUsername, tokens: tokens })
+    });
 
    const data = await response.json();
    if (data.success) {
-       alert('Tokens redeemed successfully! Remaining tokens: ' + data.tokens);
-       tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
+        console.log(`Successfully redeemed ${tokens} tokens! Remaining tokens: ${data.tokens}`);
+        tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
+        return true;
    } else {
-       alert('Redemption failed: ' + data.error);
+        console.log('Redemption failed: ' + data.error);
+        return false;
    }
-});
+}
+
+function startAutoRedeem() {
+    if (autoRedeemInterval) {
+        console.log('Automatic token redemption is already in progress.');
+        return;
+    }
+
+    autoRedeemInterval = setInterval(async () => {
+        for (let i = 0; i < tokensToRedeemPerMinute; i++) {
+            const success = await redeemTokens(tokensToRedeemPerMinute);
+            if (!success) {
+                stopAutoRedeem();
+                break;
+            }
+        }
+    }, redemptionInterval);
+}
+
+function stopAutoRedeem() {
+    if (autoRedeemInterval) {
+        clearInterval(autoRedeemInterval);
+        autoRedeemInterval = null;
+        console.log('Automatic token redemption stopped.');
+    }
+}
+
+async function checkBalance() {
+   const token = localStorage.getItem('accessToken'); 
+
+   const response = await fetch(`https://sp4wn-signaling-server.onrender.com/check-balance`, {
+       method: 'GET',
+       headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${token}` 
+       }
+   });
+
+   if (!response.ok) {
+       console.error('HTTP error:', response.status, response.statusText);
+       
+       if (response.status === 401) {
+           await refreshAccessToken(); 
+           return await checkBalance(); 
+       }
+
+       return false;
+   }
+
+   const data = await response.json();
+   if (data.success) {
+       console.log(`Remaining tokens: ${data.tokens}`);
+       tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
+       return true;
+   } else {
+       console.log('Error: ' + data.error);
+       return false;
+   }
+}
+
+
+
 goliveBtn.addEventListener("click", function () {
-   modalVideo.style.display = "block";
-   
+   modalVideo.style.display = "block";   
  });
 videospan.onclick = function() {
    modalVideo.style.display = "none";
@@ -505,17 +589,20 @@ videoSelect.addEventListener("change", function() {
 
   if (selectedValue == "0") {
    useripaddress.style.display = "none";
+   tokenrateinput.style.display = "none";
    locationinput.style.display = "none";
    streamdescriptioninput.style.display = "none";   
   }
 
   if (selectedValue == "1") {
+   tokenrateinput.style.display = "block";
    useripaddress.style.display = "none";
    locationinput.style.display = "block";
    streamdescriptioninput.style.display = "block";   
   }
   
   if (selectedValue == "2") {
+   tokenrateinput.style.display = "block";
    useripaddress.style.display = "block";
    locationinput.style.display = "block";
    streamdescriptioninput.style.display = "block";
@@ -778,7 +865,10 @@ async function initiateConn() {
   }
 }
 
+let tokenrateinput = document.getElementById("tokenrateinput");
+let tokenrate;
 confirmVideoBtn.onclick = function() {
+   
    var selectedValue = videoSelect.value;
    //const urlprefix = "https://";
    var enteredIP = useripaddress.value;
@@ -788,6 +878,7 @@ confirmVideoBtn.onclick = function() {
    if (selectedValue == "1") {
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
+      tokenrate = tokenrateinput.value;
       initiateConn();
    }
      
@@ -803,8 +894,7 @@ confirmVideoBtn.onclick = function() {
             if(localVideo) {
                goliveBtn.style.display = "none";
                endliveBtn.style.display = "block";
-               liveVideo = 1;
-      
+               liveVideo = 1;      
                updatelive("addlive");
             }
             ICEstatus(); 
@@ -827,19 +917,15 @@ confirmVideoBtn.onclick = function() {
                   setTimeout(() => {
                      captureImage();
                   }, 1000); 
-               }
-               
-                           
+               }               
             }
             ICEstatus(); 
             beginICE();
          } catch (error) {
             console.log(error);
          }
-          
       }
    }   
-   
    startimagecapture(15000);
 }
 
@@ -1250,23 +1336,27 @@ function handleRemoteLeave() {
 };
 
 function handleStreams(images) {
+   const premadeRateIcon = `<i class="fa fa-dollar-sign"></i>`;
    const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
    const premadeInfoIcon = `<i class="fa fa-info"></i>`;
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
+      let rate = images[i].tokenrate;
       let hostlocation = images[i].location;
       let description = images[i].description;
       let divElement = document.createElement('div');
       let divElementIcon = document.createElement('div');
       let divStreamName = document.createElement('div');
       let imgElement = document.createElement('img');
+      let rateElement = document.createElement('span');
       let locationElement = document.createElement('span');
       let descContainerElem = document.createElement('div');
       let descElement = document.createElement('span');
       divElement.classList.add("live-streams-container"); 
       divStreamName.classList.add("live-streams-names");
-          
+      
+      rateElement.innerHTML = rate;
       locationElement.innerHTML = hostlocation;
       descElement.innerHTML = description;
       divStreamName.innerHTML = text;
@@ -1277,6 +1367,8 @@ function handleStreams(images) {
       divElement.appendChild(imgElement);      
       divElement.appendChild(divStreamName);
       divElement.appendChild(divElementIcon);
+      divElementIcon.innerHTML = premadeRateIcon;
+      divElementIcon.appendChild(rateElement);
       divElementIcon.innerHTML = premadeMarkerIcon;
       divElementIcon.appendChild(locationElement);
       divElement.appendChild(descContainerElem);
@@ -2060,6 +2152,7 @@ function captureImage(customWidth = 640, customHeight = 480) {
          type: "storeimg",
          image: imageDataUrl,
          username: globalUsername,
+         tokenrate: tokenrate,
          location: mylocation,
          description: streamdescription
       });
@@ -2120,7 +2213,7 @@ function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
       send({
          type: "storeimg",
          image: imageDataUrl,
-         username: globalUsername
+         username: globalUsername,
       });
       console.log("sent image to server");
    } catch (error) {

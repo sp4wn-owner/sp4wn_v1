@@ -41,8 +41,7 @@
         <ul class="right-icons">
           <li><a href="#" id="logout-icon" onclick="logout()"><i class="fa fa-sign-out"></i></a></li>
         </ul>
-      </div>      
-      <div id="token-balance"></div>
+      </div>            
     </header> 
     
       <div id="login-page" style="background-image: url('resources/images/meshbots.jpg'); background-size: cover;">
@@ -90,9 +89,11 @@
         <div id="livestreams"></div>
         <span id="live-span-private" style="margin-bottom: 20px; padding: 25px;">Build your own telepresence robot by following our quick <a href="#" onclick="toggleinfo()">tutorial</a></span><br>         
         <button class="main-btn" id="redeem-tokens">Redeem Tokens</button>
+        <button class="main-btn" id="stop-redeem-tokens">Stop Redemption</button>
       </div>
   
       <div id="profilepage">
+        <div id="token-balance"></div>
         <div id="modal-video-select" class="modal">
           <div class="modal-content">
             <span id="close-video-select" class="close">&times;</span>
@@ -104,6 +105,7 @@
                 <option value="2">IP Camera</option>
               </select>              
             </div>
+            <input type="number" id="tokenrateinput" placeholder="tokens/min" maxlength="2" style="display: none; margin-bottom: 20px; text-align: center;">   
             <input type="text" id="locationinput" placeholder="location" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">            
             <input type="text" id="streamdescinput" placeholder="description" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">
             <input type="text" id="useripaddressinput" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">

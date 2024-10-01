@@ -17,7 +17,6 @@ header {
   background-color: black;
   position: relative;
   width: 100%;
-  margin-bottom: 25px;
 }
 
 .text-container {
@@ -162,6 +161,7 @@ button:hover {
   color: lime;
 }
 #token-balance {
+  display: none;
   float: right;
   color: #169937;
   font-size: 15px;
@@ -182,12 +182,16 @@ button:hover {
   margin-bottom: 100px;
 }
 #homepage h1 {
+  padding-top: 25px;
   text-decoration: underline;
   text-underline-offset: 10px;
 }
 
 #infopage {
   margin-bottom: 50px;
+}
+#infopage h1 {
+  padding-top: 25px;
 }
 #home-icon.active {
   color: lime;
