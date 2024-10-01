@@ -343,7 +343,6 @@ async function loginAndConnectToWebSocket(username, password) {
    if (data.success) {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
-      console.log(data.tokens);
       const tokenBalance = data.tokens;
       tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
       connect(username, data.accessToken);
@@ -367,9 +366,8 @@ async function autoLogin() {
          const data = await response.json();
          if (response.ok) {
             tokenBalance = data.tokens;
-            console.log(tokenBalance);
             tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
-            console.log('Auto-login successful!');               
+            console.log('Login successful!');               
             connect(username, accessToken);
          } else if (response.status === 401) {
             console.log('Unauthorized access. Attempting to refresh token...');
@@ -961,7 +959,7 @@ function ICEstatus() {
 //open datachannel as Peer A
 function opendc() {
    dc = yourConn.createDataChannel("PeerA");
-   dc.onopen = () => {
+   dc.onopen = async () => {
       console.log("Data channel A is open");
       dc.send("Hello, Peer B!");
       stopimagecapture();
@@ -970,11 +968,11 @@ function opendc() {
 
    dc.onmessage = (event) => {
       console.log("Received from Peer B:", event.data);
-      if (event.data == "handleimg") {
-         //stopimagecapture();
-      } else {
+      if (server) {
          sendtoDevice(event.data);
          dc.send(event.data);
+      } else {
+         console.log("not connected to device");
       }
    };
 
@@ -1224,9 +1222,6 @@ function handleLeave() {
       yourConn.close();
       yourConn.onicecandidate = null;
       yourConn.onaddstream = null;
-      //toggleprofile('local');
-      //setTimeout(togglehome(), 200);
-      //togglehome();
       if(connectedUser != null) {
          send({
             type: "leave",
@@ -1335,14 +1330,14 @@ function toggleinfo() {
 let streamInterval;
 
 function startStreamInterval(interval) {
+   getStreams();
    if(streamInterval) {
       stopStreamInterval();
-   }
-   
-   console.log("Stream interval initiated");
+   }      
    streamInterval = setInterval(() => {
       getStreams();
    }, interval);
+   console.log("Stream interval initiated");
 }
 
 function stopStreamInterval() {
@@ -1359,11 +1354,8 @@ function togglehome() {
    profileicon.classList.remove("active");
    infoicon.classList.remove("active");
    liveStreams.innerHTML = "";
-
-   setTimeout(getStreams(), 50);
-
-   startStreamInterval(10000);
-   
+   //setTimeout(getStreams(), 50);
+   startStreamInterval(10000);   
 }
 
 function toggleprofile(msg) {
@@ -1396,13 +1388,12 @@ function toggleprofile(msg) {
             controlbuttons.forEach(button => {
                button.addEventListener("click", () => {
                   //isCopyEnabled = !isCopyEnabled;
+                  isCopyEnabled = "false";
                   const content = document.querySelectorAll(".nocopy");
                   content.style.userSelect = isCopyEnabled ? 'text' : 'none'; 
                   content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; 
                });
             });
-             
-            
             if (liveVideo == 1) {
                goliveBtn.style.display = "none";
                endliveBtn.style.display = "block";
