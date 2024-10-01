@@ -69,9 +69,6 @@ function connect(username, accessToken) {
          case "liveusers":
             handleStreams(data.images);
             break;
-         case "finalleave":
-            handleFinalLeave();
-            break;
          case "handlecheck":
             handlecheck(data.name);
             break;
@@ -455,14 +452,17 @@ function getStreams() {
    liveStreams.innerHTML = "";
 
       if(connectedUser != null) {
-         send({
-            type: "leave",
-            othername: connectedUser,
-            username: globalUsername
-         });
-         handleLeave();
+         if(liveVideo = 1) {
+            console.log("still streaming");
+         } else {
+            send({
+               type: "leave",
+               othername: connectedUser,
+               username: globalUsername
+            });
+            handleLeave();
+         }         
       }
-   
       send({
          type: "streams"
       });
@@ -801,9 +801,7 @@ confirmVideoBtn.onclick = function() {
    if (selectedValue == "1") {
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
-
       initiateConn();
-
    }
      
    if (selectedValue == "2") {
@@ -1200,21 +1198,28 @@ function handleCandidate(candidate) {
 };
 
 function handleClientDisconnect() {
-   sendBT("off");
+   if (server) {
+      sendBT("off");
+   } else {
+      console.log("not connected to device");
+   }
 }
 
 function handleLeave() {   
 
-   if (liveVideo == 1) {
+   if (liveVideo = 1) {
       updatelive('addlive');
       connectedUser = null;
+      if (dc === open) {
+         dc.close();
+      }
       dc = null;
       handleClientDisconnect();
       captureImage();
       startimagecapture(15000);
    } 
    
-   if (liveremoteVideo == 1) {
+   if (liveremoteVideo = 1) {
       liveremoteVideo = 0;
       remoteVideo.srcObject = null;
       removeKeyListeners();
@@ -1228,8 +1233,11 @@ function handleLeave() {
             othername: connectedUser,
             username: globalUsername
          });
-         connectedUser = null;
+         if (dc === open) {
+            dc.close();
+         }
          dc = null;
+         connectedUser = null;         
       }
    }
 };
@@ -1253,17 +1261,6 @@ function handleRemoteLeave() {
    spawnBtn.style.display = "block";
 
 };
-function handleFinalLeave() {
-   disconnectDevice();
-   connectedUser = null;
-   dc = null;
-   remoteVideo.srcObject = null;
-   localVideo.srcObject = null;
-   yourConn.close();
-   yourConn.onicecandidate = null;
-   yourConn.onaddstream = null;
-}
-
 
 function handleStreams(images) {
    const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
@@ -1330,7 +1327,6 @@ function toggleinfo() {
 let streamInterval;
 
 function startStreamInterval(interval) {
-   getStreams();
    if(streamInterval) {
       stopStreamInterval();
    }      
@@ -1354,7 +1350,7 @@ function togglehome() {
    profileicon.classList.remove("active");
    infoicon.classList.remove("active");
    liveStreams.innerHTML = "";
-   //setTimeout(getStreams(), 50);
+   setTimeout(getStreams(), 50);
    startStreamInterval(10000);   
 }
 
@@ -1371,7 +1367,14 @@ function toggleprofile(msg) {
       case "local":
          if (liveremoteVideo == 1) {
             toggleprofile('remote');
-         } else {            
+         } else {     
+            if (liveVideo == 1) {               
+               goliveBtn.style.display = "none";
+               endliveBtn.style.display = "block";
+            } else {
+               goliveBtn.style.display = "block";
+               endliveBtn.style.display = "none";
+            }       
             profileTitle.innerHTML = globalUsername;
             remoteVideo.style.display = "none";
             localVideo.style.display = "block";
@@ -1394,13 +1397,6 @@ function toggleprofile(msg) {
                   content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; 
                });
             });
-            if (liveVideo == 1) {
-               goliveBtn.style.display = "none";
-               endliveBtn.style.display = "block";
-            } else {
-               goliveBtn.style.display = "block";
-               endliveBtn.style.display = "none";
-            }
          }
          
          break;
@@ -2040,6 +2036,7 @@ function captureImage(customWidth = 640, customHeight = 480) {
    // Check if localVideo element is available
    if (!localVideo || !localVideo.videoWidth || !localVideo.videoHeight) {
       console.error("Video element not available or video not playing.");
+      stopimagecapture();
       return;
    }
    
