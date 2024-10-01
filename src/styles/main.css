@@ -110,15 +110,21 @@ button:hover {
 #registerform {
   display: none;
 }
+.logo {
+  font-family: Exarros;
+  font-size: 40px;
+  color: white;
+}
 .top-link-bar {
   display: flex;
   padding: 10px;
-  font-size: 30px;  
+  font-size: 40px;  
 }
 
 .left-icons {
   display: flex;
   padding-left: 15px;
+  width: 25%;
 }
 
 .center-icons {
@@ -130,13 +136,39 @@ button:hover {
 .left-icons li, .center-icons li, .right-icons li {
   list-style: none;
   padding: 0;
-  margin: 0 15px;
+  margin: 0 25px;
 }
 
 .right-icons {
   display: flex;
+  width: 25%;
   padding-right: 15px;
 }
+
+.right-icons li{
+  width: 100%;
+  text-align: right;
+}
+
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: lightgray;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: lightgray;
+}
+
 .top-link-bar li a {
   color: white;
 }
@@ -144,12 +176,14 @@ button:hover {
   color: lime;
 }
 #token-balance {
-  color: #0056b3;
+  float: right;
+  color: #169937;
   font-size: 15px;
+  font-weight: bold;
   width: 100%;
   text-align: right;
-  padding-right: 10px;
-  padding-top: 10px;
+  padding-right: 30px;
+  padding-top: 15px;
 }
 #redeem-tokens {
   margin-top: 25px;
@@ -579,6 +613,12 @@ footer {
   .text-container span {
     font-size: 5.75vw;
   }
+  .logo {
+    font-size: 30px;
+  }
+  .top-link-bar {
+    font-size: 30px;
+  }
 }
 @media screen and (max-width:750px) {
   .text-container span {
@@ -639,5 +679,7 @@ footer {
     padding-right: 0;
     padding-bottom: 10px;
   }
-  
+  .logo {
+    display: none;
+  }
 }
