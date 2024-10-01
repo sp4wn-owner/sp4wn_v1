@@ -138,7 +138,7 @@ button:hover {
   flex-grow: 1;
 }
 
-.left-icons li, .center-icons li, .right-icons li {
+.center-icons li {
   list-style: none;
   padding: 0;
   margin: 0 25px;
@@ -146,8 +146,8 @@ button:hover {
 
 .right-icons {
   display: flex;
-  width: 25%;
   padding-right: 15px;
+  width: 25%;
 }
 
 .right-icons li{
@@ -168,7 +168,7 @@ button:hover {
   font-weight: bold;
   width: 100%;
   text-align: right;
-  padding-right: 30px;
+  padding-right: 25px;
   padding-top: 15px;
 }
 #redeem-tokens {
