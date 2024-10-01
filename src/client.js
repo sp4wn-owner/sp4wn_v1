@@ -118,6 +118,8 @@ var usernameInput = document.querySelector('#usernameInput');
 var pwInput = document.querySelector('#pwInput');
 var loginBtn = document.querySelector('#loginBtn');
 var registerBtn = document.querySelector('#registerBtn');
+const tokenBalanceDisplay = document.getElementById('token-balance');
+const redeemButton = document.getElementById('redeem-tokens');
 
 var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
@@ -339,38 +341,41 @@ async function loginAndConnectToWebSocket(username, password) {
    const data = await response.json();
 
    if (data.success) {
-      const { accessToken, refreshToken } = data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      connect(username, accessToken);
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      console.log(data.tokens);
+      const tokenBalance = data.tokens;
+      tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
+      connect(username, data.accessToken);
    } else {
       console.log("Login failed:", data.message);
       alert("Login failed");
    }
 }
-
 async function autoLogin() {
    console.log("Attempting auto login");
    if (hasToken()) {
-       const accessToken = localStorage.getItem('accessToken');
-       const username = await getUsernameFromToken(accessToken);
-       if (accessToken) {           
-           const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
-               method: 'GET',
-               headers: {
-                   'Authorization': `Bearer ${accessToken}`
-               }
-           });
-           
-           if (response.ok) {
-               console.log('Auto-login successful!');
-               connect(username, accessToken); // Use accessToken here
+      const accessToken = localStorage.getItem('accessToken');
+      const username = await getUsernameFromToken(accessToken);
+      if (accessToken) {           
+         const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
+            method: 'GET',
+            headers: {
+                  'Authorization': `Bearer ${accessToken}`
+            }
+         });
+         const data = await response.json();
+         if (response.ok) {
+            tokenBalance = data.tokens;
+            console.log(tokenBalance);
+            tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
+            console.log('Auto-login successful!');               
+            connect(username, accessToken);
          } else if (response.status === 401) {
-               // Handle unauthorized access (possibly refresh token)
-               console.log('Unauthorized access. Attempting to refresh token...');
-               await refreshAccessToken();
+            console.log('Unauthorized access. Attempting to refresh token...');
+            await refreshAccessToken();
          } else {
-               alert('Auto-login failed: ' + (await response.json()).message);
+            alert('Auto-login failed: ' + (await response.json()).message);
          }
       } else {
          console.log("No access token found.");
@@ -427,12 +432,9 @@ async function logout() {
       } else {
          console.error('Logout failed:', response.statusText);
      }
-   });
-
-   
-   
-    
+   });    
 }
+
 async function getUsername() {
    if (hasToken()) {
       const accessToken = localStorage.getItem('accessToken');
@@ -467,7 +469,23 @@ function getStreams() {
          type: "streams"
       });
 }
+redeemButton.addEventListener('click', async () => {
+   const response = await fetch('https://sp4wn-signaling-server.onrender.com/redeem', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({ username: globalUsername })
+   });
 
+   const data = await response.json();
+   if (data.success) {
+       alert('Tokens redeemed successfully! Remaining tokens: ' + data.tokens);
+       tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
+   } else {
+       alert('Redemption failed: ' + data.error);
+   }
+});
 goliveBtn.addEventListener("click", function () {
    modalVideo.style.display = "block";
    

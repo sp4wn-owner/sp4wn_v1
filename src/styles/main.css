@@ -112,36 +112,48 @@ button:hover {
 }
 .top-link-bar {
   display: flex;
-  padding: 10px; /* Adjust padding as needed */
-  font-size: 30px;
+  padding: 10px;
+  font-size: 30px;  
 }
 
 .left-icons {
-  display: flex; /* Align icons in a row */  
-  margin-left: 15px;
+  display: flex;
+  padding-left: 15px;
 }
 
 .center-icons {
-  display: flex; /* Align center icons in a row */
-  justify-content: center; /* Center the icons */
-  flex-grow: 1; /* Allow this container to grow */
+  display: flex;
+  justify-content: center;
+  flex-grow: 1;
 }
 
 .left-icons li, .center-icons li, .right-icons li {
-  list-style: none; /* Removes bullets from lists */
-  padding: 0; /* Reset padding */
-  margin: 0 15px; /* Space between icons */
+  list-style: none;
+  padding: 0;
+  margin: 0 15px;
 }
 
 .right-icons {
-  display: flex; /* Align right icons in a row */
-  margin-right: 15px;
+  display: flex;
+  padding-right: 15px;
 }
 .top-link-bar li a {
   color: white;
 }
 .top-link-bar li a:hover {
   color: lime;
+}
+#token-balance {
+  color: #0056b3;
+  font-size: 15px;
+  width: 100%;
+  text-align: right;
+  padding-right: 10px;
+  padding-top: 10px;
+}
+#redeem-tokens {
+  margin-top: 25px;
+  text-align: center;
 }
 #homepage, #profilepage, #infopage {
   display: none;
@@ -621,6 +633,11 @@ footer {
   }
   .modal-content {
     width: auto;
+  }
+  #token-balance {
+    text-align: center;
+    padding-right: 0;
+    padding-bottom: 10px;
   }
   
 }

@@ -40,7 +40,9 @@
         <ul class="right-icons">
           <li><a href="#" id="logout-icon" onclick="logout()"><i class="fa fa-sign-out"></i></a></li>
         </ul>
-      </div>
+      </div>      
+      <div style="color: black; float: right;" id="token-balance"></div>
+
     </header> 
     
       <div id="login-page" style="background-image: url('resources/images/meshbots.jpg'); background-size: cover;">
@@ -87,6 +89,7 @@
         <h2 style="margin-top: 35px;">DIY Robot</h2><br>
         <div id="livestreams"></div>
         <span id="live-span-private" style="margin-bottom: 20px; padding: 25px;">Build your own telepresence robot by following our quick <a href="#" onclick="toggleinfo()">tutorial</a></span><br>         
+        <button class="main-btn" id="redeem-tokens">Redeem Tokens</button>
       </div>
   
       <div id="profilepage">
@@ -161,8 +164,7 @@
               <br>
               <button class="main-btn" id="endotherliveBtn">Stop Watching</button>
               <button id="disconnectdevice-Btn">Disconnect</button>
-            </div>
-                          
+            </div>                          
           </div>
         </div>
       </div>
