@@ -450,22 +450,9 @@ function hasToken() {
 }
 function getStreams() {
    liveStreams.innerHTML = "";
-
-      if(connectedUser != null) {
-         if(liveVideo = 1) {
-            console.log("still streaming");
-         } else {
-            send({
-               type: "leave",
-               othername: connectedUser,
-               username: globalUsername
-            });
-            handleLeave();
-         }         
-      }
-      send({
-         type: "streams"
-      });
+   send({
+      type: "streams"
+   });
 }
 redeemButton.addEventListener('click', async () => {
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/redeem', {
@@ -1207,7 +1194,7 @@ function handleClientDisconnect() {
 
 function handleLeave() {   
 
-   if (liveVideo = 1) {
+   if (liveVideo == 1) {
       updatelive('addlive');
       connectedUser = null;
       if (dc === open) {
@@ -1219,7 +1206,7 @@ function handleLeave() {
       startimagecapture(15000);
    } 
    
-   if (liveremoteVideo = 1) {
+   if (liveremoteVideo == 1) {
       liveremoteVideo = 0;
       remoteVideo.srcObject = null;
       removeKeyListeners();
@@ -1350,6 +1337,18 @@ function togglehome() {
    profileicon.classList.remove("active");
    infoicon.classList.remove("active");
    liveStreams.innerHTML = "";
+   if(connectedUser != null) {
+      if(liveVideo == 1) {
+         console.log("still streaming");
+      } else {
+         send({
+            type: "leave",
+            othername: connectedUser,
+            username: globalUsername
+         });
+         handleLeave();
+      }         
+   }
    setTimeout(getStreams(), 50);
    startStreamInterval(10000);   
 }
