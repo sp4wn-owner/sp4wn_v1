@@ -114,9 +114,11 @@ button:hover {
   font-family: Exarros;
   font-size: 40px;
   color: white;
+  text-decoration: none;
 }
 .logo:hover {
   color: lime;
+  
 }
 .top-link-bar {
   display: flex;
