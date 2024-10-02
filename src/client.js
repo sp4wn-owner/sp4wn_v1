@@ -116,7 +116,6 @@ var pwInput = document.querySelector('#pwInput');
 var loginBtn = document.querySelector('#loginBtn');
 var registerBtn = document.querySelector('#registerBtn');
 const tokenBalanceDisplay = document.getElementById('token-balance');
-const redeemButton = document.getElementById('redeem-tokens');
 
 var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
@@ -454,17 +453,6 @@ function getStreams() {
    send({
       type: "streams"
    });
-}
-
-stopredeemButton = document.getElementById("stop-redeem-tokens");
-
-redeemButton.onclick = function() {
-   console.log("starting auto redeem");
-   startAutoRedeem();
-}
-stopredeemButton.onclick = function() {
-   console.log("stopping auto redeem");
-   stopAutoRedeem();
 }
 
 let autoRedeemInterval;
@@ -1507,14 +1495,14 @@ function toggleprofile(msg) {
                cparrowsremote.style.display = 'none';
             });
             controlbuttons.forEach(button => {
-               button.addEventListener("click", () => {
-                  //isCopyEnabled = !isCopyEnabled;
-                  isCopyEnabled = "false";
-                  const content = document.querySelectorAll(".nocopy");
-                  content.style.userSelect = isCopyEnabled ? 'text' : 'none'; 
-                  content.style.pointerEvents = isCopyEnabled ? 'auto' : 'none'; 
+               button.addEventListener("click", () => {                   
+                   const content = document.querySelectorAll(".nocopy");
+                   content.forEach(item => {
+                       item.style.userSelect = isCopyEnabled ? 'text' : 'none';
+                       item.style.pointerEvents = isCopyEnabled ? 'auto' : 'none';
+                   });
                });
-            });
+           });           
          }
          
          break;
