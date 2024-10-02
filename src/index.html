@@ -51,7 +51,7 @@
             <h1>Login</h1>
             <div class="form-group">
               <label>Username</label>
-              <input type="text" name="username" id="usernameInput" maxlength="15" placeholder="" autocomplete="username" required>
+              <input type="text" name="username" id="usernameInput" maxlength="15" placeholder="" autocomplete="username" required>              
             </div>
             <div class="form-group">
               <label>Password</label>
@@ -66,19 +66,20 @@
               <h1>Register</h1>
               <div class="form-group">
                   <label>Username</label>
-                  <input type="text" id="regusernameInput" maxlength="15" placeholder="">
+                  <input type="text" id="regusernameInput" minlength="3" maxlength="30" placeholder="" onblur="checkUsernameAvailability()">
+                  <div id="usernameMessage" style="color: red; margin-top: 5px;"></div>
               </div>
               <div class="form-group">
                   <label>Password</label>
                   <div class="password-container">
-                      <input type="password" id="regpwInput" maxlength="15" placeholder="">
+                      <input type="password" id="regpwInput" minlength="8" maxlength="50" placeholder="" onblur="validatePassword()">
                       <i class="bi bi-eye-slash toggle-password" id="togglePassword" onclick="togglePasswordVisibility('regpwInput', this)"></i>
                   </div>
               </div>
               <div class="form-group">
                   <label>Confirm Password</label>
                   <div class="password-container">
-                      <input type="password" id="regpwConfirmInput" maxlength="15" placeholder="">
+                      <input type="password" id="regpwConfirmInput" minlength="8" maxlength="50" placeholder="">
                       <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword" onclick="togglePasswordVisibility('regpwConfirmInput', this)"></i>
                   </div>
               </div>
@@ -113,7 +114,7 @@
                 <option value="2">IP Camera</option>
               </select>              
             </div>
-            <input type="text" id="tokenrateinput" placeholder="tokens/min" max="990" min="10" maxlength="3" style="display: none; margin-bottom: 20px; text-align: center;">   
+            <input type="text" id="tokenrateinput" placeholder="tokens/min" max="990" min="10" step="10" maxlength="3" style="display: none; margin-bottom: 20px; text-align: center;">   
             <input type="text" id="locationinput" placeholder="location" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">            
             <input type="text" id="streamdescinput" placeholder="description" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">
             <input type="text" id="useripaddressinput" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">

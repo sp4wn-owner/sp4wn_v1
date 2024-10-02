@@ -301,60 +301,138 @@ document.getElementById('registerBtn').addEventListener('click', () => {
    const username = document.getElementById('regusernameInput').value;
    const password = document.getElementById('regpwInput').value;
    const confirmPassword = document.getElementById('regpwConfirmInput').value;
-   registerUser(username, password, confirmPassword);
+   validateAndRegister(username, password, confirmPassword);
 });
 
-function togglePasswordVisibility(inputId, icon) {
-   const passwordInput = document.getElementById(inputId);
-   const isPasswordVisible = passwordInput.type === 'text';
+async function checkUsernameAvailability() {
+   const usernameInput = document.getElementById('regusernameInput');
+   const usernameMessage = document.getElementById('usernameMessage');
+   const username = usernameInput.value;
 
-   if (isPasswordVisible) {
-       passwordInput.type = 'password';
-       icon.classList.remove('bi-eye');
-       icon.classList.add('bi-eye-slash');
-   } else {
-       passwordInput.type = 'text';
-       icon.classList.remove('bi-eye-slash');
-       icon.classList.add('bi-eye');
+   usernameMessage.textContent = '';
+
+   if (username === '') {
+       return;
+   }
+
+   try {
+       const response = await fetch(`https://sp4wn-signaling-server.onrender.com/check-username?username=${encodeURIComponent(username)}`);
+
+       if (response.ok) {
+           const data = await response.json();
+           if (data.exists) {
+               usernameMessage.textContent = "Username is already taken.";
+           } else {
+               usernameMessage.textContent = "Username is available.";
+               usernameMessage.style.color = "green";
+           }
+       } else {
+           console.error("Failed to check username availability:", await response.text());
+       }
+   } catch (error) {
+       console.error("Error checking username availability:", error);
    }
 }
 
-async function registerUser(username, password, confirmPassword) {
+function validatePassword() {
+   const passwordInput = document.getElementById('regpwInput');
+   const messageArea = document.getElementById('messageArea');
+   const password = passwordInput.value;
+
+   const validPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+   if (!validPasswordRegex.test(password)) {
+       messageArea.textContent = "Password must be at least 8 characters long and contain numbers and special characters.";
+       messageArea.style.color = "red";
+       passwordInput.style.borderColor = "red";
+   } else {
+       messageArea.textContent = ''; 
+       passwordInput.style.borderColor = '';
+   }
+}
+
+function togglePasswordVisibility(inputId, toggleIcon) {
+   const input = document.getElementById(inputId);
+   const isPasswordVisible = input.type === 'text';
+   input.type = isPasswordVisible ? 'password' : 'text';
+   toggleIcon.classList.toggle('bi-eye-slash', isPasswordVisible);
+   toggleIcon.classList.toggle('bi-eye', !isPasswordVisible);
+}
+
+async function validateAndRegister() {
+   const username = document.getElementById('regusernameInput').value;
+   const password = document.getElementById('regpwInput').value;
+   const confirmPassword = document.getElementById('regpwConfirmInput').value;
+
+   const messageArea = document.getElementById('messageArea');
+   const passwordInput = document.getElementById('regpwInput');
+   const confirmPasswordInput = document.getElementById('regpwConfirmInput');
+
+   messageArea.textContent = '';
+   passwordInput.style.borderColor = '';
+   confirmPasswordInput.style.borderColor = '';
+
+   const isPasswordValid = validatePasswordOnSubmit(password);
+   if (!isPasswordValid) return;
+
+   if (confirmPassword === '') {
+       messageArea.textContent = "Please confirm your password.";
+       messageArea.style.color = "red";
+       confirmPasswordInput.style.borderColor = "red";
+       return;
+   }
 
    if (password !== confirmPassword) {
-       const messageArea = document.getElementById('messageArea');
        messageArea.textContent = "Passwords do not match. Please try again.";
        messageArea.style.color = "red";
+       passwordInput.style.borderColor = "red";
+       confirmPasswordInput.style.borderColor = "red";
        return; 
    }
 
-   const response = await fetch('https://sp4wn-signaling-server.onrender.com/register', {
-       method: 'POST',
-       headers: {
-           'Content-Type': 'application/json'
-       },
-       body: JSON.stringify({ username, password })
-   });
-   
-   const data = await response.json();
-   const messageArea = document.getElementById('messageArea');
+   try {
+       const response = await fetch('https://sp4wn-signaling-server.onrender.com/register', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json'
+           },
+           body: JSON.stringify({ username, password })
+       });
 
-   if (response.ok) {
-       messageArea.textContent = "Account created successfully. Please login.";
-       messageArea.style.color = "green"; 
-       displayContent();
-   } else {
+       const data = await response.json();
 
-       let errorMessage = "Registration failed. Please try again.";
-       if (data.message) {
-           errorMessage = data.message;
+       if (response.ok) {
+           messageArea.textContent = "Account created successfully. Please login.";
+           messageArea.style.color = "green"; 
+           displayContent();
+       } else {
+           let errorMessage = "Registration failed. Please try again.";
+           if (data.message) {
+               errorMessage = data.message;
+           }
+           messageArea.textContent = errorMessage;
+           messageArea.style.color = "red"; 
+           console.log("Registration failed:", data.message);
        }
-       messageArea.textContent = errorMessage;
+   } catch (error) {
+       messageArea.textContent = "An error occurred. Please try again.";
        messageArea.style.color = "red"; 
-       console.log("Registration failed:", data.message);
+       console.error("Registration error:", error);
    }
 }
 
+function validatePasswordOnSubmit(password) {
+   const messageArea = document.getElementById('messageArea');
+   const validPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+   if (!validPasswordRegex.test(password)) {
+       messageArea.textContent = "Password must be at least 8 characters long and contain numbers and special characters.";
+       messageArea.style.color = "red";
+       document.getElementById('regpwInput').style.borderColor = "red";
+       return false;
+   }
+   return true;
+}
 function handleAuth(success) {
    if (success === false) {
       alert("Unable to authenticate user");
@@ -466,7 +544,7 @@ async function logout() {
             conn.close();
          }
 
-         alert('You are logged out. Please log back in.');
+         console.log('You are logged out. Please log back in.');
          window.location.reload();
       } else {
          console.error('Logout failed:', response.statusText);
@@ -910,6 +988,28 @@ function validateInput(event) {
 
    return numericValue;
 }
+function getTokenRate() {
+   const tokenrate = validateInput({ target: tokenrateinput });
+   console.log(`Validated token rate: ${tokenrate}`);
+   return tokenrate;
+}
+
+function validateTokenRate() {
+   const value = parseInt(tokenrateinput.value);
+
+   if (value >= 10 && value <= 990 && value % 10 === 0) {
+      confirmVideoBtn.disabled = false;
+      tokenrateinput.classList.remove('invalid-input');
+      tokenrateinput.setCustomValidity("");
+   } else {
+      confirmVideoBtn.disabled = true;
+      tokenrateinput.classList.add('invalid-input'); 
+      tokenrateinput.setCustomValidity("Token rate must be between 10 and 990 in intervals of 10.");
+      tokenrateinput.reportValidity();
+   }
+}
+
+tokenrateinput.addEventListener('input', validateTokenRate);
 
 confirmVideoBtn.onclick = function() {
    
@@ -920,10 +1020,10 @@ confirmVideoBtn.onclick = function() {
    deviceIPsrc = enteredIP;
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
-      
+      tokenrate = getTokenRate();
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
-      tokenrate = getTokenRate();
+      
       if(mylocation == "" || mylocation == null) {
          mylocation = "Not specified";
       }
