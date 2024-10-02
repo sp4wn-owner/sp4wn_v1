@@ -497,14 +497,11 @@ function startAutoRedeem() {
         return;
     }
 
-    autoRedeemInterval = setInterval(async () => {
-        for (let i = 0; i < tokenrate; i++) {
-            const success = await redeemTokens(tokenrate);
-            if (!success) {
-                stopAutoRedeem();
-                break;
-            }
-        }
+    autoRedeemInterval = setInterval(async () => {        
+      const success = await redeemTokens(tokenrate);
+      if (!success) {
+            stopAutoRedeem();            
+      }       
     }, redemptionInterval);
 }
 
