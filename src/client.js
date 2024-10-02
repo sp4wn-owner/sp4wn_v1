@@ -214,10 +214,6 @@ var configuration = {
    'sdpSemantics': 'unified-plan',
  };
 
- const introtext = "Dawn of Telepresence Robotics";
- const textContainer = document.getElementById('introtext');
- let index = 0;
- 
 document.addEventListener("DOMContentLoaded", function() {
    displayContent();
    document.body.style.display = "block";
@@ -262,6 +258,16 @@ function loginform() {
    document.getElementById("loginform").style.display = "block";
    document.getElementById("registerform").style.display = "none";
 }
+
+let introtext;
+const textContainer = document.getElementById('introtext');
+let index = 0;
+if (isMobileOrSmallScreen()) {
+   introtext = "Spawn"; 
+} else {
+   introtext = "Dawn of Telepresence Robotics"; 
+}
+
 function revealText() {
    
    if (index < introtext.length) {
@@ -279,19 +285,49 @@ function revealText() {
   }
 }
 
+function isMobileOrSmallScreen() {
+   const isMobile = /Mobi|Android/i.test(navigator.userAgent);  
+   const isSmallScreen = window.innerWidth < 600;               
+   return isMobile || isSmallScreen;
+}
+
 loginBtn.addEventListener("click", function (event) {
    const username = usernameInput.value;
    const password = pwInput.value;
    loginAndConnectToWebSocket(username, password);
 });
 
-registerBtn.addEventListener("click", function (event) {
-   const username = document.getElementById("regusernameInput").value;
-   const password = document.getElementById("regpwInput").value;
-   registerUser(username, password);
+document.getElementById('registerBtn').addEventListener('click', () => {
+   const username = document.getElementById('regusernameInput').value;
+   const password = document.getElementById('regpwInput').value;
+   const confirmPassword = document.getElementById('regpwConfirmInput').value;
+   registerUser(username, password, confirmPassword);
 });
 
-async function registerUser(username, password) {   
+function togglePasswordVisibility(inputId, icon) {
+   const passwordInput = document.getElementById(inputId);
+   const isPasswordVisible = passwordInput.type === 'text';
+
+   if (isPasswordVisible) {
+       passwordInput.type = 'password';
+       icon.classList.remove('bi-eye');
+       icon.classList.add('bi-eye-slash');
+   } else {
+       passwordInput.type = 'text';
+       icon.classList.remove('bi-eye-slash');
+       icon.classList.add('bi-eye');
+   }
+}
+
+async function registerUser(username, password, confirmPassword) {
+
+   if (password !== confirmPassword) {
+       const messageArea = document.getElementById('messageArea');
+       messageArea.textContent = "Passwords do not match. Please try again.";
+       messageArea.style.color = "red";
+       return; 
+   }
+
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/register', {
        method: 'POST',
        headers: {
@@ -301,13 +337,21 @@ async function registerUser(username, password) {
    });
    
    const data = await response.json();
+   const messageArea = document.getElementById('messageArea');
 
-   if (data.success) {
-      alert("Account created. Please login.")
-      displayContent();
+   if (response.ok) {
+       messageArea.textContent = "Account created successfully. Please login.";
+       messageArea.style.color = "green"; 
+       displayContent();
    } else {
-      alert("Registration failed. Username unavailable")
-      console.log("registration failed:", data.message);
+
+       let errorMessage = "Registration failed. Please try again.";
+       if (data.message) {
+           errorMessage = data.message;
+       }
+       messageArea.textContent = errorMessage;
+       messageArea.style.color = "red"; 
+       console.log("Registration failed:", data.message);
    }
 }
 

@@ -20,8 +20,7 @@
     <link rel="icon" type="image/x-icon" href="resources/images/favicon.ico">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <!--<script src="https://kit.fontawesome.com/16193e6209.js" crossorigin="anonymous"></script>
-    -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <title>Spawn</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -64,17 +63,28 @@
         </div>
         <div id="registerform" class="login-container">
           <div class="login-form">
-            <h1>Register</h1>
-            <div class="form-group">
-              <label>Username</label>
-              <input type="text" id="regusernameInput" maxlength="15" placeholder="">
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="text" id="regpwInput" maxlength="15" placeholder="">
-            </div>
-            <button class="main-btn" id="registerBtn">Register</button>
-            <a href="#" onclick="loginform();">login</a>
+              <h1>Register</h1>
+              <div class="form-group">
+                  <label>Username</label>
+                  <input type="text" id="regusernameInput" maxlength="15" placeholder="">
+              </div>
+              <div class="form-group">
+                  <label>Password</label>
+                  <div class="password-container">
+                      <input type="password" id="regpwInput" maxlength="15" placeholder="">
+                      <i class="bi bi-eye-slash toggle-password" id="togglePassword" onclick="togglePasswordVisibility('regpwInput', this)"></i>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <label>Confirm Password</label>
+                  <div class="password-container">
+                      <input type="password" id="regpwConfirmInput" maxlength="15" placeholder="">
+                      <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword" onclick="togglePasswordVisibility('regpwConfirmInput', this)"></i>
+                  </div>
+              </div>
+              <button class="main-btn" id="registerBtn">Register</button>
+              <a href="#" onclick="loginform();">Login</a>
+              <div id="messageArea" style="margin-top: 10px; color: green;"></div>
           </div>
         </div>
       </div>
