@@ -382,14 +382,14 @@ async function autoLogin() {
 }
 
 async function refreshAccessToken() {
+   const refreshToken = localStorage.getItem('refreshToken');
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/token', {
        method: 'POST',
        headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ refreshToken: getRefreshTokenFromCookie() }), // Implement this function to retrieve refresh token from cookie
+       body: JSON.stringify({ refreshToken: refreshToken }), 
    });
 
    if (response.ok) {
-      console.log(data);
        const data = await response.json();
        localStorage.setItem('accessToken', data.accessToken);
        localStorage.setItem('refreshToken', data.refreshToken);
@@ -537,7 +537,7 @@ async function checkBalance() {
 
    const data = await response.json();
    if (data.success) {
-       console.log(`Remaining tokens: ${data.tokens}`);
+       console.log(`Balance: ${data.tokens}`);
        tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
        return data.tokens;
    } else {
