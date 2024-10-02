@@ -303,6 +303,14 @@ document.getElementById('registerBtn').addEventListener('click', () => {
    const password = document.getElementById('regpwInput').value;
    const confirmPassword = document.getElementById('regpwConfirmInput').value;
    validateAndRegister(username, password, confirmPassword);
+
+   if (username.length < 8) {
+      const usernameMessage = document.getElementById('usernameMessage');
+      usernameMessage.textContent = "Username must be at least 8 characters long.";
+      usernameMessage.style.color = "red";
+      return;
+  }
+
 });
 
 async function checkUsernameAvailability() {
@@ -311,6 +319,12 @@ async function checkUsernameAvailability() {
    const username = usernameInput.value;
 
    usernameMessage.textContent = '';
+
+   if (username.length < 8) {
+      usernameMessage.textContent = "Username must be at least 8 characters long.";
+      usernameMessage.style.color = "red";
+      return;
+  }
 
    if (username === '') {
        return;
