@@ -183,7 +183,7 @@ button:hover {
 .top-link-bar li a:hover {
   color: lime;
 }
-#token-balance {
+.token-balance {
   display: none;
   float: right;
   color: #169937;
@@ -704,7 +704,7 @@ footer {
   .modal-content {
     width: auto;
   }
-  #token-balance {
+  .token-balance {
     text-align: center;
     padding-right: 0;
     padding-bottom: 10px;

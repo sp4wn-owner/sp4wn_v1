@@ -115,7 +115,7 @@ var usernameInput = document.querySelector('#usernameInput');
 var pwInput = document.querySelector('#pwInput');
 var loginBtn = document.querySelector('#loginBtn');
 var registerBtn = document.querySelector('#registerBtn');
-const tokenBalanceDisplay = document.getElementById('token-balance');
+const tokenBalanceDisplay = document.querySelectorAll('.token-balance');
 
 var streamPage = document.querySelector('#stream-page');
 var videoContainer = document.querySelector('#video-container');
@@ -669,7 +669,9 @@ async function checkBalance() {
    const data = await response.json();
    if (data.success) {
        console.log(`Balance: ${data.tokens}`);
-       tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
+       tokenBalanceDisplay.forEach((element) => {
+         element.textContent = `Tokens: ${data.tokens}`;
+      });       
        return data.tokens;
    } else {
        console.log('Error: ' + data.error);
