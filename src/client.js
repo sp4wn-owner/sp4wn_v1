@@ -2438,7 +2438,7 @@ async function checkUsername() {
 }
 
 const tokenamount = 100;
-const stripe = Stripe('pk_test_51Q5Mk3BlJkYr4D45sAh8AHKGCRMcDgXhiWomGISKvQtn7TIe77eZniEAJghfBD2EMjCOfpRfcVLqST0qTM5ooCey00YbYmQX5v'); // Replace with your publishable key
+const stripe = Stripe('pk_test_51Q5W2QK6K3XpLiJAXCOHs60262ZZzXtZHFym8OhC73IL1VsMxURw5WBFzegofpHxY7EfGalvJFYfdjjGeRcvV3e100RBC5ZaJz');
 const elements = stripe.elements();
 const cardElement = elements.create('card');
 cardElement.mount('#card-element');
