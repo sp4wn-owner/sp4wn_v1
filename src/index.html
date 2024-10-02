@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
 
     <title>Spawn</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -35,7 +36,7 @@
         <ul class="center-icons">   
           <li><a href="#" id="home-icon" onclick="togglehome()"><i class="fa fa-home"></i></a></li>       
           <li><a href="#" id="profile-icon" onclick="toggleprofile('local')"><i class="fa fa-user"></i></a></li>
-          <li><a href="#" id="info-icon" onclick="toggleinfo()"><i class="fa fa-info"></i></a></li>
+          <li><a href="#" id="bank-icon" onclick="togglebank()"><i class="fa fa-bank"></i></a></li>
         </ul>
         <ul class="right-icons">
           <li><a href="#" id="logout-icon" onclick="logout()"><i class="fa fa-sign-out"></i></a></li>
@@ -178,6 +179,16 @@
             </div>                          
           </div>
         </div>
+      </div>
+
+      <div id="bankpage"></div>
+        <h1>Bank</h1><br>
+        <h2>Pay with Stripe</h2>
+        <form id="payment-form">
+            <div id="card-element"><!-- A Stripe Element will be inserted here. --></div>
+            <button id="submit">Pay</button>
+            <div id="payment-result" class="hidden"></div>
+        </form>
       </div>
 
       <div id="infopage">

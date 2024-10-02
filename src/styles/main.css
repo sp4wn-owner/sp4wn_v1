@@ -198,6 +198,11 @@ button:hover {
   margin-top: 25px;
   text-align: center;
 }
+#payment-form {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
 #homepage, #profilepage, #infopage {
   display: none;
 }

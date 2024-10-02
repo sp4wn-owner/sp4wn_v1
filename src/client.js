@@ -153,7 +153,7 @@ var remoteVideo = document.querySelector('#remoteVideo');
 
 let profileicon = document.querySelector('#profile-icon');
 let homeicon = document.querySelector('#home-icon');
-let infoicon = document.querySelector('#info-icon');
+let bankicon = document.querySelector('#bank-icon');
 
 var deviceaddressinput;
 let locationinput = document.getElementById("locationinput");
@@ -1551,7 +1551,16 @@ function toggleinfo() {
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "block";
-   infoicon.classList.add("active");
+   bankicon.classList.remove("active");
+   homeicon.classList.remove("active");
+   profileicon.classList.remove("active");
+}
+
+function togglebank() {
+   homePage.style.display = "none";
+   profilePage.style.display = "none";
+   infoPage.style.display = "block";
+   bankicon.classList.add("active");
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
 }
@@ -1580,7 +1589,7 @@ function togglehome() {
    infoPage.style.display = "none";
    homeicon.classList.add("active");
    profileicon.classList.remove("active");
-   infoicon.classList.remove("active");
+   bankicon.classList.remove("active");
    liveStreams.innerHTML = "";
    if(connectedUser != null) {
       if(liveVideo == 1) {
@@ -1606,7 +1615,7 @@ function toggleprofile(msg) {
    homePage.style.display = "none";
    infoPage.style.display = "none";
    homeicon.classList.remove("active");
-   infoicon.classList.remove("active");
+   bankicon.classList.remove("active");
    profileicon.classList.add("active");
    switch(data) {
       case "local":
@@ -2378,4 +2387,34 @@ async function checkUsername() {
    await getUsername();
    console.log("Username:", globalUsername);
 }
+const stripe = Stripe('pk_test_TYooMQauyInHX6W5x8Q8f9m3'); // Replace with your publishable key
+   const elements = stripe.elements();
+   const cardElement = elements.create('card');
+   cardElement.mount('#card-element');
+
+   const form = document.getElementById('payment-form');
+   form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Create a PaymentIntent on your backend
+      const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', { // Your backend endpoint
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: 1000 }), // Amount in cents
+      }).then(r => r.json());
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+               card: cardElement,
+            },
+      });
+
+      if (error) {
+            document.getElementById('payment-result').innerText = error.message;
+      } else {
+            if (paymentIntent.status === 'succeeded') {
+               document.getElementById('payment-result').innerText = 'Payment succeeded!';
+            }
+      }
+   });
 init();
