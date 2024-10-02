@@ -2387,7 +2387,7 @@ async function checkUsername() {
    await getUsername();
    console.log("Username:", globalUsername);
 }
-const stripe = Stripe('pk_test_TYooMQauyInHX6W5x8Q8f9m3'); // Replace with your publishable key
+const stripe = Stripe('pk_test_51Q5Mk3BlJkYr4D45sAh8AHKGCRMcDgXhiWomGISKvQtn7TIe77eZniEAJghfBD2EMjCOfpRfcVLqST0qTM5ooCey00YbYmQX5v'); // Replace with your publishable key
    const elements = stripe.elements();
    const cardElement = elements.create('card');
    cardElement.mount('#card-element');
