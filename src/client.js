@@ -2413,6 +2413,7 @@ async function checkUsername() {
    console.log("Username:", globalUsername);
 }
 
+const tokenamount = 100;
 const stripe = Stripe('pk_test_51Q5Mk3BlJkYr4D45sAh8AHKGCRMcDgXhiWomGISKvQtn7TIe77eZniEAJghfBD2EMjCOfpRfcVLqST0qTM5ooCey00YbYmQX5v'); // Replace with your publishable key
 const elements = stripe.elements();
 const cardElement = elements.create('card');
@@ -2426,7 +2427,7 @@ form.addEventListener('submit', async (event) => {
    const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ amount: 1000, username: globalUsername }), // Amount in cents
+         body: JSON.stringify({ amount: 1000, username: globalUsername, tokenamount: tokenamount }), // Amount in cents
    }).then(r => r.json());
 
    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
