@@ -466,7 +466,9 @@ async function loginAndConnectToWebSocket(username, password) {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       const tokenBalance = data.tokens;
-      tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
+      tokenBalanceDisplay.forEach((element) => {
+         element.textContent = `Tokens: ${tokenBalance}`;
+      });   
       connect(username, data.accessToken);
    } else {
       console.log("Login failed:", data.message);
@@ -492,7 +494,9 @@ async function autoLogin() {
            const data = await response.json();
            if (response.ok) {
                tokenBalance = data.tokens;
-               tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
+               tokenBalanceDisplay.forEach((element) => {
+                  element.textContent = `Tokens: ${tokenBalance}`;
+               });   
                console.log('Login successful!');
                connect(username, accessToken);
            } else if (response.status === 401) {
@@ -607,7 +611,9 @@ async function redeemTokens(tokens) {
    const data = await response.json();
    if (data.success) {
         console.log(`Successfully redeemed ${tokens} tokens! Remaining tokens: ${data.tokens}`);
-        tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
+        tokenBalanceDisplay.forEach((element) => {
+         element.textContent = `Tokens: ${data.tokens}`;
+      });   
         return true;
    } else {
         console.log('Redemption failed: ' + data.error);
