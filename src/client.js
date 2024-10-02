@@ -2451,7 +2451,7 @@ form.addEventListener('submit', async (event) => {
    event.preventDefault();
 
    submitButton.disabled = true;
-   paymentResult.classList.add = "visible";
+   paymentResult.classList.add("visible");
 
    try {
        const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
