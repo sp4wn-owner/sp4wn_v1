@@ -444,7 +444,9 @@ function handleAuth(success) {
       }      
       loginPage.style.display = "none";
       document.getElementsByTagName('header')[0].style.display = "block";
-      tokenBalanceDisplay.style.display = "block";
+      tokenBalanceDisplay.forEach((element) => {
+         element.style.display = "block";
+      });       
       togglehome();      
     }
 };
