@@ -849,27 +849,22 @@ let tokenrateinput = document.getElementById("tokenrateinput");
 let tokenrate;
 
 function validateInput(event) {
-   const value = event.target.value;
+   let value = event.target.value;
 
    const validValue = value.replace(/[^0-9]/g, '');
-
    let numericValue = Number(validValue);
 
-   if (numericValue > 999) {
-       numericValue = 999;
-   } else if (numericValue < 0) {
-       numericValue = 0;
+   if (numericValue < 10) {
+       numericValue = 10;
+   } else if (numericValue > 990) {
+       numericValue = 990;
    }
+
+   numericValue = Math.floor(numericValue / 10) * 10;
 
    event.target.value = numericValue.toString();
 
    return numericValue;
-}
-
-function getTokenRate() {
-   const tokenrate = validateInput({ target: tokenrateinput });
-   console.log(`Validated token rate: ${tokenrate}`);
-   return tokenrate;
 }
 
 confirmVideoBtn.onclick = function() {
