@@ -203,7 +203,7 @@ button:hover {
   flex-direction: column;
   width: 300px;
 }
-#homepage, #profilepage, #infopage {
+#homepage, #profilepage, #bankpage, #infopage {
   display: none;
 }
 #homepage {
@@ -214,7 +214,14 @@ button:hover {
   text-decoration: underline;
   text-underline-offset: 10px;
 }
-
+#bankpage {
+  height: 800px;
+}
+#bankpage h1 {
+  padding-top: 25px;
+  text-decoration: underline;
+  text-underline-offset: 10px;
+}
 #infopage {
   margin-bottom: 50px;
 }

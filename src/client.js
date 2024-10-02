@@ -123,6 +123,7 @@ var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
+var bankPage = document.querySelector('#bankpage');
 var infoPage = document.querySelector('#infopage');
 var profileTitle = document.querySelector('#profiletitle');
 
@@ -244,7 +245,7 @@ function displayContent() {
       document.getElementById("loginform").style.display = "block";
       document.getElementById("registerform").style.display = "none";
       homePage.style.display = "none";
-      infoPage.style.display = "none";
+      bankPage.style.display = "none";
       profilePage.style.display = "none";
       liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "none"; 
@@ -472,51 +473,62 @@ async function loginAndConnectToWebSocket(username, password) {
 }
 async function autoLogin() {
    console.log("Attempting auto login");
+   
    if (hasToken()) {
-      const accessToken = localStorage.getItem('accessToken');
-      const username = await getUsernameFromToken(accessToken);
-      if (accessToken) {           
-         const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
-            method: 'GET',
-            headers: {
-                  'Authorization': `Bearer ${accessToken}`
-            }
-         });
-         const data = await response.json();
-         if (response.ok) {
-            tokenBalance = data.tokens;
-            tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
-            console.log('Login successful!');               
-            connect(username, accessToken);
-         } else if (response.status === 401) {
-            console.log('Unauthorized access. Attempting to refresh token...');
-            await refreshAccessToken();
-         } else {
-            alert('Auto-login failed: ' + (await response.json()).message);
-         }
-      } else {
-         console.log("No access token found.");
-      }
+       const accessToken = localStorage.getItem('accessToken');
+       const refreshToken = localStorage.getItem('refreshToken');
+       const username = await getUsernameFromToken(accessToken);
+
+       if (accessToken) {
+           const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
+               method: 'GET',
+               headers: {
+                   'Authorization': `Bearer ${accessToken}`
+               }
+           });
+
+           const data = await response.json();
+           if (response.ok) {
+               tokenBalance = data.tokens;
+               tokenBalanceDisplay.textContent = 'Tokens: ' + tokenBalance;
+               console.log('Login successful!');
+               connect(username, accessToken);
+           } else if (response.status === 401) {
+               console.log('Unauthorized access. Attempting to refresh token...');
+               await refreshAccessToken(refreshToken);
+           } else {
+               alert('Auto-login failed: ' + data.message);
+           }
+       } else {
+           console.log("No access token found.");
+       }
    } else {
-      console.log("No token found in localStorage.");
+       console.log("No token found in localStorage.");
    }
 }
 
-async function refreshAccessToken() {
-   const refreshToken = localStorage.getItem('refreshToken');
-   const response = await fetch('https://sp4wn-signaling-server.onrender.com/token', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ refreshToken: refreshToken }), 
-   });
+async function refreshAccessToken(refreshToken) {
+   try {
+       const response = await fetch('https://sp4wn-signaling-server.onrender.com/refresh-token', {
+            method: 'POST',
+            headers: {
+                  'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ refreshToken })
+       });
 
-   if (response.ok) {
-       const data = await response.json();
-       localStorage.setItem('accessToken', data.accessToken);
-       localStorage.setItem('refreshToken', data.refreshToken);
-   } else {
-      console.log("no refresh token available");
-       logout();
+       if (response.ok) {
+            const { accessToken, newRefreshToken } = await response.json();
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', newRefreshToken);
+            console.log('Token refreshed successfully.');
+            await autoLogin();
+       } else {
+            alert('Failed to refresh token: ' + (await response.json()).message);
+            logout();
+       }
+   } catch (error) {
+       console.error('Error refreshing token:', error);
    }
 }
 
@@ -624,13 +636,14 @@ function stopAutoRedeem() {
 }
 
 async function checkBalance() {
-   const token = localStorage.getItem('accessToken'); 
+   const accessToken = localStorage.getItem('accessToken');
+   const refreshToken = localStorage.getItem('refreshToken'); // Retrieve the refresh token
 
    const response = await fetch(`https://sp4wn-signaling-server.onrender.com/check-balance`, {
        method: 'GET',
        headers: {
            'Content-Type': 'application/json',
-           'Authorization': `Bearer ${token}` 
+           'Authorization': `Bearer ${accessToken}` 
        }
    });
 
@@ -638,11 +651,19 @@ async function checkBalance() {
        console.error('HTTP error:', response.status, response.statusText);
        
        if (response.status === 401) {
-           await refreshAccessToken(); 
-           return await checkBalance(); 
+           console.log('Unauthorized. Attempting to refresh token...');
+           const refreshed = await refreshAccessToken(refreshToken); // Pass the refresh token
+
+           if (refreshed) {
+               // Retry the original request after refreshing the token
+               return await checkBalance();
+           } else {
+               console.log('Token refresh failed. User may need to log in again.');
+               return false;
+           }
        }
 
-       return false;
+       return false; // Handle other non-401 errors as needed
    }
 
    const data = await response.json();
@@ -1551,6 +1572,7 @@ function toggleinfo() {
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "block";
+   bankPage.style.display = "none";
    bankicon.classList.remove("active");
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
@@ -1559,7 +1581,8 @@ function toggleinfo() {
 function togglebank() {
    homePage.style.display = "none";
    profilePage.style.display = "none";
-   infoPage.style.display = "block";
+   infoPage.style.display = "none";
+   bankPage.style.display = "block";
    bankicon.classList.add("active");
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
@@ -1587,6 +1610,7 @@ function togglehome() {
    homePage.style.display = "block";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
+   bankPage.style.display = "none";
    homeicon.classList.add("active");
    profileicon.classList.remove("active");
    bankicon.classList.remove("active");
@@ -1614,6 +1638,7 @@ function toggleprofile(msg) {
    profilePage.style.display = "block";
    homePage.style.display = "none";
    infoPage.style.display = "none";
+   bankPage.style.display = "none";
    homeicon.classList.remove("active");
    bankicon.classList.remove("active");
    profileicon.classList.add("active");
@@ -2387,34 +2412,35 @@ async function checkUsername() {
    await getUsername();
    console.log("Username:", globalUsername);
 }
+
 const stripe = Stripe('pk_test_51Q5Mk3BlJkYr4D45sAh8AHKGCRMcDgXhiWomGISKvQtn7TIe77eZniEAJghfBD2EMjCOfpRfcVLqST0qTM5ooCey00YbYmQX5v'); // Replace with your publishable key
-   const elements = stripe.elements();
-   const cardElement = elements.create('card');
-   cardElement.mount('#card-element');
+const elements = stripe.elements();
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
 
-   const form = document.getElementById('payment-form');
-   form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+const form = document.getElementById('payment-form');
 
-      // Create a PaymentIntent on your backend
-      const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', { // Your backend endpoint
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: 1000 }), // Amount in cents
-      }).then(r => r.json());
+form.addEventListener('submit', async (event) => {
+   event.preventDefault();
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-               card: cardElement,
-            },
-      });
+   const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ amount: 1000, username: globalUsername }), // Amount in cents
+   }).then(r => r.json());
 
-      if (error) {
-            document.getElementById('payment-result').innerText = error.message;
-      } else {
-            if (paymentIntent.status === 'succeeded') {
-               document.getElementById('payment-result').innerText = 'Payment succeeded!';
-            }
-      }
+   const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+         payment_method: {
+            card: cardElement,
+         },
    });
+
+   if (error) {
+         document.getElementById('payment-result').innerText = error.message;
+   } else {
+         if (paymentIntent.status === 'succeeded') {
+            document.getElementById('payment-result').innerText = 'Payment succeeded!';
+         }
+   }
+});
 init();

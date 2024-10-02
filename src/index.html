@@ -181,14 +181,23 @@
         </div>
       </div>
 
-      <div id="bankpage"></div>
-        <h1>Bank</h1><br>
-        <h2>Pay with Stripe</h2>
-        <form id="payment-form">
+      <div id="bankpage">
+        <h1>Bank</h1><br>        
+        <div class="text-block" style="text-align: center;">
+          <h2>Add Tokens</h2>
+          <ul style="list-style-type: none;">
+            <li>Visa: 4242 4242 4242 4242</li>
+            <li>MasterCard: 5555 5555 5555 4444</li>
+            <li>American Express: 3782 822463 10005</li>
+            <li>Discover: 6011 1111 1111 1117</li>
+          </ul>
+          <div style="padding: 25px 0;">Purchase 1000 tokens</div>
+          <form id="payment-form" style="margin: 25px auto;">
             <div id="card-element"><!-- A Stripe Element will be inserted here. --></div>
-            <button id="submit">Pay</button>
+            <button id="submit" style="cursor: pointer;">Pay</button>
             <div id="payment-result" class="hidden"></div>
         </form>
+        </div>        
       </div>
 
       <div id="infopage">
