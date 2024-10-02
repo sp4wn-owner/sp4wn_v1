@@ -2451,6 +2451,7 @@ form.addEventListener('submit', async (event) => {
    event.preventDefault();
 
    submitButton.disabled = true;
+   paymentResult.classList.add = "visible";
 
    try {
        const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
@@ -2468,7 +2469,7 @@ form.addEventListener('submit', async (event) => {
        if (error) {
            paymentResult.innerText = error.message;
        } else {
-           if (paymentIntent.status === 'succeeded') {
+           if (paymentIntent.status === 'succeeded') {               
                paymentResult.innerText = 'Payment succeeded!';
            }
        }

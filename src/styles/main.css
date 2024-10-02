@@ -35,7 +35,7 @@ header {
   display: none;
 }
 .visible {
-  visibility: visible;
+  display: block;
 }
 
 #login-header {
