@@ -60,9 +60,6 @@ function connect(username, accessToken) {
          case "leave":
             handleLeave();
             break;
-         case "remoteleave":
-            handleRemoteLeave();
-            break;
          case "watch":
             watchStream(data.name);
             break;
@@ -471,12 +468,10 @@ stopredeemButton.onclick = function() {
 }
 
 let autoRedeemInterval;
-let tokensToRedeemPerMinute = 1;
-const redemptionInterval = 10 * 1000;
+const redemptionInterval = 60 * 1000;
 
 async function redeemTokens(tokens) {
-   connectedUser = "admin";
-   console.log(connectedUser);
+   
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/redeem', {
         method: 'POST',
         headers: {
@@ -503,8 +498,8 @@ function startAutoRedeem() {
     }
 
     autoRedeemInterval = setInterval(async () => {
-        for (let i = 0; i < tokensToRedeemPerMinute; i++) {
-            const success = await redeemTokens(tokensToRedeemPerMinute);
+        for (let i = 0; i < tokenrate; i++) {
+            const success = await redeemTokens(tokenrate);
             if (!success) {
                 stopAutoRedeem();
                 break;
@@ -547,7 +542,7 @@ async function checkBalance() {
    if (data.success) {
        console.log(`Remaining tokens: ${data.tokens}`);
        tokenBalanceDisplay.textContent = `Tokens: ${data.tokens}`;
-       return true;
+       return data.tokens;
    } else {
        console.log('Error: ' + data.error);
        return false;
@@ -867,18 +862,53 @@ async function initiateConn() {
 
 let tokenrateinput = document.getElementById("tokenrateinput");
 let tokenrate;
+
+function validateInput(event) {
+   const value = event.target.value;
+
+   const validValue = value.replace(/[^0-9]/g, '');
+
+   let numericValue = Number(validValue);
+
+   if (numericValue > 999) {
+       numericValue = 999;
+   } else if (numericValue < 0) {
+       numericValue = 0;
+   }
+
+   event.target.value = numericValue.toString();
+
+   return numericValue;
+}
+
+function getTokenRate() {
+   const tokenrate = validateInput({ target: tokenrateinput });
+   console.log(`Validated token rate: ${tokenrate}`);
+   return tokenrate;
+}
+
 confirmVideoBtn.onclick = function() {
    
-   var selectedValue = videoSelect.value;
+   let selectedValue = videoSelect.value;
    //const urlprefix = "https://";
-   var enteredIP = useripaddress.value;
+   let enteredIP = useripaddress.value;
    //var deviceIPsrc = urlprefix.concat(enteredIP);
    deviceIPsrc = enteredIP;
    modalVideo.style.display = "none";
    if (selectedValue == "1") {
+      
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
-      tokenrate = tokenrateinput.value;
+      tokenrate = getTokenRate();
+      if(mylocation == "" || mylocation == null) {
+         mylocation = "Not specified";
+      }
+      if(streamdescription == "" || streamdescription == null) {
+         streamdescription = "No description";
+      }
+      if(tokenrate == "" || tokenrate == null) {
+         tokenrate = 0;
+      }
       initiateConn();
    }
      
@@ -1083,75 +1113,86 @@ function stopStreamedVideo(localVideo) {
  }
 
 
-spawnBtn.addEventListener("click", function (event) {   
-   connectedUser = otheruser;   
-        
-   yourConn = new RTCPeerConnection(configuration);       
-   stream = new MediaStream();           
-   remoteVideo.srcObject = stream;
-   yourConn.onaddstream = function (e) {         
-      remoteVideo.srcObject = e.stream;       
-   }               
-   send({
-      type: "watch",
-      username: globalUsername,
-      host: connectedUser
-   });
-   dcpeerB();  
-   beginICE(); 
+spawnBtn.addEventListener("click", async (event) => {   
+   connectedUser = otheruser;  
+   const balance = await checkBalance();
+      if (balance != null) {
+         console.log('Balance checked successfully.');
+         if(balance < tokenrate) {
+            alert("your token balance is too low.");
+            return;
+         } else {
+            const redeemsuccess = await redeemTokens(tokenrate);
+            if (redeemsuccess) {
+               startAutoRedeem(tokenrate);
+               yourConn = new RTCPeerConnection(configuration);       
+               stream = new MediaStream();           
+               remoteVideo.srcObject = stream;
+               yourConn.onaddstream = function (e) {         
+                  remoteVideo.srcObject = e.stream;       
+               }               
+               send({
+                  type: "watch",
+                  username: globalUsername,
+                  host: connectedUser
+               });
+               dcpeerB();  
+               beginICE(); 
+                     
+               console.log("attempt to connect");     
          
-   console.log("attempt to connect");     
-
-   async function checkICEStatus(maxRetries = 5, delay = 1500) {
-      for (let retries = 0; retries < maxRetries; retries++) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-   
-            ICEstatus();
-            console.log("ice status is ", yourConn.iceConnectionState);
-   
-            if (yourConn.iceConnectionState === 'connected') {
-               try {
-                  await new Promise(resolve => {
-                        setTimeout(() => {
-                           resolve("Data received!");
-                        }, 2000);
-                  });
-   
-                  video = remoteVideo;
-                  liveremoteVideo = 1;
-                  spawnBtn.style.display = "none";
-                  controlpanel.style.display = "block";
-                  connectdeviceBtn.style.display = "none";
-                  controlpaneloutputs.style.display = "block";
-                  connectcontrollerBtn.style.display = "inline-block";
-                  cparrowsremote.forEach(cparrowsremote => {
-                        cparrowsremote.style.display = 'inline-block';
-                  });
-                  console.log('PeerConnection is connected!');
-   
-                  addKeyListeners();
-                  window.addEventListener("gamepaddisconnected", (event) => {
-                        console.log("Gamepad disconnected:", event.gamepad);
-                  });
-                  if (isDataChannelOpen()) {
-                     console.log("data channel is open");
-                  } else {retryFunction(dcpeerB);}   
-                  return;
-               } catch (error) {
-                  console.log(error);
-               }
-            } else {
-               console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+               async function checkICEStatus(maxRetries = 5, delay = 1500) {
+                  for (let retries = 0; retries < maxRetries; retries++) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+               
+                        ICEstatus();
+                        console.log("ice status is ", yourConn.iceConnectionState);
+               
+                        if (yourConn.iceConnectionState === 'connected') {
+                           try {
+                              await new Promise(resolve => {
+                                    setTimeout(() => {
+                                       resolve("Data received!");
+                                    }, 2000);
+                              });
+               
+                              video = remoteVideo;
+                              liveremoteVideo = 1;
+                              spawnBtn.style.display = "none";
+                              controlpanel.style.display = "block";
+                              connectdeviceBtn.style.display = "none";
+                              controlpaneloutputs.style.display = "block";
+                              connectcontrollerBtn.style.display = "inline-block";
+                              cparrowsremote.forEach(cparrowsremote => {
+                                    cparrowsremote.style.display = 'inline-block';
+                              });
+                              console.log('PeerConnection is connected!');
+               
+                              addKeyListeners();
+                              window.addEventListener("gamepaddisconnected", (event) => {
+                                    console.log("Gamepad disconnected:", event.gamepad);
+                              });
+                              if (isDataChannelOpen()) {
+                                 console.log("data channel is open");
+                              } else {retryFunction(dcpeerB);}   
+                              return;
+                           } catch (error) {
+                              console.log(error);
+                           }
+                        } else {
+                           console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+                        }
+                  }      
+                  console.error('Max retries reached. ICE connection is still not connected.');
+               }      
+               checkICEStatus();  
             }
-
             
-      }
-   
-      console.error('Max retries reached. ICE connection is still not connected.');
-   }
-   
-   checkICEStatus();  
-   
+         }
+      } else {
+            console.log('Failed to check balance.');
+      } 
+            
 });
 
 
@@ -1293,6 +1334,7 @@ function handleLeave() {
    } 
    
    if (liveremoteVideo == 1) {
+      stopAutoRedeem();
       liveremoteVideo = 0;
       remoteVideo.srcObject = null;
       removeKeyListeners();
@@ -1314,41 +1356,27 @@ function handleLeave() {
       }
    }
 };
-function handleRemoteLeave() {
-   send({
-      type: "leave",
-      username: globalUsername,
-      othername: connectedUser
-   });
-   if (dc === open) {
-      dc.close();
-   }
-   
-   console.log("Data channel B is closed");
-   dc = null;
-   connectedUser = null;
-   remoteVideo.srcObject = null;
-   yourConn.close();
-   yourConn.onicecandidate = null;
-   yourConn.onaddstream = null;
-   spawnBtn.style.display = "block";
-
-};
 
 function handleStreams(images) {
-   const premadeRateIcon = `<i class="fa fa-dollar-sign"></i>`;
+   let ratetext = ' tokens/min';
    const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
    const premadeInfoIcon = `<i class="fa fa-info"></i>`;
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let imgurl = images[i].imageDataUrl;
       let rate = images[i].tokenrate;
+      if (rate == 0 || rate == null) {
+         rate = "FREE";
+         ratetext = '';
+      }
       let hostlocation = images[i].location;
       let description = images[i].description;
       let divElement = document.createElement('div');
       let divElementIcon = document.createElement('div');
       let divStreamName = document.createElement('div');
       let imgElement = document.createElement('img');
+      let divElementRate = document.createElement('div');
+      let elementRateSpan = document.createElement('span');
       let rateElement = document.createElement('span');
       let locationElement = document.createElement('span');
       let descContainerElem = document.createElement('div');
@@ -1366,19 +1394,19 @@ function handleStreams(images) {
       liveStreams.appendChild(divElement);
       divElement.appendChild(imgElement);      
       divElement.appendChild(divStreamName);
+      divElement.appendChild(divElementRate);
+      divElementRate.appendChild(rateElement);      
+      divElementRate.appendChild(elementRateSpan);  
+      elementRateSpan.innerText = ratetext;      
       divElement.appendChild(divElementIcon);
-      divElementIcon.innerHTML = premadeRateIcon;
-      divElementIcon.appendChild(rateElement);
       divElementIcon.innerHTML = premadeMarkerIcon;
       divElementIcon.appendChild(locationElement);
       divElement.appendChild(descContainerElem);
       descContainerElem.innerHTML = premadeInfoIcon;
       descContainerElem.appendChild(descElement);
       
-
-      // Attach the onclick event
       divElement.onclick = function() {
-         checkProfile(text);
+         checkProfile(text, rate);
       };
    }
 
@@ -1389,7 +1417,8 @@ function handleStreams(images) {
    }
 }
 
-function checkProfile (userdata) {
+function checkProfile (userdata, rate) {
+   tokenrate = rate;
    otheruser = userdata;
    connectedUser = otheruser;   
    toggleprofile('remote');
@@ -1433,6 +1462,7 @@ function togglehome() {
       if(liveVideo == 1) {
          console.log("still streaming");
       } else {
+         stopAutoRedeem();
          send({
             type: "leave",
             othername: connectedUser,
