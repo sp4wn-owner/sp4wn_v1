@@ -2430,28 +2430,39 @@ const cardElement = elements.create('card');
 cardElement.mount('#card-element');
 
 const form = document.getElementById('payment-form');
+const submitButton = document.getElementById('submit');
+const paymentResult = document.getElementById('payment-result');
 
 form.addEventListener('submit', async (event) => {
    event.preventDefault();
 
-   const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ amount: 1000, username: globalUsername, tokenamount: tokenamount }), // Amount in cents
-   }).then(r => r.json());
+   submitButton.disabled = true;
 
-   const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-         payment_method: {
-            card: cardElement,
-         },
-   });
+   try {
+       const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ amount: 1000, username: globalUsername, tokenamount: tokenamount }), 
+       }).then(r => r.json());
 
-   if (error) {
-         document.getElementById('payment-result').innerText = error.message;
-   } else {
-         if (paymentIntent.status === 'succeeded') {
-            document.getElementById('payment-result').innerText = 'Payment succeeded!';
-         }
+       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+           payment_method: {
+               card: cardElement,
+           },
+       });
+
+       if (error) {
+           paymentResult.innerText = error.message;
+       } else {
+           if (paymentIntent.status === 'succeeded') {
+               paymentResult.innerText = 'Payment succeeded!';
+           }
+       }
+   } catch (error) {
+       console.error('Payment processing error:', error);
+       paymentResult.innerText = 'An error occurred while processing payment.';
+   } finally {
+       submitButton.disabled = false;
    }
 });
 init();
