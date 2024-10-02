@@ -123,7 +123,7 @@ var adminbtnContainer = document.querySelector('#admin-button-container');
 var viewerbtnContainer = document.querySelector('#viewer-button-container');
 var homePage = document.querySelector('#homepage');
 var profilePage = document.querySelector('#profilepage');
-var bankPage = document.querySelector('#bankpage');
+var settingsPage = document.querySelector('#settingspage');
 var infoPage = document.querySelector('#infopage');
 var profileTitle = document.querySelector('#profiletitle');
 
@@ -154,7 +154,7 @@ var remoteVideo = document.querySelector('#remoteVideo');
 
 let profileicon = document.querySelector('#profile-icon');
 let homeicon = document.querySelector('#home-icon');
-let bankicon = document.querySelector('#bank-icon');
+let settingsicon = document.querySelector('#settings-icon');
 
 var deviceaddressinput;
 let locationinput = document.getElementById("locationinput");
@@ -245,7 +245,7 @@ function displayContent() {
       document.getElementById("loginform").style.display = "block";
       document.getElementById("registerform").style.display = "none";
       homePage.style.display = "none";
-      bankPage.style.display = "none";
+      settingsPage.style.display = "none";
       profilePage.style.display = "none";
       liveStreams.innerHTML = "";
       document.getElementsByTagName('header')[0].style.display = "none"; 
@@ -1596,18 +1596,18 @@ function toggleinfo() {
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "block";
-   bankPage.style.display = "none";
-   bankicon.classList.remove("active");
+   settingsPage.style.display = "none";
+   settingsicon.classList.remove("active");
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
 }
 
-function togglebank() {
+function togglesettings() {
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
-   bankPage.style.display = "block";
-   bankicon.classList.add("active");
+   settingsPage.style.display = "block";
+   settingsicon.classList.add("active");
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
 }
@@ -1634,10 +1634,10 @@ function togglehome() {
    homePage.style.display = "block";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
-   bankPage.style.display = "none";
+   settingsPage.style.display = "none";
    homeicon.classList.add("active");
    profileicon.classList.remove("active");
-   bankicon.classList.remove("active");
+   settingsicon.classList.remove("active");
    liveStreams.innerHTML = "";
    if(connectedUser != null) {
       if(liveVideo == 1) {
@@ -1662,9 +1662,9 @@ function toggleprofile(msg) {
    profilePage.style.display = "block";
    homePage.style.display = "none";
    infoPage.style.display = "none";
-   bankPage.style.display = "none";
+   settingsPage.style.display = "none";
    homeicon.classList.remove("active");
-   bankicon.classList.remove("active");
+   settingsicon.classList.remove("active");
    profileicon.classList.add("active");
    switch(data) {
       case "local":
