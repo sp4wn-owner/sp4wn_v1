@@ -126,6 +126,9 @@ var profilePage = document.querySelector('#profilepage');
 var settingsPage = document.querySelector('#settingspage');
 var infoPage = document.querySelector('#infopage');
 var profileTitle = document.querySelector('#profiletitle');
+var profilesettings = document.querySelector('#profile-settings');
+var robotssettings = document.querySelector('#robots-settings');
+var tokenspagelink = document.querySelector('#tokens-page-link');
 
 var goliveBtn = document.querySelector('#goliveBtn');
 var endliveBtn = document.querySelector('#endliveBtn');
@@ -252,6 +255,7 @@ function displayContent() {
    }
 }
 function registerform() {
+   resetForm('regusernameInput', 'usernameMessage', 'regpwInput', 'regpwConfirmInput', 'messageArea');
    document.getElementById("loginform").style.display = "none";
    document.getElementById("registerform").style.display = "block";
 }
@@ -302,7 +306,7 @@ document.getElementById('registerBtn').addEventListener('click', () => {
    const username = document.getElementById('regusernameInput').value;
    const password = document.getElementById('regpwInput').value;
    const confirmPassword = document.getElementById('regpwConfirmInput').value;
-   validateAndRegister(username, password, confirmPassword);
+   validateAndRegister('register', username, password, confirmPassword);
 
    if (username.length < 8) {
       const usernameMessage = document.getElementById('usernameMessage');
@@ -313,9 +317,79 @@ document.getElementById('registerBtn').addEventListener('click', () => {
 
 });
 
-async function checkUsernameAvailability() {
-   const usernameInput = document.getElementById('regusernameInput');
-   const usernameMessage = document.getElementById('usernameMessage');
+let updateuserBtn = document.getElementById("updateuserbtn");
+
+document.getElementById('updateuserBtn').addEventListener('click', () => {
+   const username = document.getElementById('updateusernameInput').value;
+   const password = document.getElementById('updateregpwInput').value;
+   const confirmPassword = document.getElementById('updateregpwConfirmInput').value;
+   validateAndRegister('update', username, password, confirmPassword);
+
+   if (username.length < 8) {
+      const usernameMessage = document.getElementById('usernameMessage');
+      usernameMessage.textContent = "Username must be at least 8 characters long.";
+      usernameMessage.style.color = "red";
+      return;
+  }
+
+});
+
+async function resetForm(usernameID, messageID, regpwInputID, regpwConfirmInputID, messageareaID) {
+   const usernameInput = document.getElementById(usernameID);
+   const usernameMessage = document.getElementById(messageID);
+   const passwordInput = document.getElementById(regpwInputID);
+   const confirmPasswordInput = document.getElementById(regpwConfirmInputID);
+   const messageArea = document.getElementById(messageareaID);
+   const username = await getUsername();
+
+   if (usernameInput) {
+       usernameInput.value = username ? username : "";
+   } else {
+       console.warn(`Element with ID ${usernameID} not found.`);
+   }
+
+   if (usernameMessage) {
+       usernameMessage.innerText = "";
+   } else {
+       console.warn(`Element with ID ${messageID} not found.`);
+   }
+
+   if (passwordInput) {
+       passwordInput.value = "";
+       passwordInput.style.borderColor = '';
+   } else {
+       console.warn(`Element with ID ${regpwInputID} not found.`);
+   }
+
+   if (confirmPasswordInput) {
+       confirmPasswordInput.value = "";
+       confirmPasswordInput.style.borderColor = '';
+   } else {
+       console.warn(`Element with ID ${regpwConfirmInputID} not found.`);
+   }
+
+   if (messageArea) {
+       messageArea.innerText = "";
+   } else {
+       console.warn(`Element with ID ${messageareaID} not found.`);
+   }
+}
+
+let usernameTimeout;
+
+function handleInputChange(inputId, messageId) {
+    clearTimeout(usernameTimeout);
+    
+    usernameTimeout = setTimeout(() => {
+        checkUsernameAvailability(inputId, messageId);
+    }, 1000);
+}
+
+async function checkUsernameAvailability(elementID, messageID) {
+   const usernameInput = document.getElementById(elementID);
+   const usernameMessage = document.getElementById(messageID);
+   //const usernameInput = document.getElementById('regusernameInput');
+   //const usernameMessage = document.getElementById('usernameMessage');
    const username = usernameInput.value;
 
    usernameMessage.textContent = '';
@@ -337,6 +411,7 @@ async function checkUsernameAvailability() {
            const data = await response.json();
            if (data.exists) {
                usernameMessage.textContent = "Username is already taken.";
+               usernameMessage.style.color = "red";
            } else {
                usernameMessage.textContent = "Username is available.";
                usernameMessage.style.color = "green";
@@ -349,20 +424,26 @@ async function checkUsernameAvailability() {
    }
 }
 
-function validatePassword() {
-   const passwordInput = document.getElementById('regpwInput');
-   const messageArea = document.getElementById('messageArea');
+function validatePassword(passwordID, messageID) {
+   const passwordInput = document.getElementById(passwordID);
+   const messageArea = document.getElementById(messageID);
    const password = passwordInput.value;
 
    const validPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
-   if (!validPasswordRegex.test(password)) {
+   if (password.trim() === '') {
+       messageArea.textContent = '';
+       passwordInput.style.borderColor = '';
+       return false;
+   } else if (!validPasswordRegex.test(password)) {
        messageArea.textContent = "Password must be at least 8 characters long and contain numbers and special characters.";
        messageArea.style.color = "red";
        passwordInput.style.borderColor = "red";
+       return false;
    } else {
        messageArea.textContent = ''; 
        passwordInput.style.borderColor = '';
+       return true;
    }
 }
 
@@ -374,67 +455,154 @@ function togglePasswordVisibility(inputId, toggleIcon) {
    toggleIcon.classList.toggle('bi-eye', !isPasswordVisible);
 }
 
-async function validateAndRegister() {
-   const username = document.getElementById('regusernameInput').value;
-   const password = document.getElementById('regpwInput').value;
-   const confirmPassword = document.getElementById('regpwConfirmInput').value;
-
+async function validateAndRegister(type, username, password, confirmPassword) {
    const messageArea = document.getElementById('messageArea');
    const passwordInput = document.getElementById('regpwInput');
    const confirmPasswordInput = document.getElementById('regpwConfirmInput');
-
+   
    messageArea.textContent = '';
    passwordInput.style.borderColor = '';
    confirmPasswordInput.style.borderColor = '';
-
    const isPasswordValid = validatePasswordOnSubmit(password);
-   if (!isPasswordValid) return;
 
-   if (confirmPassword === '') {
-       messageArea.textContent = "Please confirm your password.";
-       messageArea.style.color = "red";
-       confirmPasswordInput.style.borderColor = "red";
-       return;
-   }
+   if (type === 'register') {
+       if (!isPasswordValid) return;
 
-   if (password !== confirmPassword) {
-       messageArea.textContent = "Passwords do not match. Please try again.";
-       messageArea.style.color = "red";
-       passwordInput.style.borderColor = "red";
-       confirmPasswordInput.style.borderColor = "red";
-       return; 
-   }
-
-   try {
-       const response = await fetch('https://sp4wn-signaling-server.onrender.com/register', {
-           method: 'POST',
-           headers: {
-               'Content-Type': 'application/json'
-           },
-           body: JSON.stringify({ username, password })
-       });
-
-       const data = await response.json();
-
-       if (response.ok) {
-           messageArea.textContent = "Account created successfully. Please login.";
-           messageArea.style.color = "green"; 
-           displayContent();
-       } else {
-           let errorMessage = "Registration failed. Please try again.";
-           if (data.message) {
-               errorMessage = data.message;
-           }
-           messageArea.textContent = errorMessage;
-           messageArea.style.color = "red"; 
-           console.log("Registration failed:", data.message);
+       if (confirmPassword === '') {
+           messageArea.textContent = "Please confirm your password.";
+           messageArea.style.color = "red";
+           confirmPasswordInput.style.borderColor = "red";
+           return;
        }
-   } catch (error) {
-       messageArea.textContent = "An error occurred. Please try again.";
-       messageArea.style.color = "red"; 
-       console.error("Registration error:", error);
-   }
+
+       if (password !== confirmPassword) {
+           messageArea.textContent = "Passwords do not match. Please try again.";
+           messageArea.style.color = "red";
+           passwordInput.style.borderColor = "red";
+           confirmPasswordInput.style.borderColor = "red";
+           return; 
+       }
+
+       try {
+           const response = await fetch('https://sp4wn-signaling-server.onrender.com/register', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json'
+               },
+               body: JSON.stringify({ username, password })
+           });
+
+           if (response.ok) {
+               messageArea.textContent = "Account created successfully. Please login.";
+               messageArea.style.color = "green"; 
+               alert("Account created successfully. Please login.");
+               displayContent();
+           } else {
+               const data = await response.json(); 
+               let errorMessage = "Registration failed. Please try again.";
+               if (data.message) {
+                   errorMessage = data.message;
+               }
+               messageArea.textContent = errorMessage;
+               messageArea.style.color = "red"; 
+               console.log("Registration failed:", data.message);
+           }
+       } catch (error) {
+           messageArea.textContent = "An error occurred. Please try again.";
+           messageArea.style.color = "red"; 
+           console.error("Registration error:", error);
+       }
+   } else if (type === 'update') {
+      let body;
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+  
+      if (!isPasswordValid) {
+          body = { username };
+      } else {
+          body = { username, password };
+      }
+  
+      try {
+          const response = await fetch('https://sp4wn-signaling-server.onrender.com/update-user', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${accessToken}`
+              },
+              body: JSON.stringify(body)
+          });
+  
+          if (response.ok) {
+              const responseData = await response.json();
+  
+              if (responseData.accessToken) {
+                  localStorage.setItem('accessToken', responseData.accessToken);
+              }
+  
+              messageArea.textContent = "Account updated successfully.";
+              messageArea.style.color = "green"; 
+              alert("Account updated successfully");
+              resetForm('updateusernameInput', 'updateusernameMessage', 'updateregpwInput', 'updateregpwConfirmInput', 'updatemessageArea');
+          } else if (response.status === 401) {
+              console.log('Unauthorized access. Attempting to refresh token...');
+              const newAccessToken = await refreshAccessToken(refreshToken);
+              if (newAccessToken) {
+                  const retryResponse = await fetch('https://sp4wn-signaling-server.onrender.com/update-user', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${newAccessToken}`
+                      },
+                      body: JSON.stringify(body)
+                  });
+  
+                  if (retryResponse.ok) {
+                      const retryData = await retryResponse.json();
+                      if (retryData.accessToken) {
+                          localStorage.setItem('accessToken', retryData.accessToken);
+                      }
+  
+                      messageArea.textContent = "Account updated successfully.";
+                      messageArea.style.color = "green"; 
+                      alert("Account updated successfully");
+                      resetForm('updateusernameInput', 'updateusernameMessage', 'updateregpwInput', 'updateregpwConfirmInput', 'updatemessageArea');
+                  } else {
+                      const retryData = await retryResponse.json();
+                      let errorMessage = "Account update failed. Please try again.";
+                      if (retryData.message) {
+                          errorMessage = retryData.message;
+                      }
+                      messageArea.textContent = errorMessage;
+                      messageArea.style.color = "red"; 
+                      console.log("Account update failed:", retryData.message);
+                  }
+              } else {
+                  messageArea.textContent = "Failed to refresh token. Please login again.";
+                  messageArea.style.color = "red"; 
+                  console.log("Failed to refresh token.");
+              }
+          } else {
+              const data = await response.json();
+              let errorMessage = "Account update failed. Please try again.";
+              if (data.message) {
+                  errorMessage = data.message;
+              }
+              messageArea.textContent = errorMessage;
+              messageArea.style.color = "red"; 
+              console.log("Account update failed:", data.message);
+          }
+      } catch (error) {
+          messageArea.textContent = "An error occurred. Please try again.";
+          messageArea.style.color = "red"; 
+          console.error("Account update error:", error);
+      }
+  }
+  
+  
 }
+
+
 
 function validatePasswordOnSubmit(password) {
    const messageArea = document.getElementById('messageArea');
@@ -460,10 +628,24 @@ function handleAuth(success) {
       document.getElementsByTagName('header')[0].style.display = "block";
       tokenBalanceDisplay.forEach((element) => {
          element.style.display = "block";
+         element.addEventListener('click', function() {
+            toggletokenspage();
+          });
       });       
       togglehome();      
     }
 };
+
+function logincheckEnter(event) {
+   if (event.key === 'Enter') {
+       loginBtn.click();
+   }
+}
+function registercheckEnter(event) {
+   if (event.key === 'Enter') {
+       registerBtn.click();
+   }
+}
 
 async function loginAndConnectToWebSocket(username, password) {   
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/login', {
@@ -495,7 +677,7 @@ async function autoLogin() {
    if (hasToken()) {
        const accessToken = localStorage.getItem('accessToken');
        const refreshToken = localStorage.getItem('refreshToken');
-       const username = await getUsernameFromToken(accessToken);
+       //const username = await getUsernameFromToken(accessToken);
 
        if (accessToken) {
            const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
@@ -507,7 +689,8 @@ async function autoLogin() {
 
            const data = await response.json();
            if (response.ok) {
-               tokenBalance = data.tokens;
+               username = data.username;
+               tokenBalance = data.tokens;               
                tokenBalanceDisplay.forEach((element) => {
                   element.textContent = `Tokens: ${tokenBalance}`;
                });   
@@ -613,27 +796,33 @@ let autoRedeemInterval;
 const redemptionInterval = 60 * 1000;
 
 async function redeemTokens(tokens) {
-   
+   const userId = getUserIdFromAccessToken();
+
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/redeem', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ host: connectedUser, username: globalUsername, tokens: tokens })
-    });
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({
+           hostId: connectedUser,
+           userId: userId,
+           tokens: tokens
+       })
+   });
 
    const data = await response.json();
    if (data.success) {
-        console.log(`Successfully redeemed ${tokens} tokens! Remaining tokens: ${data.tokens}`);
-        tokenBalanceDisplay.forEach((element) => {
-         element.textContent = `Tokens: ${data.tokens}`;
-      });   
-        return true;
+       console.log(`Successfully redeemed ${tokens} tokens! Remaining tokens: ${data.tokens}`);
+       tokenBalanceDisplay.forEach((element) => {
+           element.textContent = `Tokens: ${data.tokens}`;
+       });
+       return true;
    } else {
-        console.log('Redemption failed: ' + data.error);
-        return false;
+       console.log('Redemption failed: ' + data.error);
+       return false;
    }
 }
+
 
 function startAutoRedeem() {
     if (autoRedeemInterval) {
@@ -657,9 +846,40 @@ function stopAutoRedeem() {
     }
 }
 
+function getUserIdFromAccessToken() {
+
+   const accessToken = localStorage.getItem('accessToken');
+
+   if (!accessToken) {
+       console.error('Access token is undefined or null.');
+       return null; 
+   }
+
+   try {
+       const payload = accessToken.split('.')[1];
+
+       if (!payload) {
+           console.error('Access token is not in the correct format.');
+           return null; 
+       }
+
+       const decodedPayload = JSON.parse(atob(payload));
+
+       return decodedPayload.id;
+   } catch (err) {
+       console.error(`Error decoding access token: ${err.message}`);
+       return null;
+   }
+}
+
 async function checkBalance() {
    const accessToken = localStorage.getItem('accessToken');
-   const refreshToken = localStorage.getItem('refreshToken'); // Retrieve the refresh token
+   const refreshToken = localStorage.getItem('refreshToken');
+
+   if (!accessToken) {
+       console.log('Access token is missing. User may need to log in again.');
+       return false;
+   }
 
    const response = await fetch(`https://sp4wn-signaling-server.onrender.com/check-balance`, {
        method: 'GET',
@@ -674,32 +894,59 @@ async function checkBalance() {
        
        if (response.status === 401) {
            console.log('Unauthorized. Attempting to refresh token...');
-           const refreshed = await refreshAccessToken(refreshToken); // Pass the refresh token
+           const refreshed = await refreshAccessToken(refreshToken);
 
            if (refreshed) {
-               // Retry the original request after refreshing the token
-               return await checkBalance();
+               const newAccessToken = localStorage.getItem('accessToken');
+               return await checkBalanceWithNewToken(newAccessToken);
            } else {
                console.log('Token refresh failed. User may need to log in again.');
                return false;
            }
        }
 
-       return false; // Handle other non-401 errors as needed
+       return false;
    }
 
    const data = await response.json();
    if (data.success) {
-       console.log(`Balance: ${data.tokens}`);
-       tokenBalanceDisplay.forEach((element) => {
-         element.textContent = `Tokens: ${data.tokens}`;
-      });       
-       return data.tokens;
-   } else {
-       console.log('Error: ' + data.error);
+      console.log(`Balance: ${data.tokens}`);
+      tokenBalanceDisplay.forEach((element) => {
+        element.textContent = `Tokens: ${data.tokens}`;
+     });       
+      return data.tokens;
+  } else {
+      console.log('Error: ' + data.error);
+      return false;
+  }
+}
+
+async function checkBalanceWithNewToken(accessToken) {
+   const response = await fetch(`https://sp4wn-signaling-server.onrender.com/check-balance`, {
+       method: 'GET',
+       headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${accessToken}`
+       }
+   });
+
+   if (!response.ok) {
+       console.error('HTTP error after refreshing token:', response.status, response.statusText);
        return false;
    }
+
+   if (data.success) {
+      console.log(`Balance: ${data.tokens}`);
+      tokenBalanceDisplay.forEach((element) => {
+        element.textContent = `Tokens: ${data.tokens}`;
+     });       
+      return data.tokens;
+  } else {
+      console.log('Error: ' + data.error);
+      return false;
+  }
 }
+
 
 
 
@@ -1448,12 +1695,11 @@ function isDataChannelOpen() {
 
  }
 
-//when somebody sends us an offer
+
 function handleOffer(offer) {
-   //connectedUser = host;
+
    yourConn.setRemoteDescription(new RTCSessionDescription(offer));
 
-   //create an answer to an offer
    yourConn.createAnswer(function (answer) {
       yourConn.setLocalDescription(answer);
 
@@ -1463,19 +1709,15 @@ function handleOffer(offer) {
          username: globalUsername,
          host: connectedUser
       });
-    //  document.getElementById('sdp-answer').value = JSON.stringify(answer)
    }, function (error) {
       alert("Error when creating an answer");
    });
-   //toggleprofile('remote');
 };
 
-//when we got an answer from a remote user
 function handleAnswer(answer) {
    yourConn.setRemoteDescription(new RTCSessionDescription(answer));
 };
 
-//when we got an ice candidate from a remote user
 function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
@@ -1610,6 +1852,54 @@ function togglesettings() {
    settingsicon.classList.add("active");
    homeicon.classList.remove("active");
    profileicon.classList.remove("active");
+   toggleprofilesettings();
+
+}
+
+let tokenspage = document.getElementById("tokenspage");
+let profilesettingspage = document.getElementById("profilesettingspage");
+let robotssettingspage = document.getElementById("robotssettingspage");
+
+async function toggleprofilesettings() {
+   homePage.style.display = "none";
+   profilePage.style.display = "none";
+   infoPage.style.display = "none";
+   settingsPage.style.display = "block";
+   settingsicon.classList.add("active");
+   homeicon.classList.remove("active");
+   profileicon.classList.remove("active")
+   const usernameInputfield = document.getElementById("updateusernameInput");
+   profilesettings.classList.add("active");
+   robotssettings.classList.remove("active");
+   tokenspagelink.classList.remove("active");
+   profilesettingspage.style.display = "block";
+   robotssettingspage.style.display = "none";
+   tokenspage.style.display = "none";
+   resetForm('updateusernameInput', 'updateusernameMessage', 'updateregpwInput', 'updateregpwConfirmInput', 'updatemessageArea');
+   usernameInputfield.value = await getUsername();
+}
+function togglerobotssettings() {   
+   profilesettings.classList.remove("active");
+   robotssettings.classList.add("active");
+   tokenspagelink.classList.remove("active");
+   profilesettingspage.style.display = "none";
+   robotssettingspage.style.display = "block";
+   tokenspage.style.display = "none";
+}
+function toggletokenspage() {
+   homePage.style.display = "none";
+   profilePage.style.display = "none";
+   infoPage.style.display = "none";
+   settingsPage.style.display = "block";
+   settingsicon.classList.add("active");
+   homeicon.classList.remove("active");
+   profileicon.classList.remove("active");
+   profilesettings.classList.remove("active");
+   robotssettings.classList.remove("active");
+   tokenspagelink.classList.add("active");
+   profilesettingspage.style.display = "none";
+   robotssettingspage.style.display = "none";
+   tokenspage.style.display = "block";
 }
 
 let streamInterval;
@@ -1655,17 +1945,25 @@ function togglehome() {
    setTimeout(getStreams(), 50);
    startStreamInterval(10000);   
 }
-
+function handleProfileTitleClick() {
+   toggleprofilesettings();
+}
 function toggleprofile(msg) {
    stopStreamInterval();
    var data = msg;
-   profilePage.style.display = "block";
+   if (isMobileOrSmallScreen()) {
+      profilePage.style.display = "block";
+   } else {
+      profilePage.style.display = "grid";
+   }
+   
    homePage.style.display = "none";
    infoPage.style.display = "none";
    settingsPage.style.display = "none";
    homeicon.classList.remove("active");
    settingsicon.classList.remove("active");
    profileicon.classList.add("active");
+   
    switch(data) {
       case "local":
          if (liveremoteVideo == 1) {
@@ -1677,7 +1975,8 @@ function toggleprofile(msg) {
             } else {
                goliveBtn.style.display = "block";
                endliveBtn.style.display = "none";
-            }       
+            }
+            profileTitle.addEventListener('click', handleProfileTitleClick);    
             profileTitle.innerHTML = globalUsername;
             remoteVideo.style.display = "none";
             localVideo.style.display = "block";
@@ -1696,7 +1995,7 @@ function toggleprofile(msg) {
                    const content = document.querySelectorAll(".nocopy");
                    content.forEach(item => {
                        item.style.userSelect = isCopyEnabled ? 'text' : 'none';
-                       item.style.pointerEvents = isCopyEnabled ? 'auto' : 'none';
+                       //item.style.pointerEvents = isCopyEnabled ? 'auto' : 'none';
                    });
                });
            });           
@@ -1708,6 +2007,7 @@ function toggleprofile(msg) {
          if (otheruser == globalUsername) {
             toggleprofile('local');
          } else {
+            profileTitle.removeEventListener('click', handleProfileTitleClick);
             profileTitle.innerHTML = otheruser;
             remoteVideo.style.display = "block";
             localVideo.style.display = "none";
@@ -1715,7 +2015,8 @@ function toggleprofile(msg) {
             endliveBtn.style.display = "none";
             deviceinfo.style.display = "none";
             controlpanel.style.display = "none";     
-            disconnectdeviceBtn.style.display = "none";       
+            disconnectdeviceBtn.style.display = "none"; 
+            connectdeviceBtn.style.display = "none";       
             cparrowshost.forEach(cparrowshost => {
                cparrowshost.style.display = 'none';
              });
@@ -1771,7 +2072,7 @@ async function connectDevice() {
          console.error('Notifications or indications are not supported on this characteristic');
        }
        deviceType = "BT";
-       //enable buttons
+       
        connectdeviceBtn.style.display = "none";   
        connectcontrollerBtn.style.display = "inline-block";  
        disconnectdeviceBtn.style.display = "block";          
@@ -2447,17 +2748,41 @@ const form = document.getElementById('payment-form');
 const submitButton = document.getElementById('submit');
 const paymentResult = document.getElementById('payment-result');
 
+let selectedTokens = null;
+let selectedAmount = null;
+
+document.querySelectorAll('.purchase-block').forEach(block => {
+   block.addEventListener('click', () => {
+      document.querySelectorAll('.purchase-block').forEach(b => b.classList.remove('selected'));
+      block.classList.add('selected');
+      selectedTokens = block.getAttribute('data-tokens');
+      selectedAmount = block.getAttribute('data-amount');
+      document.getElementById('payment-form').style.display = 'block';
+   });
+});
+
 form.addEventListener('submit', async (event) => {
    event.preventDefault();
 
    submitButton.disabled = true;
    paymentResult.classList.add("visible");
 
+   const username = await getUsername();
+
    try {
+       const accessToken = localStorage.getItem('accessToken');
+
+       const { id: userId } = jwt_decode(accessToken);
+
        const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ amount: 1000, username: globalUsername, tokenamount: tokenamount }), 
+           body: JSON.stringify({ 
+               amount: selectedAmount, 
+               username: username, 
+               tokenamount: selectedTokens,
+               userId: userId
+           }), 
        }).then(r => r.json());
 
        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -2480,4 +2805,24 @@ form.addEventListener('submit', async (event) => {
        submitButton.disabled = false;
    }
 });
+
+function copyToClipboard(cardNumber) {
+   navigator.clipboard.writeText(cardNumber).then(function() {
+     showSnackbar(`${cardNumber} copied!`);
+   }).catch(function(err) {
+     console.error('Error copying text: ', err);
+     alert('Failed to copy card number.');
+   });
+ }
+
+ function showSnackbar(message) {
+   const snackbar = document.getElementById('snackbar');
+   snackbar.textContent = message;
+   snackbar.className = 'snackbar show';
+
+   setTimeout(function() {
+     snackbar.className = snackbar.className.replace('show', '');
+   }, 3000);  // Snackbar will disappear after 3 seconds
+ }
+
 init();

@@ -56,9 +56,9 @@
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" name="password" id="pwInput" maxlength="15" placeholder="" autocomplete="current-password" required>
+              <input type="password" name="password" id="pwInput" maxlength="15" placeholder="" autocomplete="current-password" onkeypress="logincheckEnter(event)" required>
             </div>
-            <button class="main-btn" id="loginBtn">Login</button>
+            <button class="main-btn wide" id="loginBtn">Login</button>
             <a href="#" onclick="registerform();">create account</a>
           </div>
         </div>
@@ -67,24 +67,24 @@
               <h1>Register</h1>
               <div class="form-group">
                   <label>Username</label>
-                  <input type="text" id="regusernameInput" minlength="3" maxlength="30" placeholder="" onblur="checkUsernameAvailability()">
+                  <input type="text" id="regusernameInput" minlength="3" maxlength="30" placeholder="" oninput="handleInputChange('regusernameInput', 'usernameMessage')">
                   <div id="usernameMessage" style="color: red; margin-top: 5px;"></div>
               </div>
               <div class="form-group">
                   <label>Password</label>
                   <div class="password-container">
-                      <input type="password" id="regpwInput" minlength="8" maxlength="50" placeholder="" onblur="validatePassword()">
+                      <input type="password" id="regpwInput" minlength="8" maxlength="50" placeholder="" onblur="validatePassword('regpwInput', 'messageArea')">
                       <i class="bi bi-eye-slash toggle-password" id="togglePassword" onclick="togglePasswordVisibility('regpwInput', this)"></i>
                   </div>
               </div>
               <div class="form-group">
                   <label>Confirm Password</label>
                   <div class="password-container">
-                      <input type="password" id="regpwConfirmInput" minlength="8" maxlength="50" placeholder="">
+                      <input type="password" id="regpwConfirmInput" minlength="8" maxlength="50" placeholder="" onkeypress="registercheckEnter(event)">
                       <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword" onclick="togglePasswordVisibility('regpwConfirmInput', this)"></i>
                   </div>
               </div>
-              <button class="main-btn" id="registerBtn">Register</button>
+              <button class="main-btn wide" id="registerBtn">Register</button>
               <a href="#" onclick="loginform();">Login</a>
               <div id="messageArea" style="margin-top: 10px; color: green;"></div>
           </div>
@@ -103,102 +103,188 @@
       </div>
   
       <div id="profilepage">
-        <div class="token-balance"></div>
-        <div id="modal-video-select" class="modal">
-          <div class="modal-content">
-            <span id="close-video-select" class="close">&times;</span>
-            <h2>Video Source</h2>
-            <div class="custom-select" style="width:200px;">
-              <select id="videoSelect">
-                <option value="0">Select device</option>
-                <option value="1">This Device</option>
-                <option value="2">IP Camera</option>
-              </select>              
-            </div>
-            <input type="text" id="tokenrateinput" placeholder="tokens/min" max="990" min="10" step="10" maxlength="3" style="display: none; margin-bottom: 20px; text-align: center;">   
-            <input type="text" id="locationinput" placeholder="location" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">            
-            <input type="text" id="streamdescinput" placeholder="description" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">
-            <input type="text" id="useripaddressinput" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">
-            <button class="main-btn" id="confirmvideoBTN">Confirm</button>            
-          </div>          
-        </div>   
-        <div id="profiletitle"></div>
-        <div class="stream-container">
-          <div id="video-container">
-            <video id="localVideo" autoplay controls></video>
-            <video id="remoteVideo" autoplay controls></video>                                              
-          </div>            
-          <button class="main-btn" id="goliveBtn">Go Live</button>
-          <button class="main-btn" id="spawnBtn">Spawn In</button>
+        <div class="column col1">
+          TODO: Available robots to be displayed here
         </div>
-        <button class="main-btn" id="endliveBtn">End Live</button>
-        <div id="control-panel">
-          <h2 id="cph2" style="display: none;">Control Panel</h2>            
-          <span id="deviceinfo">No device connected</span>          
-          <button class="main-btn" id="connectdevice-Btn">Connect</button>
-          <button class="main-btn" id="connectcontroller-Btn">Connect Controller</button>
-          <div id="modal-device-select" class="modal">
+        <div class="column col2">                 
+          <div id="modal-video-select" class="modal">
             <div class="modal-content">
-              <span class="close" id="close-device-select">&times;</span>
-              <h2>Select Device</h2>
+              <span id="close-video-select" class="close">&times;</span>
+              <h2>Video Source</h2>
               <div class="custom-select" style="width:200px;">
-                <select id="deviceSelect">
+                <select id="videoSelect">
                   <option value="0">Select device</option>
-                  <option value="1">BLE Server</option>
-                  <option value="2">Web Server</option>                  
+                  <option value="1">This Device</option>
+                  <option value="2">IP Camera</option>
                 </select>              
               </div>
-              <input type="text" id="devicenameinput" placeholder="Devce Name" value="v0_Robot" style="display: none; margin-bottom: 20px; text-align: center;">
-              <input type="text" id="deviceserviceinput" placeholder="Service UUID" value="12345678-1234-1234-1234-123456789012" style="display: none; margin-bottom: 20px; text-align: center;">            
-              <input type="text" id="devicecharinput" placeholder="Characteristic UUID" value="abcdef12-1234-1234-1234-abcdef123456" style="display: none; margin-bottom: 20px; text-align: center;">
-              <input type="text" id="deviceaddressinput" placeholder="Device URL" value="ws://10.0.0.244:81" style="display: none; margin-bottom: 20px; text-align: center;">
-              <button class="main-btn" id="confirmdeviceBTN">Confirm</button>            
+              <input type="text" id="tokenrateinput" placeholder="tokens/min" max="990" min="10" step="10" maxlength="3" style="display: none; margin-bottom: 20px; text-align: center;">   
+              <input type="text" id="locationinput" placeholder="location" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">            
+              <input type="text" id="streamdescinput" placeholder="description" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">
+              <input type="text" id="useripaddressinput" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">
+              <button class="main-btn" id="confirmvideoBTN">Confirm</button>            
             </div>          
-          </div>  
-          <div class="control-panel-outputs">
-            <div class="arrow-container-host">
-              <div class="arrow-buttons">
-                  <button id="host-forward" class="arrow up nocopy">&#9650;</button>
-                  <button id="host-left" class="arrow left nocopy">&#9664;</button>
-                  <button id="host-right" class="arrow right nocopy">&#9654;</button>
-                  <button id="host-reverse" class="arrow down nocopy">&#9660;</button>
+          </div>             
+          <div class="stream-container">
+            <div id="video-container">
+              <video id="localVideo" autoplay controls></video>
+              <video id="remoteVideo" autoplay controls></video>                                              
+            </div>                        
+          </div>
+          <button class="main-btn" id="endliveBtn">End Live</button>
+          <div id="control-panel">
+            <h2 id="cph2" style="display: none;">Control Panel</h2>            
+            <span id="deviceinfo">No device connected</span>                      
+            <div id="modal-device-select" class="modal">
+              <div class="modal-content">
+                <span class="close" id="close-device-select">&times;</span>
+                <h2>Select Device</h2>
+                <div class="custom-select" style="width:200px;">
+                  <select id="deviceSelect">
+                    <option value="0">Select device</option>
+                    <option value="1">BLE Server</option>
+                    <option value="2">Web Server</option>                  
+                  </select>              
+                </div>
+                <input type="text" id="devicenameinput" placeholder="Devce Name" value="v0_Robot" style="display: none; margin-bottom: 20px; text-align: center;">
+                <input type="text" id="deviceserviceinput" placeholder="Service UUID" value="12345678-1234-1234-1234-123456789012" style="display: none; margin-bottom: 20px; text-align: center;">            
+                <input type="text" id="devicecharinput" placeholder="Characteristic UUID" value="abcdef12-1234-1234-1234-abcdef123456" style="display: none; margin-bottom: 20px; text-align: center;">
+                <input type="text" id="deviceaddressinput" placeholder="Device URL" value="ws://10.0.0.244:81" style="display: none; margin-bottom: 20px; text-align: center;">
+                <button class="main-btn" id="confirmdeviceBTN">Confirm</button>            
+              </div>          
+            </div>  
+            <div class="control-panel-outputs">
+              <div class="arrow-container-host">
+                <div class="arrow-buttons">
+                    <button id="host-forward" class="arrow up nocopy">&#9650;</button>
+                    <button id="host-left" class="arrow left nocopy">&#9664;</button>
+                    <button id="host-right" class="arrow right nocopy">&#9654;</button>
+                    <button id="host-reverse" class="arrow down nocopy">&#9660;</button>
+                </div>
               </div>
+              <div class="arrow-container-remote">
+                <div class="arrow-buttons">
+                    <button id="forwardbtn" class="arrow up nocopy">&#9650;</button>
+                    <button id="turnleftbtn" class="arrow left nocopy">&#9664;</button>
+                    <button id="turnrightbtn" class="arrow right nocopy">&#9654;</button>
+                    <button id="reversebtn" class="arrow down nocopy">&#9660;</button>
+                </div>
+              </div>              
+              <div class="bottom-control-panel">
+                <br>
+                <button class="main-btn" id="endotherliveBtn">Stop Watching</button>
+                <button id="disconnectdevice-Btn">Disconnect</button>
+              </div>                          
             </div>
-            <div class="arrow-container-remote">
-              <div class="arrow-buttons">
-                  <button id="forwardbtn" class="arrow up nocopy">&#9650;</button>
-                  <button id="turnleftbtn" class="arrow left nocopy">&#9664;</button>
-                  <button id="turnrightbtn" class="arrow right nocopy">&#9654;</button>
-                  <button id="reversebtn" class="arrow down nocopy">&#9660;</button>
-              </div>
-            </div>              
-            <div class="bottom-control-panel">
-              <br>
-              <button class="main-btn" id="endotherliveBtn">Stop Watching</button>
-              <button id="disconnectdevice-Btn">Disconnect</button>
-            </div>                          
           </div>
         </div>
+        <div class="column col3">
+          <div style="padding-top: 15px;" id="profiletitle"></div>
+          <div class="break"></div>
+          <div style="width: 100%; text-align: right;">
+            <div class="token-balance-container-center">
+              <div class="token-balance"></div> 
+            </div> 
+          </div> 
+          <div class="break"></div>
+          <button class="main-btn" id="connectdevice-Btn">Connect</button>
+          <button class="main-btn" id="goliveBtn">Go Live</button>
+          <button class="main-btn" id="spawnBtn">Spawn In</button>
+          
+          <button class="main-btn" id="connectcontroller-Btn">Connect Controller</button>
+        </div>        
       </div>
 
-      <div id="settingspage">
-        <div class="token-balance"></div>
-        <h1>Settings</h1><br>        
-        <div class="text-block" style="text-align: center;">          
-          <h2>Add Tokens</h2>
-          <ul style="list-style-type: none;">
-            <li>Visa: 4242 4242 4242 4242</li>
-            <li>MasterCard: 5555 5555 5555 4444</li>
-            <li>American Express: 3782 822463 10005</li>
-            <li>Discover: 6011 1111 1111 1117</li>
-          </ul>
-          <div style="padding: 25px 0;">Purchase 100 tokens</div>
-          <form id="payment-form" style="margin: 25px auto;">
-            <div id="card-element"><!-- A Stripe Element will be inserted here. --></div>
-            <button id="submit" style="cursor: pointer;">Pay</button>
-            <div id="payment-result" class="hidden"></div>
-          </form>
-        </div>        
+      <div id="settingspage">        
+        <div class="settings-link-bar">          
+          <ul class="settings-icons">   
+            <li><a href="#" id="profile-settings" onclick="toggleprofilesettings()">Profile</a></li>       
+            <li><a href="#" id="robots-settings" onclick="togglerobotssettings()">Robots</a></li>
+            <li><a href="#" id="tokens-page-link" onclick="toggletokenspage()">Tokens</a></li>
+          </ul>          
+        </div> 
+        <div id="profilesettingspage">
+          <div id="updateprofileform" class="login-container">
+            <div class="login-form">              
+              <div class="form-group">
+                <h2>Update Profile</h2>
+                  <label>Username</label>
+                  <input type="text" id="updateusernameInput" minlength="3" maxlength="30" placeholder="" oninput="handleInputChange('updateusernameInput', 'updateusernameMessage')">
+                  <div id="updateusernameMessage" style="color: red; margin-top: 5px;"></div>
+              </div>
+              <div class="form-group">
+                  <label>New Password</label>
+                  <div class="password-container">
+                      <input type="password" id="updateregpwInput" minlength="8" maxlength="50" placeholder="" onblur="validatePassword('updateregpwInput', 'updatemessageArea')">
+                      <i class="bi bi-eye-slash toggle-password" id="togglePassword" onclick="togglePasswordVisibility('regpwInput', this)"></i>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <label>Confirm New Password</label>
+                  <div class="password-container">
+                      <input type="password" id="updateregpwConfirmInput" minlength="8" maxlength="50" placeholder="">
+                      <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword" onclick="togglePasswordVisibility('regpwConfirmInput', this)"></i>
+                  </div>
+              </div>
+              <button class="main-btn" id="updateuserBtn">Save</button>
+              <div id="updatemessageArea" style="margin-top: 10px; color: green;"></div>
+            </div>
+          </div>
+        </div>
+        <div id="robotssettingspage">
+          <div class="text-block" style="text-align: center;">          
+            <h2>Your Robots</h2>
+            
+          </div>
+        </div>
+        <div id="tokenspage">          
+          <div class="token-page-container" style="text-align: center;">    
+            <div class="token-balance-container-center">
+              <div class="token-balance"></div> 
+            </div> 
+            <div class="stripe-form-container">
+              <h2>Purchase Tokens</h2>
+              
+              <!-- Token Selection -->
+              <div>
+                <label for="token-amount">Select Number of Tokens:</label>
+                <select id="token-amount">
+                  <option value="100">100 tokens - $10</option>
+                  <option value="500">500 tokens - $50</option>
+                  <option value="1000">1,000 tokens - $100</option>
+                  <option value="10000">10,000 tokens - $1000</option>
+                </select>
+              </div>
+          
+              <!-- Stripe Payment Form -->
+              <form id="payment-form">
+                <div id="card-element"></div> <!-- Stripe Element will be inserted here -->
+                <button id="stripe-submit" style="cursor: pointer;">Pay</button>
+                <div id="payment-result" class="hidden"></div> <!-- Payment result message -->
+              </form>
+            </div>
+            <ul>
+              <h3 style="margin: 25px 0;">Test cards</h3>
+              <li class="payment-method visa" onclick="copyToClipboard('4242 4242 4242 4242')">
+                <span class="payment-icon">💳</span>
+                <span class="card-info">Visa: 4242 4242 4242 4242</span>
+              </li>
+              <li class="payment-method mastercard" onclick="copyToClipboard('5555 5555 5555 4444')">
+                <span class="payment-icon">💳</span>
+                <span class="card-info">MasterCard: 5555 5555 5555 4444</span>
+              </li>
+              <li class="payment-method amex" onclick="copyToClipboard('3782 822463 10005')">
+                <span class="payment-icon">💳</span>
+                <span class="card-info">American Express: 3782 822463 10005</span>
+              </li>
+              <li class="payment-method discover" onclick="copyToClipboard('6011 1111 1111 1117')">
+                <span class="payment-icon">💳</span>
+                <span class="card-info">Discover: 6011 1111 1111 1117</span>
+              </li>
+            </ul>
+            <div id="snackbar"></div>
+          </div>
+        </div>           
       </div>
 
       <div id="infopage">
