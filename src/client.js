@@ -1900,6 +1900,11 @@ function toggletokenspage() {
    profilesettingspage.style.display = "none";
    robotssettingspage.style.display = "none";
    tokenspage.style.display = "block";
+   tokenAmountSelect.addEventListener('change', () => {
+      selectedTokens = tokenAmountSelect.value; 
+      selectedAmount = tokenAmountSelect.options[tokenAmountSelect.selectedIndex].getAttribute('data-amount'); // Get the associated amount
+      document.getElementById('payment-form').style.display = 'block'; 
+   });
 }
 
 let streamInterval;
@@ -2753,12 +2758,7 @@ let selectedAmount = null;
 
 const tokenAmountSelect = document.getElementById('token-amount');
 
-// Update selected tokens and amount based on the selection
-tokenAmountSelect.addEventListener('change', () => {
-    selectedTokens = tokenAmountSelect.value; // Get the selected value (number of tokens)
-    selectedAmount = tokenAmountSelect.options[tokenAmountSelect.selectedIndex].getAttribute('data-amount'); // Get the associated amount
-    document.getElementById('payment-form').style.display = 'block'; // Show the payment form
-});
+
 
 
 form.addEventListener('submit', async (event) => {
@@ -2770,15 +2770,14 @@ form.addEventListener('submit', async (event) => {
    const username = await getUsername();
 
    try {
-       const accessToken = localStorage.getItem('accessToken');
-
-       const { id: userId } = jwt_decode(accessToken);
+       const userId = getUserIdFromAccessToken();
+       console.log(userId);
 
        const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify({ 
-               amount: selectedAmount, 
+               amount: tokenamount, 
                username: username, 
                tokenamount: selectedTokens,
                userId: userId
