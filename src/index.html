@@ -242,6 +242,7 @@
             <div class="token-balance-container-center">
               <div class="token-balance"></div> 
             </div> 
+
             <div class="stripe-form-container">
               <h2>Purchase Tokens</h2>
               
@@ -249,11 +250,11 @@
               <div>
                 <label for="token-amount">Select Number of Tokens:</label>
                 <select id="token-amount">
-                  <option value="100">100 tokens - $10</option>
-                  <option value="500">500 tokens - $50</option>
-                  <option value="1000">1,000 tokens - $100</option>
-                  <option value="10000">10,000 tokens - $1000</option>
-                </select>
+                  <option value="100" data-amount="1000">100 tokens - $10</option>
+                  <option value="500" data-amount="5000">500 tokens - $50</option>
+                  <option value="1000" data-amount="10000">1,000 tokens - $100</option>
+                  <option value="10000" data-amount="100000">10,000 tokens - $1000</option>
+              </select>
               </div>
           
               <!-- Stripe Payment Form -->
@@ -263,6 +264,7 @@
                 <div id="payment-result" class="hidden"></div> <!-- Payment result message -->
               </form>
             </div>
+
             <ul>
               <h3 style="margin: 25px 0;">Test cards</h3>
               <li class="payment-method visa" onclick="copyToClipboard('4242 4242 4242 4242')">
