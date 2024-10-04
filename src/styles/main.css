@@ -306,7 +306,7 @@ button:hover {
 #goliveBtn, #spawnBtn, #connectdevice-Btn {
   margin: 0;
   position: absolute;
-  top: 30%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
@@ -1066,11 +1066,7 @@ footer {
     display: none;
   }
   #goliveBtn, #spawnBtn, #connectdevice-Btn {
-    margin: 0;
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    
   }
   #profilepage {
     
