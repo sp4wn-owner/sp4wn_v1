@@ -200,11 +200,12 @@ button:hover {
 }
 
 .token-balance {
+  margin: 0 auto;
   font-family: 'Exarros'; /* Ensure the font is properly loaded */
   display: block; /* Change to 'block' so it shows up */
   color: green; /* A cool, vibrant green */
   font-weight: bold;
-  width: 100%;
+  width: 90%;
   font-size: 24px; /* Make the text bigger for impact */
   text-align: center; /* Center the text */
   letter-spacing: 2px; /* Add some spacing for a modern look */
@@ -346,11 +347,12 @@ button:hover {
   color: lime;
 }
 #profiletitle {
+  margin: 0 auto;
   font-family: 'Exarros'; 
   display: block; 
   color: #8F00FF;
   font-weight: bold;
-  width: 100%;
+  width: 90%;
   font-size: 36px;
   text-align: center; 
   letter-spacing: 2px;
@@ -359,8 +361,10 @@ button:hover {
   color: transparent; 
   text-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
   transform: scale(1);
+  transform-origin: center; /* This sets the scaling point to the center */
   transition: transform 0.3s ease-in-out, color 0.3s ease;
 }
+
 #profiletitle:hover {
   cursor: pointer;
   transform: scale(1.1); 
@@ -426,6 +430,7 @@ video::-webkit-media-controls-play-button {
 video {
   background: #f1f1f1;
   height: 360px;
+  width: 100%;
 }
 
 #localVideo, #remoteVideo {  
