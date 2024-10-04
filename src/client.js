@@ -2771,7 +2771,6 @@ form.addEventListener('submit', async (event) => {
 
    try {
        const userId = getUserIdFromAccessToken();
-       console.log(userId);
 
        const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
            method: 'POST',
