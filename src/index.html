@@ -31,7 +31,7 @@
     <header>
       <div id="toplinkbar" class="top-link-bar">
         <ul class="left-icons">
-          <a class="logo" href="#" onclick="togglehome()">SP4WN</a>
+          <a class="logo" href="#" onclick="togglehome()">SPAWN</a>
         </ul>
         <ul class="center-icons">   
           <li><a href="#" id="home-icon" onclick="togglehome()"><i class="fa fa-home"></i></a></li>       
@@ -104,7 +104,8 @@
   
       <div id="profilepage">
         <div class="column col1">
-          TODO: Available robots to be displayed here
+          <span id="promoted-span" style="display: none;">No robots available</span>
+          <div id="promoted-streams-container"></div>
         </div>
         <div class="column col2">                 
           <div id="modal-video-select" class="modal">
@@ -120,7 +121,7 @@
               </div>
               <input type="text" id="tokenrateinput" placeholder="tokens/min" max="990" min="10" step="10" maxlength="3" style="display: none; margin-bottom: 20px; text-align: center;">   
               <input type="text" id="locationinput" placeholder="location" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">            
-              <input type="text" id="streamdescinput" placeholder="description" maxlength="23" style="display: none; margin-bottom: 20px; text-align: center;">
+              <input type="text" id="streamdescinput" placeholder="description" maxlength="100" style="display: none; margin-bottom: 20px; text-align: center;">
               <input type="text" id="useripaddressinput" value="https://10.0.0.249:81/stream" style="display: none; margin-bottom: 20px; text-align: center;">
               <button class="main-btn" id="confirmvideoBTN">Confirm</button>            
             </div>          
@@ -131,6 +132,25 @@
               <video id="remoteVideo" autoplay controls></video>                                              
             </div>                        
           </div>
+          <div class="two-column-layout">
+            <div class="column">
+              <div id="profiletitle"></div>
+            </div>
+            
+            <div class="column">
+              <div class="token-balance-container-right">
+              <div class="token-balance"></div> 
+            </div> 
+            
+          </div>
+          
+          <button class="main-btn" id="connectdevice-Btn">Connect</button>
+          <button class="main-btn" id="goliveBtn">Go Live</button>
+          <button class="main-btn" id="spawnBtn">Spawn In</button>
+          
+          </div>  
+          <button class="main-btn" id="connectcontroller-Btn">Connect Controller</button>
+
           <button class="main-btn" id="endliveBtn">End Live</button>
           <div id="control-panel">
             <h2 id="cph2" style="display: none;">Control Panel</h2>            
@@ -179,20 +199,9 @@
           </div>
         </div>
         <div class="column col3">
-          <div id="profiletitle"></div>
-          <div class="break"></div>
-          <div>
-            <div class="token-balance-container-center">
-              <div class="token-balance"></div> 
-            </div> 
-          </div> 
-          <div class="break"></div>
-          <button class="main-btn" id="connectdevice-Btn">Connect</button>
-          <button class="main-btn" id="goliveBtn">Go Live</button>
-          <button class="main-btn" id="spawnBtn">Spawn In</button>
-          
-          <button class="main-btn" id="connectcontroller-Btn">Connect Controller</button>
-        </div>        
+          <h2>Details</h2>
+          <div id="robotdescription"></div>
+        </div>
       </div>
 
       <div id="settingspage">        

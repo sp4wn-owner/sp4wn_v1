@@ -200,14 +200,13 @@ button:hover {
 }
 
 .token-balance {
-  margin: 0 auto;
-  font-family: 'Exarros'; /* Ensure the font is properly loaded */
+  font-family: monospace; /* Ensure the font is properly loaded */
   display: block; /* Change to 'block' so it shows up */
   color: green; /* A cool, vibrant green */
   font-weight: bold;
-  width: 90%;
-  font-size: 24px; /* Make the text bigger for impact */
-  text-align: center; /* Center the text */
+  width: 100%;
+  font-size: 15px;
+  float: right;
   letter-spacing: 2px; /* Add some spacing for a modern look */
   background: linear-gradient(90deg, green, lime); /* Gradient background */
   -webkit-background-clip: text; /* Clip the background to text (Webkit support) */
@@ -225,16 +224,15 @@ button:hover {
 }
 
 .token-balance-container-right {
-  display: inline-block;
-  width: fit-content;
-  padding-right: 25px;
-  padding-top: 15px;
-  font-size: 25px;
+  text-align: right;
+  float: right;
+  padding-right: 10px;
 }
 .token-balance-container-center {
   text-align: center;
   font-size: 25px;
   margin-bottom: 25px;
+
 }
 #redeem-tokens {
   margin-top: 25px;
@@ -268,8 +266,11 @@ button:hover {
   text-underline-offset: 10px;
 }
 #profilepage {
-  
   grid-template-columns: 1fr 3fr 1fr;
+}
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   column-gap: 1em;
 }
 .three-column-layout {
@@ -282,15 +283,33 @@ button:hover {
   box-sizing: border-box;
 }
 .col1 {
-  margin: 0 auto;
+  width: 100%;
 }
 .col2 {
   margin: 0 auto;
 }
 .col3 {
   margin: 0 auto;
+  font-family: monospace;  
+}
+.col3 h2 {
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: underline;
+  text-underline-offset: 10px;
+}
+#robotdescription {
+  font-size: 20px;
+  margin-top: 15px;
 }
 
+#goliveBtn, #spawnBtn, #connectdevice-Btn {
+  margin: 0;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 #settingspage {
   height: 900px; 
 }
@@ -347,14 +366,15 @@ button:hover {
   color: lime;
 }
 #profiletitle {
-  margin: 0 auto;
-  font-family: 'Exarros'; 
+  font-family: monospace; 
   display: block; 
   color: #8F00FF;
   font-weight: bold;
-  width: 90%;
-  font-size: 36px;
-  text-align: center; 
+  width: 85%;
+  float: left; 
+  text-align: left;
+  padding-left: 10px;
+  font-size: 15px;
   letter-spacing: 2px;
   background: linear-gradient(90deg, #8F00FF, #1a002e); 
   -webkit-background-clip: text; 
@@ -399,6 +419,31 @@ button:hover {
   text-decoration: none;
   text-transform: uppercase;  
 }
+.promoted-streams-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1em;
+  cursor: pointer;
+  background-color: #f1f1f1;
+  padding: 5px;
+  
+}
+.promoted-streams-layout:hover {
+  background-color: lightgreen;
+}
+.promoted-streams-names {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 20px;
+  text-decoration: none; 
+  align-content: center;
+}
+.promoted-streams-layout span {
+  align-content: center;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 20px;
+}
 #getstreamsbtn {
   margin: 25px;
 }
@@ -429,7 +474,7 @@ video::-webkit-media-controls-play-button {
 }
 video {
   background: #f1f1f1;
-  height: 360px;
+  height: 480px;
   width: 100%;
 }
 
@@ -568,6 +613,7 @@ text-decoration: none;
 }
 #connectcontroller-Btn {
   display: none;
+  margin: 0 auto;
 }
 #disconnectdevice-Btn {
   margin: 0 auto;
@@ -1005,11 +1051,7 @@ footer {
   .modal-content {
     width: auto;
   }
-  .token-balance {
-    text-align: center;
-    padding-right: 0;
-    padding-bottom: 10px;
-  }
+
   .logo {
     display: none;
   }
@@ -1021,7 +1063,7 @@ footer {
     width: 100%;
   }
   .col3 {
-    display: block;
+    display: none;
   }
   #goliveBtn, #spawnBtn, #connectdevice-Btn {
     margin: 0;

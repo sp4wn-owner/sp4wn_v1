@@ -66,6 +66,9 @@ function connect(username, accessToken) {
          case "liveusers":
             handleStreams(data.images);
             break;
+         case "promotedstreams":
+            handlePromotedStreams(data.images);
+            break;
          case "handlecheck":
             handlecheck(data.name);
             break;
@@ -178,7 +181,8 @@ var devicespan = document.getElementById("close-device-select");
 var confirmVideoBtn = document.querySelector('#confirmvideoBTN');
 var confirmDeviceBtn = document.querySelector('#confirmdeviceBTN');
 const controlbuttons = document.querySelectorAll(".nocopy");
-
+let robotdescription;
+var robotdescriptionelement = document.getElementById("robotdescription");
 var yourConn;
 var stream;
 var call
@@ -673,65 +677,109 @@ async function loginAndConnectToWebSocket(username, password) {
 }
 async function autoLogin() {
    console.log("Attempting auto login");
-   
-   if (hasToken()) {
-       const accessToken = localStorage.getItem('accessToken');
-       const refreshToken = localStorage.getItem('refreshToken');
-       //const username = await getUsernameFromToken(accessToken);
 
-       if (accessToken) {
-           const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
-               method: 'GET',
-               headers: {
-                   'Authorization': `Bearer ${accessToken}`
-               }
+   if (!hasToken()) {
+       console.log("No token found in localStorage.");
+       return;
+   }
+
+   const accessToken = localStorage.getItem('accessToken');
+   const refreshToken = localStorage.getItem('refreshToken');
+
+   if (!accessToken) {
+       console.log("No access token found.");
+       return;
+   }
+
+   try {
+       const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
+           method: 'GET',
+           headers: {
+               'Authorization': `Bearer ${accessToken}`
+           }
+       });
+
+       const data = await response.json();
+
+       if (response.ok) {
+           const username = data.username;
+           const tokenBalance = data.tokens;
+
+           tokenBalanceDisplay.forEach((element) => {
+               element.textContent = `Tokens: ${tokenBalance}`;
            });
 
-           const data = await response.json();
-           if (response.ok) {
-               username = data.username;
-               tokenBalance = data.tokens;               
-               tokenBalanceDisplay.forEach((element) => {
-                  element.textContent = `Tokens: ${tokenBalance}`;
-               });   
-               console.log('Login successful!');
-               connect(username, accessToken);
-           } else if (response.status === 401) {
-               console.log('Unauthorized access. Attempting to refresh token...');
-               await refreshAccessToken(refreshToken);
+           console.log('Login successful!');
+           connect(username, accessToken);
+       } else if (response.status === 401) {
+           console.log('Unauthorized access. Attempting to refresh token...');
+           const newTokens = await refreshAccessToken(refreshToken);
+
+           if (newTokens) {
+               await autoLoginWithNewToken(newTokens.accessToken, newTokens.refreshToken);
            } else {
-               alert('Auto-login failed: ' + data.message);
+               console.log("Failed to refresh access token.");
+               alert('Session expired. Please log in again.');
            }
        } else {
-           console.log("No access token found.");
+           alert('Auto-login failed: ' + data.message);
        }
-   } else {
-       console.log("No token found in localStorage.");
+   } catch (error) {
+       console.error("Error during auto login:", error);
+       alert('An error occurred during auto login. Please try again.');
    }
 }
 
 async function refreshAccessToken(refreshToken) {
    try {
        const response = await fetch('https://sp4wn-signaling-server.onrender.com/refresh-token', {
-            method: 'POST',
-            headers: {
-                  'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ refreshToken })
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json'
+           },
+           body: JSON.stringify({ refreshToken })
        });
 
        if (response.ok) {
-            const { accessToken, newRefreshToken } = await response.json();
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', newRefreshToken);
-            console.log('Token refreshed successfully.');
-            await autoLogin();
+           const data = await response.json();
+           localStorage.setItem('accessToken', data.accessToken);
+           localStorage.setItem('refreshToken', data.refreshToken);
+           return data; 
        } else {
-            alert('Failed to refresh token: ' + (await response.json()).message);
-            logout();
+           console.error("Failed to refresh token:", response.status);
+           return null;
        }
    } catch (error) {
-       console.error('Error refreshing token:', error);
+       console.error("Error during token refresh:", error);
+       return null; 
+   }
+}
+
+async function autoLoginWithNewToken(newAccessToken, newRefreshToken) {
+   try {
+       const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
+           method: 'GET',
+           headers: {
+               'Authorization': `Bearer ${newAccessToken}`
+           }
+       });
+
+       const data = await response.json();
+       if (response.ok) {
+           const username = data.username;
+           const tokenBalance = data.tokens;
+
+           tokenBalanceDisplay.forEach((element) => {
+               element.textContent = `Tokens: ${tokenBalance}`;
+           });
+
+           console.log('Re-login successful!');
+           connect(username, newAccessToken);
+       } else {
+           alert('Failed to access protected resource after token refresh: ' + data.message);
+       }
+   } catch (error) {
+       console.error("Error during re-login with new token:", error);
    }
 }
 
@@ -785,11 +833,166 @@ function hasToken() {
    const token = localStorage.getItem('accessToken'); 
    return token !== null;
 }
+
+let streamInterval;
+
+function startStreamInterval(interval) {
+   if(streamInterval) {
+      stopStreamInterval();
+   }      
+   streamInterval = setInterval(() => {
+      getStreams();
+   }, interval);
+   console.log("Stream interval initiated");
+}
+
+function stopStreamInterval() {
+   clearInterval(streamInterval);   
+   streamInterval = null;
+   console.log("Stream interval terminated");
+}
+
 function getStreams() {
    liveStreams.innerHTML = "";
    send({
       type: "streams"
    });
+}
+
+let promotedstreamInterval;
+let promotedStreamsContainer = document.getElementById("promoted-streams-container");
+
+function startPromotedStreamInterval(interval) {
+   if(promotedstreamInterval) {
+      stopPromotedStreamInterval();
+   }      
+   promotedstreamInterval = setInterval(() => {
+      getPromotedStreams();
+   }, interval);
+   console.log("Promoted stream interval initiated");
+}
+
+function stopPromotedStreamInterval() {
+   clearInterval(promotedstreamInterval);   
+   promotedstreamInterval = null;
+   console.log("Promoted stream interval terminated");
+}
+
+function getPromotedStreams() {
+   promotedStreamsContainer.innerHTML = "";
+   send({
+      type: "promotedstreams"
+   });
+}
+
+
+function handleStreams(images) {
+   let ratetext = ' tokens/min';
+   const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
+   const premadeInfoIcon = `<i class="fa fa-info"></i>`;
+   for (let i = 0; i< images.length; i++) {
+      let text = images[i].username;
+      let imgurl = images[i].imageDataUrl;
+      let rate = images[i].tokenrate;
+      if (rate == 0 || rate == null) {
+         rate = "FREE";
+         ratetext = '';
+      }
+      let hostlocation = images[i].location;
+      let description = images[i].description;
+      let divElement = document.createElement('div');
+      let divElementIcon = document.createElement('div');
+      let divStreamName = document.createElement('div');
+      let imgElement = document.createElement('img');
+      let divElementRate = document.createElement('div');
+      let elementRateSpan = document.createElement('span');
+      let rateElement = document.createElement('span');
+      let locationElement = document.createElement('span');
+    //  let descContainerElem = document.createElement('div');
+   //   let descElement = document.createElement('span');
+      divElement.classList.add("live-streams-container"); 
+      divStreamName.classList.add("live-streams-names");
+      
+      rateElement.innerHTML = rate;
+      locationElement.innerHTML = hostlocation;
+      //descElement.innerHTML = description;
+      divStreamName.innerHTML = text;
+      imgElement.src = imgurl;
+      imgElement.style.width = '250px';
+
+      liveStreams.appendChild(divElement);
+      divElement.appendChild(imgElement);      
+      divElement.appendChild(divStreamName);
+      divElement.appendChild(divElementRate);
+      divElementRate.appendChild(rateElement);      
+      divElementRate.appendChild(elementRateSpan);  
+      elementRateSpan.innerText = ratetext;      
+      divElement.appendChild(divElementIcon);
+      divElementIcon.innerHTML = premadeMarkerIcon;
+      divElementIcon.appendChild(locationElement);
+    //  divElement.appendChild(descContainerElem);
+    //  descContainerElem.innerHTML = premadeInfoIcon;
+    //  descContainerElem.appendChild(descElement);
+      
+      divElement.onclick = function() {
+         checkProfile(text, rate, description);
+      };
+   }
+
+   if (images.length < 1) {
+      document.getElementById("live-span-public").style.display = "block";      
+   } else {
+      document.getElementById("live-span-public").style.display = "none";      
+   }
+}
+
+function handlePromotedStreams(images) {
+   //let ratetext = ' tokens/min';
+   for (let i = 0; i< images.length; i++) {
+      let text = images[i].username;
+      let rate = images[i].tokenrate;
+      if (rate == 0 || rate == null) {
+         rate = "FREE";
+         ratetext = '';
+      }
+      let description = images[i].description;
+      let divElement = document.createElement('div');
+      let divStreamName = document.createElement('div');
+      
+      let divElementRate = document.createElement('div');
+      let rateElement = document.createElement('span');
+     // let elementRateSpan = document.createElement('span');
+
+      divElement.classList.add("promoted-streams-layout"); 
+      divStreamName.classList.add("promoted-streams-names");
+      
+      rateElement.innerHTML = rate;
+      divStreamName.innerHTML = text;
+
+      promotedStreamsContainer.appendChild(divElement);    
+      divElement.appendChild(divStreamName);
+      divElement.appendChild(divElementRate);
+      divElementRate.appendChild(rateElement); 
+      //divElementRate.appendChild(elementRateSpan);   
+      //elementRateSpan.innerText = ratetext;         
+      
+      divElement.onclick = function() {
+         checkProfile(text, rate, description);
+      };
+   }
+
+   if (images.length < 1) {
+      document.getElementById("promoted-span").style.display = "block";      
+   } else {
+      document.getElementById("promoted-span").style.display = "none";      
+   }
+}
+
+function checkProfile (userdata, rate, description) {
+   tokenrate = rate;
+   otheruser = userdata;   
+   robotdescription = description;    
+   toggleprofile('remote');
 }
 
 let autoRedeemInterval;
@@ -1315,6 +1518,7 @@ confirmVideoBtn.onclick = function() {
       tokenrate = getTokenRate();
       mylocation = locationinput.value;
       streamdescription = streamdescriptioninput.value;
+      robotdescriptionelement.innerHTML = streamdescription;
       
       if(mylocation == "" || mylocation == null) {
          mylocation = "Not specified";
@@ -1768,72 +1972,6 @@ function handleLeave() {
    }
 };
 
-function handleStreams(images) {
-   let ratetext = ' tokens/min';
-   const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
-   const premadeInfoIcon = `<i class="fa fa-info"></i>`;
-   for (let i = 0; i< images.length; i++) {
-      let text = images[i].username;
-      let imgurl = images[i].imageDataUrl;
-      let rate = images[i].tokenrate;
-      if (rate == 0 || rate == null) {
-         rate = "FREE";
-         ratetext = '';
-      }
-      let hostlocation = images[i].location;
-      let description = images[i].description;
-      let divElement = document.createElement('div');
-      let divElementIcon = document.createElement('div');
-      let divStreamName = document.createElement('div');
-      let imgElement = document.createElement('img');
-      let divElementRate = document.createElement('div');
-      let elementRateSpan = document.createElement('span');
-      let rateElement = document.createElement('span');
-      let locationElement = document.createElement('span');
-      let descContainerElem = document.createElement('div');
-      let descElement = document.createElement('span');
-      divElement.classList.add("live-streams-container"); 
-      divStreamName.classList.add("live-streams-names");
-      
-      rateElement.innerHTML = rate;
-      locationElement.innerHTML = hostlocation;
-      descElement.innerHTML = description;
-      divStreamName.innerHTML = text;
-      imgElement.src = imgurl;
-      imgElement.style.width = '250px';
-
-      liveStreams.appendChild(divElement);
-      divElement.appendChild(imgElement);      
-      divElement.appendChild(divStreamName);
-      divElement.appendChild(divElementRate);
-      divElementRate.appendChild(rateElement);      
-      divElementRate.appendChild(elementRateSpan);  
-      elementRateSpan.innerText = ratetext;      
-      divElement.appendChild(divElementIcon);
-      divElementIcon.innerHTML = premadeMarkerIcon;
-      divElementIcon.appendChild(locationElement);
-      divElement.appendChild(descContainerElem);
-      descContainerElem.innerHTML = premadeInfoIcon;
-      descContainerElem.appendChild(descElement);
-      
-      divElement.onclick = function() {
-         checkProfile(text, rate);
-      };
-   }
-
-   if (images.length < 1) {
-      document.getElementById("live-span-public").style.display = "block";      
-   } else {
-      document.getElementById("live-span-public").style.display = "none";      
-   }
-}
-
-function checkProfile (userdata, rate) {
-   tokenrate = rate;
-   otheruser = userdata;
-   connectedUser = otheruser;   
-   toggleprofile('remote');
-}
 function toggleinfo() {
    homePage.style.display = "none";
    profilePage.style.display = "none";
@@ -1907,23 +2045,7 @@ function toggletokenspage() {
    });
 }
 
-let streamInterval;
 
-function startStreamInterval(interval) {
-   if(streamInterval) {
-      stopStreamInterval();
-   }      
-   streamInterval = setInterval(() => {
-      getStreams();
-   }, interval);
-   console.log("Stream interval initiated");
-}
-
-function stopStreamInterval() {
-   clearInterval(streamInterval);   
-   streamInterval = null;
-   console.log("Stream interval terminated");
-}
 
 function togglehome() {   
    homePage.style.display = "block";
@@ -1947,14 +2069,17 @@ function togglehome() {
          handleLeave();
       }         
    }
+   stopPromotedStreamInterval();
    setTimeout(getStreams(), 50);
-   startStreamInterval(10000);   
+   startStreamInterval(30000);   
 }
 function handleProfileTitleClick() {
    toggleprofilesettings();
 }
 function toggleprofile(msg) {
    stopStreamInterval();
+   getPromotedStreams();
+   startPromotedStreamInterval(30000);
    var data = msg;
    if (isMobileOrSmallScreen()) {
       profilePage.style.display = "block";
@@ -2014,6 +2139,7 @@ function toggleprofile(msg) {
          } else {
             profileTitle.removeEventListener('click', handleProfileTitleClick);
             profileTitle.innerHTML = otheruser;
+            robotdescriptionelement. innerHTML = robotdescription;
             remoteVideo.style.display = "block";
             localVideo.style.display = "none";
             goliveBtn.style.display = "none";
