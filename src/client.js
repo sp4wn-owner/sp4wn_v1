@@ -2745,21 +2745,21 @@ const cardElement = elements.create('card');
 cardElement.mount('#card-element');
 
 const form = document.getElementById('payment-form');
-const submitButton = document.getElementById('submit');
+const submitButton = document.getElementById('stripe-submit');
 const paymentResult = document.getElementById('payment-result');
 
 let selectedTokens = null;
 let selectedAmount = null;
 
-document.querySelectorAll('.purchase-block').forEach(block => {
-   block.addEventListener('click', () => {
-      document.querySelectorAll('.purchase-block').forEach(b => b.classList.remove('selected'));
-      block.classList.add('selected');
-      selectedTokens = block.getAttribute('data-tokens');
-      selectedAmount = block.getAttribute('data-amount');
-      document.getElementById('payment-form').style.display = 'block';
-   });
+const tokenAmountSelect = document.getElementById('token-amount');
+
+// Update selected tokens and amount based on the selection
+tokenAmountSelect.addEventListener('change', () => {
+    selectedTokens = tokenAmountSelect.value; // Get the selected value (number of tokens)
+    selectedAmount = tokenAmountSelect.options[tokenAmountSelect.selectedIndex].getAttribute('data-amount'); // Get the associated amount
+    document.getElementById('payment-form').style.display = 'block'; // Show the payment form
 });
+
 
 form.addEventListener('submit', async (event) => {
    event.preventDefault();
