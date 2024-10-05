@@ -87,7 +87,7 @@ function handleMessage(data) {
             checkBalance(data.username);
             break;
         case "error":
-            handleError(data.error);
+            handleError(data.message);
             break;
         default:
             console.log('Unhandled message type:', data.type);
