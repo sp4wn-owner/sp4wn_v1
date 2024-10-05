@@ -241,14 +241,14 @@ document.addEventListener("DOMContentLoaded", async function() {
            if (refreshToken) {
                await refreshAccessToken(refreshToken);
            } else {
-            console.log("unable to refresh access token");
+            showSnackbar("User not valid. Please login/register.");
            }
        } else {
            displayContent();
        }
    } else {
-      console.log("Please login");
-       displayContent();
+      showSnackbar("Please login.");
+      displayContent();
    }
 });
 
@@ -571,7 +571,7 @@ async function validateAndRegister(type, username, password, confirmPassword) {
   
               messageArea.textContent = "Account updated successfully.";
               messageArea.style.color = "green"; 
-              alert("Account updated successfully");
+              showSnackbar("Account successfully updated");
               resetForm('updateusernameInput', 'updateusernameMessage', 'updateregpwInput', 'updateregpwConfirmInput', 'updatemessageArea');
           } else if (response.status === 401) {
               console.log('Unauthorized access. Attempting to refresh token...');
@@ -594,7 +594,7 @@ async function validateAndRegister(type, username, password, confirmPassword) {
   
                       messageArea.textContent = "Account updated successfully.";
                       messageArea.style.color = "green"; 
-                      alert("Account updated successfully");
+                      showSnackbar("Account updated successfully.");
                       resetForm('updateusernameInput', 'updateusernameMessage', 'updateregpwInput', 'updateregpwConfirmInput', 'updatemessageArea');
                   } else {
                       const retryData = await retryResponse.json();
@@ -647,7 +647,7 @@ function validatePasswordOnSubmit(password) {
 }
 function handleAuth(success) {
    if (success === false) {
-      alert("Unable to authenticate user");
+      showSnackbar("Unable to authenticate user");
       logout();
    } else {
       console.log("successfully logged in");
@@ -702,7 +702,7 @@ async function loginAndConnectToWebSocket(username, password) {
        connect(username, userId, data.accessToken);
    } else {
        console.log("Login failed:", data.message);
-       alert("Login failed");
+       showSnackbar("Login failed")
    }
 }
 
@@ -751,14 +751,14 @@ async function autoLogin() {
                await autoLoginWithNewToken(newTokens.accessToken, newTokens.refreshToken);
            } else {
                console.log("Failed to refresh access token.");
-               alert('Session expired. Please log in again.');
+               showSnackbar("Session expired. Please log in again.");
            }
        } else {
-           alert('Auto-login failed: ' + data.message);
+            showSnackbar("Auto-login failed: ' + data.message");
        }
    } catch (error) {
        console.error("Error during auto login:", error);
-       alert('An error occurred during auto login. Please try again.');
+       showSnackbar("An error occurred during auto login. Please try again.");
    }
 }
 
@@ -918,7 +918,7 @@ function getPromotedStreams() {
    });
 }
 
-
+let promotedimage;
 function handleStreams(images) {
    let ratetext = ' tokens/min';
    const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
@@ -968,7 +968,7 @@ function handleStreams(images) {
     //  descContainerElem.appendChild(descElement);
       
       divElement.onclick = function() {
-         checkProfile(text, rate, description);
+         checkProfile(text, rate, description, imgurl);
       };
    }
 
@@ -989,6 +989,7 @@ function handlePromotedStreams(images) {
          ratetext = '';
       }
       let description = images[i].description;
+      let promotedimageDataURL = images[i].imageDataUrl;
       let divElement = document.createElement('div');
       let divStreamName = document.createElement('div');
       
@@ -1010,7 +1011,7 @@ function handlePromotedStreams(images) {
       //elementRateSpan.innerText = ratetext;         
       
       divElement.onclick = function() {
-         checkProfile(text, rate, description);
+         checkProfile(text, rate, description, imagedata);
       };
    }
 
@@ -1021,10 +1022,11 @@ function handlePromotedStreams(images) {
    }
 }
 
-function checkProfile (userdata, rate, description) {
+function checkProfile (userdata, rate, description, imagedata) {
    tokenrate = rate;
    otheruser = userdata;   
-   robotdescription = description;    
+   robotdescription = description;  
+   promotedimage = imagedata;  
    toggleprofile('remote');
 }
 
@@ -1345,7 +1347,7 @@ function updateCanvasAtInterval(context, image, canvas, interval) {
          endliveBtn.style.display = "none";
          liveVideo = 0;
          updatelive("local");
-         alert("Error getting stream. Make sure https is enabled on your IP camera.");
+         showSnackbar("Error getting stream. Make sure https is enabled on your IP camera.")
          stopimagecapture();
          clearInterval(intervalID);
       }
@@ -1767,6 +1769,7 @@ function stopStreamedVideo(localVideo) {
 
 
  spawnBtn.addEventListener("click", async (event) => {   
+   spawnBtn.disabled = true;
    connectedUser = otheruser;  
    const balance = await checkBalance();
 
@@ -1774,7 +1777,8 @@ function stopStreamedVideo(localVideo) {
        console.log('Balance checked successfully.');
        
        if (balance < tokenrate) {
-           alert("Your token balance is too low.");
+         showSnackbar("Your token balance is too low.");
+         spawnBtn.disabled = false;
            return;
        }
 
@@ -1798,6 +1802,9 @@ function stopStreamedVideo(localVideo) {
 
        await checkICEStatus().then(async (isConnected) => {
            if (isConnected) {
+               remoteVideo.style.display = "block";
+               videoplaceholder.style.display = 'none'; 
+               videoplaceholder.src = "";
                const redeemSuccess = await redeemTokens(tokenrate);
                if (redeemSuccess) {
                    startAutoRedeem(tokenrate);
@@ -1829,12 +1836,14 @@ async function checkICEStatus(maxRetries = 5, delay = 1500) {
        }
    }
    console.error('Max retries reached. ICE connection is still not connected.');
+   spawnBtn.disabled = false;
    return false; 
 }
 
 function handleUIOnConnection() {
    video = remoteVideo;
    liveremoteVideo = 1;
+   spawnBtn.disabled = false;
    spawnBtn.style.display = "none";
    controlpanel.style.display = "block";
    connectdeviceBtn.style.display = "none";
@@ -1955,7 +1964,7 @@ function handleOffer(offer) {
          host: connectedUser
       });
    }, function (error) {
-      alert("Error when creating an answer");
+      console.log("Error when creating an answer");
    });
 };
 
@@ -2038,6 +2047,7 @@ function togglesettings() {
 let tokenspage = document.getElementById("tokenspage");
 let profilesettingspage = document.getElementById("profilesettingspage");
 let robotssettingspage = document.getElementById("robotssettingspage");
+let videoplaceholder = document.getElementById("video-placeholder");
 
 async function toggleprofilesettings() {
    homePage.style.display = "none";
@@ -2180,8 +2190,10 @@ function toggleprofile(msg) {
          } else {
             profileTitle.removeEventListener('click', handleProfileTitleClick);
             profileTitle.innerHTML = otheruser;
+            videoplaceholder.style.display = 'block'; 
+            videoplaceholder.src = promotedimage;
             robotdescriptionelement. innerHTML = robotdescription;
-            remoteVideo.style.display = "block";
+            remoteVideo.style.display = "none";
             localVideo.style.display = "none";
             goliveBtn.style.display = "none";
             endliveBtn.style.display = "none";
@@ -2272,7 +2284,7 @@ connectcontrollerBtn.onclick = function() {
    try {
       connectController();      
    } catch (error) {
-      alert("Failed to connect controller. Try again.");
+      showSnackbar("Failed to connect controller. Try again.");
    }
    
 }
@@ -2301,7 +2313,7 @@ async function connectController() {
       checkGamepad();
    } else {
       console.log("Gamepad API is not supported in this browser.");
-      alert("If controller is connected, press a button and try again");
+      showSnackbar("If controller is connected, press a button and try again");
    }
   
 }
@@ -2850,50 +2862,39 @@ function captureImage(customWidth = 640, customHeight = 480) {
 function handleError(message) {
    console.log(message);
    if (message == "userconnected") {
-      alert("User is already connected")
+      showSnackbar("User is already connected. Please try again later.");
    }
 }
 function captureImageMaintainRatio(customWidth = 640, customHeight = 480) {
-   // Check if localVideo element is available
    if (!localVideo || !localVideo.videoWidth || !localVideo.videoHeight) {
       console.error("Video element not available or video not playing.");
       return;
    }
    
-   // Create a canvas element to capture the current video frame
    const canvas = document.createElement('canvas');
-   canvas.width = customWidth;  // Set custom width
-   canvas.height = customHeight;  // Set custom height
+   canvas.width = customWidth;  
+   canvas.height = customHeight;  
    const context = canvas.getContext('2d');
    
-   // Ensure video dimensions are available
    const videoWidth = localVideo.videoWidth;
    const videoHeight = localVideo.videoHeight;
 
-   // Calculate aspect ratio to maintain image quality
    const aspectRatio = videoWidth / videoHeight;
    let drawWidth = customWidth;
    let drawHeight = customWidth / aspectRatio;
 
-   // Adjust height if needed
    if (drawHeight > customHeight) {
        drawHeight = customHeight;
        drawWidth = customHeight * aspectRatio;
    }
    
-   // Center the image on the canvas
    const offsetX = (canvas.width - drawWidth) / 2;
    const offsetY = (canvas.height - drawHeight) / 2;
 
-   // Draw the video frame on the canvas
    context.drawImage(localVideo, offsetX, offsetY, drawWidth, drawHeight);
    
-   // Convert the canvas to a data URL (image format)
    const imageDataUrl = canvas.toDataURL('image/png');
-   // Store the image in the array
-   //capturedImageArray.push(imageDataUrl);
 
-   // Store image on server
    try {
       send({
          type: "storeimg",
