@@ -29,74 +29,83 @@ let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
 const reconnectDelay = 2000;
 
-function connect(username, accessToken) {
+function connect(username, userId, accessToken) {
     conn = new WebSocket(url);
 
     conn.onopen = () => {
-      console.log('Connected to the server');
-      reconnectAttempts = 0;        
-      conn.send(JSON.stringify({ type: 'authenticate', username, token: accessToken }));
+        console.log('Connected to the server');
+        reconnectAttempts = 0; 
+        conn.send(JSON.stringify({ type: 'authenticate', username, userId, token: accessToken }));
     };
 
-    conn.onmessage = function (msg) {
-      //console.log("Got message", msg.data);
-   
-      var data = JSON.parse(msg.data);
-   
-      switch(data.type) {
-         case "authenticated":
-            handleAuth(data.success);
-            break;   
-         case "offer":
-            handleOffer(data.offer, data.username, data.host);
-            break;
-         case "answer":
-            handleAnswer(data.answer);
-            break;
-         case "candidate":
-            console.log("handling candidate");
-            handleCandidate(data.candidate);
-            break;
-         case "leave":
-            handleLeave();
-            break;
-         case "watch":
-            watchStream(data.name);
-            break;
-         case "liveusers":
-            handleStreams(data.images);
-            break;
-         case "promotedstreams":
-            handlePromotedStreams(data.images);
-            break;
-         case "handlecheck":
-            handlecheck(data.name);
-            break;
-         case "tokenupdate":
-            checkBalance(data.username);
-            break;
-         case "error":
-            handleError(data.error);
-            break;
-         default:
-            break;
-      }
-   };
+    conn.onmessage = (msg) => {
+        const data = JSON.parse(msg.data);
+        handleMessage(data);
+    };
 
     conn.onerror = (error) => {
         console.error('WebSocket error:', error);
     };
 
     conn.onclose = () => {
-         console.log('Connection closed, attempting to reconnect...');
-         if (reconnectAttempts < maxReconnectAttempts) {
-            reconnectAttempts++;
-            setTimeout(autoLogin, reconnectDelay * reconnectAttempts);
-        } else {
-            console.log('Max reconnect attempts reached. Please refresh the page.');
-        }
+        console.log('Connection closed, attempting to reconnect...');
+        handleReconnect(username, userId, accessToken);
     };
 }
+
+function handleMessage(data) {
+    switch(data.type) {
+        case "authenticated":
+            handleAuth(data.success);
+            break;   
+        case "offer":
+            handleOffer(data.offer, data.username, data.host);
+            break;
+        case "answer":
+            handleAnswer(data.answer);
+            break;
+        case "candidate":
+            console.log("Handling candidate");
+            handleCandidate(data.candidate);
+            break;
+        case "leave":
+            handleLeave();
+            break;
+        case "watch":
+            watchStream(data.name);
+            break;
+        case "liveusers":
+            handleStreams(data.images);
+            break;
+        case "promotedstreams":
+            handlePromotedStreams(data.images);
+            break;
+        case "handlecheck":
+            handlecheck(data.name);
+            break;
+        case "tokenupdate":
+            checkBalance(data.username);
+            break;
+        case "error":
+            handleError(data.error);
+            break;
+        default:
+            console.log('Unhandled message type:', data.type);
+            break;
+    }
+}
+
+function handleReconnect(username, accessToken) {
+    if (reconnectAttempts < maxReconnectAttempts) {
+        reconnectAttempts++;
+        const delay = reconnectDelay * reconnectAttempts; 
+        console.log(`Reconnecting in ${delay / 1000} seconds... (Attempt ${reconnectAttempts})`);
+        setTimeout(() => connect(username, accessToken), delay);
+    } else {
+        console.log('Max reconnect attempts reached. Please refresh the page.');
+    }
+}
+
 
 
 function send(message) {
@@ -710,7 +719,8 @@ async function autoLogin() {
            });
 
            console.log('Login successful!');
-           connect(username, accessToken);
+           const userId = getUserIdFromAccessToken();
+           connect(username, userId, accessToken);
        } else if (response.status === 401) {
            console.log('Unauthorized access. Attempting to refresh token...');
            const newTokens = await refreshAccessToken(refreshToken);
