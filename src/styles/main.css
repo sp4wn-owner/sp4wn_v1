@@ -235,24 +235,16 @@ button:hover {
   color: lime;
 }
 
-.token-balance-old {
-  font-family: Exarros;
-  display: none;
-  color: darkgreen;
-  font-weight: bold;
-  width: 100%;
-}
-
 .token-balance {
   font-family: monospace;
   display: block;
-  color: green;
+  color: darkgreen;
   font-weight: bold;
   width: 100%;
   font-size: 15px;
   float: right;
   letter-spacing: 2px; 
-  background: linear-gradient(90deg, green, lime); 
+  background: linear-gradient(90deg, darkgreen, green); 
   -webkit-background-clip: text; 
   color: transparent;
   text-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); 

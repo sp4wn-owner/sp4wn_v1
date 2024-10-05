@@ -1733,87 +1733,95 @@ function stopStreamedVideo(localVideo) {
  }
 
 
-spawnBtn.addEventListener("click", async (event) => {   
+ spawnBtn.addEventListener("click", async (event) => {   
    connectedUser = otheruser;  
    const balance = await checkBalance();
-      if (balance != null) {
-         console.log('Balance checked successfully.');
-         if(balance < tokenrate) {
-            alert("your token balance is too low.");
-            return;
-         } else {
-            const redeemsuccess = await redeemTokens(tokenrate);
-            if (redeemsuccess) {
-               startAutoRedeem(tokenrate);
-               yourConn = new RTCPeerConnection(configuration);       
-               stream = new MediaStream();           
-               remoteVideo.srcObject = stream;
-               yourConn.onaddstream = function (e) {         
-                  remoteVideo.srcObject = e.stream;       
-               }               
-               send({
-                  type: "watch",
-                  username: globalUsername,
-                  host: connectedUser
-               });
-               dcpeerB();  
-               beginICE(); 
-                     
-               console.log("attempt to connect");     
-         
-               async function checkICEStatus(maxRetries = 5, delay = 1500) {
-                  for (let retries = 0; retries < maxRetries; retries++) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
-               
-                        ICEstatus();
-                        console.log("ice status is ", yourConn.iceConnectionState);
-               
-                        if (yourConn.iceConnectionState === 'connected') {
-                           try {
-                              await new Promise(resolve => {
-                                    setTimeout(() => {
-                                       resolve("Data received!");
-                                    }, 2000);
-                              });
-               
-                              video = remoteVideo;
-                              liveremoteVideo = 1;
-                              spawnBtn.style.display = "none";
-                              controlpanel.style.display = "block";
-                              connectdeviceBtn.style.display = "none";
-                              controlpaneloutputs.style.display = "block";
-                              connectcontrollerBtn.style.display = "inline-block";
-                              cparrowsremote.forEach(cparrowsremote => {
-                                    cparrowsremote.style.display = 'inline-block';
-                              });
-                              console.log('PeerConnection is connected!');
-               
-                              addKeyListeners();
-                              window.addEventListener("gamepaddisconnected", (event) => {
-                                    console.log("Gamepad disconnected:", event.gamepad);
-                              });
-                              if (isDataChannelOpen()) {
-                                 console.log("data channel is open");
-                              } else {retryFunction(dcpeerB);}   
-                              return;
-                           } catch (error) {
-                              console.log(error);
-                           }
-                        } else {
-                           console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
-                        }
-                  }      
-                  console.error('Max retries reached. ICE connection is still not connected.');
-               }      
-               checkICEStatus();  
-            }
-            
-         }
-      } else {
-            console.log('Failed to check balance.');
-      } 
-            
+
+   if (balance != null) {
+       console.log('Balance checked successfully.');
+       
+       if (balance < tokenrate) {
+           alert("Your token balance is too low.");
+           return;
+       }
+
+       yourConn = new RTCPeerConnection(configuration);       
+       stream = new MediaStream();           
+       remoteVideo.srcObject = stream;
+
+       yourConn.ontrack = (event) => {
+           remoteVideo.srcObject = event.streams[0];
+       };               
+
+       send({
+           type: "watch",
+           username: globalUsername,
+           host: connectedUser
+       });
+       dcpeerB();  
+       beginICE(); 
+
+       console.log("Attempting to connect...");     
+
+       await checkICEStatus().then(async (isConnected) => {
+           if (isConnected) {
+               const redeemSuccess = await redeemTokens(tokenrate);
+               if (redeemSuccess) {
+                   startAutoRedeem(tokenrate);
+                   handleUIOnConnection();
+               } else {
+                   console.error('Token redemption failed.');
+               }
+           } else {
+               console.error('ICE connection was not established.');
+           }
+       });
+       
+   } else {
+       console.log('Failed to check balance.');
+   } 
 });
+
+async function checkICEStatus(maxRetries = 5, delay = 1500) {
+   for (let retries = 0; retries < maxRetries; retries++) {
+       await new Promise(resolve => setTimeout(resolve, delay));
+       ICEstatus();
+       console.log("ICE status is ", yourConn.iceConnectionState);
+
+       if (yourConn.iceConnectionState === 'connected') {
+           console.log('PeerConnection is connected!');
+           return true;
+       } else {
+           console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
+       }
+   }
+   console.error('Max retries reached. ICE connection is still not connected.');
+   return false; 
+}
+
+function handleUIOnConnection() {
+   video = remoteVideo;
+   liveremoteVideo = 1;
+   spawnBtn.style.display = "none";
+   controlpanel.style.display = "block";
+   connectdeviceBtn.style.display = "none";
+   controlpaneloutputs.style.display = "block";
+   connectcontrollerBtn.style.display = "inline-block";
+   cparrowsremote.forEach(cparrow => {
+       cparrow.style.display = 'inline-block';
+   });
+   
+   addKeyListeners();
+   window.addEventListener("gamepaddisconnected", (event) => {
+       console.log("Gamepad disconnected:", event.gamepad);
+   });
+
+   if (isDataChannelOpen()) {
+       console.log("Data channel is open");
+   } else {
+       retryFunction(dcpeerB);
+   }
+}
 
 
 async function retryFunction(fn, retries = 3, delay = 1000) {
@@ -2078,7 +2086,7 @@ function handleProfileTitleClick() {
 }
 function toggleprofile(msg) {
    stopStreamInterval();
-   getPromotedStreams();
+   setTimeout(getPromotedStreams(), 50);
    startPromotedStreamInterval(30000);
    var data = msg;
    if (isMobileOrSmallScreen()) {
