@@ -356,19 +356,19 @@ button:hover {
   display: flex;
   padding: 10px;
 }
-.settings-icons {
+.settings-icon {
   display: flex;
   justify-content: center;
   flex-grow: 1;
   margin: 15px auto;
 }
-.settings-icons li {
+.settings-icon li {
   text-decoration: none;
   list-style: none;
   padding: 0;
   margin: 0 25px;
 }
-.settings-icons li a {
+.settings-icon li a {
   font-weight: bold;
   text-decoration: none;
   color: black;

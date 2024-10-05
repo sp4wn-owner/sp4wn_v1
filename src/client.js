@@ -231,9 +231,25 @@ var configuration = {
    'sdpSemantics': 'unified-plan',
  };
 
-document.addEventListener("DOMContentLoaded", function() {
-   displayContent();
+document.addEventListener("DOMContentLoaded", async function() {
    document.body.style.display = "block";
+   const accessToken = localStorage.getItem('accessToken');
+   const refreshToken = localStorage.getItem('refreshToken');
+
+   if (accessToken) {
+       if (isAccessTokenExpired(accessToken)) {
+           if (refreshToken) {
+               await refreshAccessToken(refreshToken);
+           } else {
+            console.log("unable to refresh access token");
+           }
+       } else {
+           displayContent();
+       }
+   } else {
+       alert("Please login first.");
+       displayContent();
+   }
 });
 
 function init() {
@@ -634,6 +650,7 @@ function handleAuth(success) {
       alert("Unable to authenticate user");
       logout();
    } else {
+      console.log("successfully logged in");
       if (globalUsername == null) {         
          loginPage.style.display = "none";
          document.getElementsByTagName('header')[0].style.display = "block";
@@ -2972,5 +2989,16 @@ function copyToClipboard(cardNumber) {
      snackbar.className = snackbar.className.replace('show', '');
    }, 3000);  // Snackbar will disappear after 3 seconds
  }
+
+function isAccessTokenExpired(accessToken) {
+   if (!accessToken) return true;
+
+   const payload = JSON.parse(atob(accessToken.split('.')[1]));
+
+   const exp = payload.exp;
+   const currentTime = Math.floor(Date.now() / 1000); 
+
+   return exp < currentTime;
+}
 
 init();
