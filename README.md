@@ -4,12 +4,10 @@ A platform where you can share access to your telepresence robot without worryin
 
 TODO:
 
--payment system that enables owners to charge for access to their robot
+-webrtc robot client implementation for Raspberry Pi
 
-  &nbsp;&nbsp;&nbsp;&nbsp; ~most likely a token-based system (users buys tokens | owners charge x amount of tokens per min)
+-24/7 robots for demonstration purposes
   
-  &nbsp;&nbsp;&nbsp;&nbsp;~potentially a cryptocurrency-based system using javascript frameworks (plus robot to robot payments using NFC?)
-  
--webrtc client implementation for Raspberry Pi
-
 -bigger & better telepresence robots
+
+~potentially a cryptocurrency-based system using javascript frameworks (robot to robot payments using NFC?)
