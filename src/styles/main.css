@@ -93,42 +93,48 @@ input:focus {
 }
 .video-container {
   position: relative;
-  width: 640px;  /* Adjust to your video width */
-  height: 360px; /* Adjust to your video height */
+  width: 640px; 
+  height: 360px;
   overflow: hidden;
 }
 
 .video {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the video covers the container */
+  object-fit: cover;
 }
 .circle-button {
-  font-family: monospace;
+  font-family: 'Courier New', monospace;
   font-weight: bold;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the button */
-  width: 100px;    /* Button width */
-  height: 100px;   /* Button height */
+  transform: translate(-50%, -50%);
+  width: 100px;  
+  height: 100px; 
   border: none;
   border-radius: 50%;
-  background-color: #8F00FF; /* Button color with transparency */
+  background: linear-gradient(135deg, #480075, #9c27b0); 
   color: white;
   font-size: 20px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 -2px 5px rgba(255, 255, 255, 0.2);
+  outline: none;
 }
 
 .circle-button:hover {
-  background-color: #7003c3;
+  background: linear-gradient(135deg, #9c27b0, #18001d); 
   transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 -3px 7px rgba(255, 255, 255, 0.3); 
 }
 
 .circle-button:active {
   transform: translate(-50%, -50%) scale(0.95);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), inset 0 -1px 3px rgba(255, 255, 255, 0.2);
 }
+
+
 
 .main-btn {
   background-color: #8F00FF;
