@@ -241,7 +241,7 @@ button:hover {
   color: darkgreen;
   font-weight: bold;
   width: 100%;
-  font-size: 15px;
+  font-size: 20px;
   float: right;
   letter-spacing: 2px; 
   background: linear-gradient(90deg, darkgreen, green); 
@@ -407,7 +407,7 @@ button:hover {
   float: left; 
   text-align: left;
   padding-left: 10px;
-  font-size: 15px;
+  font-size: 20px;
   letter-spacing: 2px;
   background: linear-gradient(90deg, #550196, #1a002e); 
   -webkit-background-clip: text; 

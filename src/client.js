@@ -35,7 +35,7 @@ function connect(username, userId, accessToken) {
     conn.onopen = () => {
         console.log('Connected to the server');
         reconnectAttempts = 0; 
-        conn.send(JSON.stringify({ type: 'authenticate', username:username, userId:userId, token: accessToken }));
+        conn.send(JSON.stringify({ type: 'authenticate', username: username, userId: userId, token: accessToken }));
     };
 
     conn.onmessage = (msg) => {
@@ -95,12 +95,12 @@ function handleMessage(data) {
     }
 }
 
-function handleReconnect(username, accessToken) {
+function handleReconnect(username, userId, accessToken) {
     if (reconnectAttempts < maxReconnectAttempts) {
         reconnectAttempts++;
         const delay = reconnectDelay * reconnectAttempts; 
         console.log(`Reconnecting in ${delay / 1000} seconds... (Attempt ${reconnectAttempts})`);
-        setTimeout(() => connect(username, accessToken), delay);
+        setTimeout(() => connect(username, userId, accessToken), delay);
     } else {
         console.log('Max reconnect attempts reached. Please refresh the page.');
     }
@@ -678,7 +678,7 @@ async function loginAndConnectToWebSocket(username, password) {
       tokenBalanceDisplay.forEach((element) => {
          element.textContent = `Tokens: ${tokenBalance}`;
       });   
-      const userId = getUserIdFromAccessToken;
+      const userId = getUserIdFromAccessToken();
       connect(username, userId, data.accessToken);
    } else {
       console.log("Login failed:", data.message);
@@ -786,7 +786,7 @@ async function autoLoginWithNewToken(newAccessToken, newRefreshToken) {
 
            console.log('Re-login successful!');
            const userId = getUserIdFromAccessToken();
-           connect(username, newAccessToken);
+           connect(username, userId, newAccessToken);
        } else {
            alert('Failed to access protected resource after token refresh: ' + data.message);
        }
