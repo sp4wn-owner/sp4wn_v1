@@ -634,19 +634,19 @@ function handleAuth(success) {
       alert("Unable to authenticate user");
       logout();
    } else {
-      if (globalUsername == null) {
-         checkUsername();
-      }      
-      loginPage.style.display = "none";
-      document.getElementsByTagName('header')[0].style.display = "block";
-      tokenBalanceDisplay.forEach((element) => {
-         element.style.display = "block";
-         element.addEventListener('click', function() {
-            toggletokenspage();
-          });
-      });       
-      togglehome();      
-    }
+      if (globalUsername == null) {         
+         loginPage.style.display = "none";
+         document.getElementsByTagName('header')[0].style.display = "block";
+         tokenBalanceDisplay.forEach((element) => {
+            element.style.display = "block";
+            element.addEventListener('click', function() {
+               toggletokenspage();
+            });
+         });    
+         checkUsername();   
+         togglehome(); 
+      }                 
+   }
 };
 
 function logincheckEnter(event) {
