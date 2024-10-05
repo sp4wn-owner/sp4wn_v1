@@ -91,6 +91,44 @@ input:focus {
   outline: none;
   border-color: #66afe9;
 }
+.video-container {
+  position: relative;
+  width: 640px;  /* Adjust to your video width */
+  height: 360px; /* Adjust to your video height */
+  overflow: hidden;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the video covers the container */
+}
+.circle-button {
+  font-family: monospace;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the button */
+  width: 100px;    /* Button width */
+  height: 100px;   /* Button height */
+  border: none;
+  border-radius: 50%;
+  background-color: #8F00FF; /* Button color with transparency */
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.circle-button:hover {
+  background-color: #7003c3;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.circle-button:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
 
 .main-btn {
   background-color: #8F00FF;
@@ -286,7 +324,7 @@ button:hover {
   width: 100%;
 }
 .col2 {
-  margin: 0 auto;
+
 }
 .col3 {
   margin: 0 auto;
@@ -304,11 +342,7 @@ button:hover {
 }
 
 #goliveBtn, #spawnBtn, #connectdevice-Btn {
-  margin: 0;
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  
 }
 #settingspage {
   height: 900px; 
@@ -472,7 +506,8 @@ video::-webkit-media-controls-fast-forward-button,
 video::-webkit-media-controls-play-button {
   display: none !important;
 }
-video {
+
+video-old {
   background: #f1f1f1;
   height: 480px;
   width: 100%;
@@ -481,11 +516,9 @@ video {
 #localVideo, #remoteVideo {  
   margin: 0 auto;
   overflow: hidden;
- 
+  width: 100%;
 }
-#video-container {
-  
-}
+
 .youtube-video-container iframe {
   width: 560px;
   height: 315px;
