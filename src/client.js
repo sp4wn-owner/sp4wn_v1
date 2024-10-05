@@ -660,7 +660,7 @@ function registercheckEnter(event) {
    }
 }
 
-async function loginAndConnectToWebSocket(username, password) {   
+async function loginAndConnectToWebSocket(username, password) {
    const response = await fetch('https://sp4wn-signaling-server.onrender.com/login', {
        method: 'POST',
        headers: {
@@ -668,23 +668,27 @@ async function loginAndConnectToWebSocket(username, password) {
        },
        body: JSON.stringify({ username, password })
    });
-   
+
    const data = await response.json();
 
    if (data.success) {
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      const tokenBalance = data.tokens;
-      tokenBalanceDisplay.forEach((element) => {
-         element.textContent = `Tokens: ${tokenBalance}`;
-      });   
-      const userId = getUserIdFromAccessToken();
-      connect(username, userId, data.accessToken);
+       localStorage.setItem('accessToken', data.accessToken);
+       localStorage.setItem('refreshToken', data.refreshToken);
+       const tokenBalance = data.tokens;
+
+       tokenBalanceDisplay.forEach((element) => {
+           element.textContent = `Tokens: ${tokenBalance}`;
+       });
+
+       const userId = data.userId;
+
+       connect(username, userId, data.accessToken);
    } else {
-      console.log("Login failed:", data.message);
-      alert("Login failed");
+       console.log("Login failed:", data.message);
+       alert("Login failed");
    }
 }
+
 async function autoLogin() {
    console.log("Attempting auto login");
 
