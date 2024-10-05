@@ -303,6 +303,7 @@ button:hover {
 }
 #profilepage {
   grid-template-columns: 1fr 3fr 1fr;
+  height: 800px;
 }
 .two-column-layout {
   display: grid;
@@ -735,7 +736,7 @@ footer {
   padding: 60px 0;
   font-size: 20px;
   text-align: left;
-  
+  margin-top: 25px;
 }
 
 .footer-container {
@@ -1006,9 +1007,7 @@ footer {
   visibility: visible;
   opacity: 1;
 }
-#goliveBtn, #spawnBtn, #connectdevice-Btn {
-  
-}
+
 @media screen and (max-width:1100px) {
   .text-container {
     width: 90%;
@@ -1102,9 +1101,12 @@ footer {
     
   }
   #profilepage {
-    
+    height: auto;
     grid-template-columns: 1fr;
     column-gap: 1em;
+  }
+  #settingspage {
+    height: auto;
   }
   .stripe-form-container {
     width: 80%;

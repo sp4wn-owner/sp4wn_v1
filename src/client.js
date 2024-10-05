@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", async function() {
            displayContent();
        }
    } else {
-       alert("Please login first.");
+      console.log("Please login");
        displayContent();
    }
 });
@@ -524,7 +524,7 @@ async function validateAndRegister(type, username, password, confirmPassword) {
            if (response.ok) {
                messageArea.textContent = "Account created successfully. Please login.";
                messageArea.style.color = "green"; 
-               alert("Account created successfully. Please login.");
+               showSnackbar("Account created successfully. Please login.");
                displayContent();
            } else {
                const data = await response.json(); 
@@ -2987,7 +2987,7 @@ function copyToClipboard(cardNumber) {
 
    setTimeout(function() {
      snackbar.className = snackbar.className.replace('show', '');
-   }, 3000);  // Snackbar will disappear after 3 seconds
+   }, 3000);
  }
 
 function isAccessTokenExpired(accessToken) {
