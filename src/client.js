@@ -231,32 +231,74 @@ var configuration = {
    'sdpSemantics': 'unified-plan',
  };
 
-document.addEventListener("DOMContentLoaded", async function() {
-   document.body.style.display = "block";
+ let savedPage;
+ function savePage(page) {
+   savedPage = page;
+   localStorage.setItem('savedPage', savedPage);
+}
+
+ window.onload = async function() {
+   //const savedInput = localStorage.getItem('savedInput');
+   
    const accessToken = localStorage.getItem('accessToken');
    const refreshToken = localStorage.getItem('refreshToken');
 
    if (accessToken) {
       try {
          autoLogin();
+         
       } catch (error) {
          console.log(error);
-      }
-      if (isAccessTokenExpired(accessToken)) {
-         if (refreshToken) {
-            await refreshAccessToken(refreshToken);
+         if (isAccessTokenExpired(accessToken)) {
+            console.log("access token expired");
+            if (refreshToken) {
+               await refreshAccessToken(refreshToken);
+            } else {
+               showSnackbar("User not valid. Please login/register.");
+            }
          } else {
-         showSnackbar("User not valid. Please login/register.");
+            autoLogin();
+            
          }
-      } else {
-         displayContent();
       }
+      
    } else {
       showSnackbar("Please login.");
-      displayContent();
+      returnToLogin();
    }
+   document.body.style.display = "block";
+};
+
+document.addEventListener("DOMContentLoaded", async function() {
+   savedPage = localStorage.getItem('savedPage', savedPage);
+   displayContent(savedPage);
 });
 
+function togglePage(page) {
+   switch(page) {
+      case 'home':
+         togglehome();
+         break;
+      case 'profile':
+         toggleprofile('local');
+         break;
+      case 'settings':
+         togglesettings();
+         break;
+      case 'info':
+         toggleinfo();
+         break;
+      case 'updateprofile':
+         toggleprofilesettings();
+         break;
+      case 'updaterobots':
+         togglerobotssettings();
+         break;
+      case 'tokenspage':
+         toggletokenspage();
+         break;
+   }
+}
 function init() {
    //displayContent();   
 };
@@ -271,11 +313,11 @@ function isTokenExpired(token) {
    return decoded.exp * 1000 < Date.now(); 
 }
 
-function displayContent() {
+function displayContent(page) {
    if (isLoggedIn()) {
       loginPage.style.display = "none";
       document.getElementsByTagName('header')[0].style.display = "block";
-      autoLogin();
+      toggle(page);
    } else {
       returnToLogin();
       
@@ -534,7 +576,7 @@ async function validateAndRegister(type, username, password, confirmPassword) {
                messageArea.textContent = "Account created successfully. Please login.";
                messageArea.style.color = "green"; 
                showSnackbar("Account created successfully. Please login.");
-               displayContent();
+               returnToLogin();
            } else {
                const data = await response.json(); 
                let errorMessage = "Registration failed. Please try again.";
@@ -739,37 +781,47 @@ async function autoLogin() {
            }
        });
 
-       const data = await response.json();
+       if (!response.ok) {
+           const responseText = await response.text(); 
+           console.error('Response Status:', response.status);
+           console.error('Response Text:', responseText);
 
-       if (response.ok) {
-           const username = data.username;
-           const tokenBalance = data.tokens;
+           if (response.status === 401) {
+               console.log('Unauthorized access. Attempting to refresh token...');
+               const newTokens = await refreshAccessToken(refreshToken);
 
-           tokenBalanceDisplay.forEach((element) => {
-               element.textContent = `Tokens: ${tokenBalance}`;
-           });
-
-           console.log('Login successful!');
-           const userId = getUserIdFromAccessToken();
-           connect(username, userId, accessToken);
-       } else if (response.status === 401) {
-           console.log('Unauthorized access. Attempting to refresh token...');
-           const newTokens = await refreshAccessToken(refreshToken);
-
-           if (newTokens) {
-               await autoLoginWithNewToken(newTokens.accessToken, newTokens.refreshToken);
+               if (newTokens) {
+                   await autoLoginWithNewToken(newTokens.accessToken, newTokens.refreshToken);
+               } else {
+                   console.log("Failed to refresh access token.");
+                   showSnackbar("Session expired. Please log in again.");
+               }
+           } else if (response.status === 403) {
+               console.log('Access forbidden. Please check your permissions.');
+               showSnackbar('Access forbidden. You do not have permission to access this resource.');
            } else {
-               console.log("Failed to refresh access token.");
-               showSnackbar("Session expired. Please log in again.");
+               showSnackbar(`Auto-login failed: ${response.status} - ${responseText}`);
            }
-       } else {
-            showSnackbar("Auto-login failed: ' + data.message");
+           return;
        }
+
+       const data = await response.json(); 
+       const username = data.username;
+       const tokenBalance = data.tokens;
+
+       tokenBalanceDisplay.forEach((element) => {
+           element.textContent = `Tokens: ${tokenBalance}`;
+       });
+
+       console.log('Login successful!');
+       const userId = getUserIdFromAccessToken();
+       connect(username, userId, accessToken);
    } catch (error) {
        console.error("Error during auto login:", error);
        showSnackbar("An error occurred during auto login. Please try again.");
    }
 }
+
 
 async function refreshAccessToken(refreshToken) {
    try {
@@ -797,32 +849,9 @@ async function refreshAccessToken(refreshToken) {
 }
 
 async function autoLoginWithNewToken(newAccessToken, newRefreshToken) {
-   try {
-       const response = await fetch('https://sp4wn-signaling-server.onrender.com/protected', {
-           method: 'GET',
-           headers: {
-               'Authorization': `Bearer ${newAccessToken}`
-           }
-       });
-
-       const data = await response.json();
-       if (response.ok) {
-           const username = data.username;
-           const tokenBalance = data.tokens;
-
-           tokenBalanceDisplay.forEach((element) => {
-               element.textContent = `Tokens: ${tokenBalance}`;
-           });
-
-           console.log('Re-login successful!');
-           const userId = getUserIdFromAccessToken();
-           connect(username, userId, newAccessToken);
-       } else {
-           alert('Failed to access protected resource after token refresh: ' + data.message);
-       }
-   } catch (error) {
-       console.error("Error during re-login with new token:", error);
-   }
+   localStorage.setItem('accessToken', newAccessToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
+    await autoLogin();
 }
 
 async function logout() {
@@ -1382,11 +1411,9 @@ function createPeerConnection() {
    return new Promise((resolve, reject) => {
        const yourConn = new RTCPeerConnection(configuration);
 
-       // Handle ICE candidates
        yourConn.onicecandidate = event => {
          if (event.candidate) {
              console.log('New ICE candidate: ', event.candidate);
-             // Send the candidate to the remote peer here
              if (event.candidate) {
                send({
                   type: "candidate",
@@ -1672,7 +1699,6 @@ function drawStream() {
    
 }
 function beginICE() {
-   // Setup ice handling
    yourConn.onicecandidate = function (event) {
       console.log("received ice candidate");
       if (event.candidate) {
@@ -1686,12 +1712,10 @@ function beginICE() {
 }
 
 function ICEstatus() {
-   // Monitor ICE connection state changes
    yourConn.oniceconnectionstatechange = () => {
       const iceConnectionState = yourConn.iceConnectionState;
       console.log('ICE Connection State changed to:', iceConnectionState);
       
-      // Handle different states
       switch (iceConnectionState) {
          case 'new':
             console.log('ICE Connection State is new.');
@@ -2032,6 +2056,7 @@ function handleLeave() {
 };
 
 function toggleinfo() {
+   savedPage = 'info';
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "block";
@@ -2042,6 +2067,7 @@ function toggleinfo() {
 }
 
 function togglesettings() {
+   savedPage = 'settings';
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2059,6 +2085,7 @@ let robotssettingspage = document.getElementById("robotssettingspage");
 let videoplaceholder = document.getElementById("video-placeholder");
 
 async function toggleprofilesettings() {
+   savedPage = 'profilesettings';
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2077,6 +2104,7 @@ async function toggleprofilesettings() {
    usernameInputfield.value = await getUsername();
 }
 function togglerobotssettings() {   
+   savedPage = 'robotssettings';
    profilesettings.classList.remove("active");
    robotssettings.classList.add("active");
    tokenspagelink.classList.remove("active");
@@ -2085,6 +2113,7 @@ function togglerobotssettings() {
    tokenspage.style.display = "none";
 }
 function toggletokenspage() {
+   savedPage = 'tokenspage';
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2098,9 +2127,10 @@ function toggletokenspage() {
    profilesettingspage.style.display = "none";
    robotssettingspage.style.display = "none";
    tokenspage.style.display = "block";
+   paymentResult.innerText = "";
    tokenAmountSelect.addEventListener('change', () => {
       selectedTokens = tokenAmountSelect.value; 
-      selectedAmount = tokenAmountSelect.options[tokenAmountSelect.selectedIndex].getAttribute('data-amount'); // Get the associated amount
+      selectedAmount = tokenAmountSelect.options[tokenAmountSelect.selectedIndex].getAttribute('data-amount');
       document.getElementById('payment-form').style.display = 'block'; 
    });
 }
@@ -2108,6 +2138,7 @@ function toggletokenspage() {
 
 
 function togglehome() {   
+   savedPage = 'home';
    homePage.style.display = "block";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2136,7 +2167,8 @@ function togglehome() {
 function handleProfileTitleClick() {
    toggleprofilesettings();
 }
-function toggleprofile(msg) {   
+function toggleprofile(msg) { 
+   savedPage = 'local';  
    stopStreamInterval();
    mobileOrientation();
    setTimeout(getPromotedStreams(), 50);
