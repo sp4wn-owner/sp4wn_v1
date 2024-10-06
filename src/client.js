@@ -272,16 +272,20 @@ function displayContent() {
       document.getElementsByTagName('header')[0].style.display = "block";
       autoLogin();
    } else {
-      revealText();
-      loginPage.style.display = "block";
-      document.getElementById("loginform").style.display = "block";
-      document.getElementById("registerform").style.display = "none";
-      homePage.style.display = "none";
-      settingsPage.style.display = "none";
-      profilePage.style.display = "none";
-      liveStreams.innerHTML = "";
-      document.getElementsByTagName('header')[0].style.display = "none"; 
+      returnToLogin();
+      
    }
+   
+}
+function returnToLogin() {
+   document.getElementsByTagName('header')[0].style.display = "none"; 
+   revealText();
+   loginPage.style.display = "block";
+   document.getElementById("loginform").style.display = "block";
+   document.getElementById("registerform").style.display = "none";
+   homePage.style.display = "none";
+   settingsPage.style.display = "none";
+   profilePage.style.display = "none";
 }
 function registerform() {
    resetForm('regusernameInput', 'usernameMessage', 'regpwInput', 'regpwConfirmInput', 'messageArea');
@@ -2127,8 +2131,9 @@ function togglehome() {
 function handleProfileTitleClick() {
    toggleprofilesettings();
 }
-function toggleprofile(msg) {
+function toggleprofile(msg) {   
    stopStreamInterval();
+   mobileOrientation();
    setTimeout(getPromotedStreams(), 50);
    startPromotedStreamInterval(30000);
    var data = msg;
@@ -2772,7 +2777,7 @@ function exitFullscreen() {
          document.msExitFullscreen();
       }
 }
-document.addEventListener('DOMContentLoaded', function() {
+function mobileOrientation() {
    if (liveVideo == 1) {
       video = localVideo;
    } else if (liveremoteVideo == 1) {
@@ -2818,7 +2823,7 @@ document.addEventListener('DOMContentLoaded', function() {
            document.msExitFullscreen();
        }
    }
-});
+}
 
 function captureImage(customWidth = 640, customHeight = 480) {
    // Check if localVideo element is available
