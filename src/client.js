@@ -315,7 +315,15 @@ function displayContent(page) {
    }
    
 }
-function returnToLogin() {
+function returnToLogin() {   
+   if (savedPage) {
+         console.log("Saved page found:", savedPage);
+         localStorage.removeItem('savedPage');
+         console.log("Saved page has been deleted.");
+   } else {
+         console.log("No saved page found.");
+   }
+   document.body.style.display = "block";
    document.getElementsByTagName('header')[0].style.display = "none"; 
    revealText();
    loginPage.style.display = "block";
@@ -694,24 +702,21 @@ function handleAuth(success) {
       logout();
    } else {
       if (savedPage) {    
-         console.log("in auth - save page: ", savedPage);     
-         loginPage.style.display = "none";
-         document.getElementsByTagName('header')[0].style.display = "block";
-         tokenBalanceDisplay.forEach((element) => {
-            element.style.display = "block";
-            element.addEventListener('click', function() {
-               toggletokenspage();
-            });
-         });    
-         checkUsername();  
+         console.log("in auth - save page: ", savedPage);          
          togglePage(savedPage); 
       } else {
-         console.log("no saved page");
-         checkUsername();   
+         console.log("no saved page");            
          togglehome();
-         
-
-      }                
+      }          
+      loginPage.style.display = "none";
+      document.getElementsByTagName('header')[0].style.display = "block";
+      tokenBalanceDisplay.forEach((element) => {
+         element.style.display = "block";
+         element.addEventListener('click', function() {
+            toggletokenspage();
+         });
+      });  
+      checkUsername();        
    }
 };
 
@@ -747,7 +752,7 @@ async function loginAndConnectToWebSocket(username, password) {
        });
 
        const userId = data.userId;
-
+       savePage('home');
        connect(username, userId, data.accessToken);
    } else {
        console.log("Login failed:", data.message);
@@ -783,6 +788,7 @@ async function autoLogin() {
            const responseText = await response.text(); 
            console.error('Response Status:', response.status);
            console.error('Response Text:', responseText);
+           returnToLogin();
 
            if (response.status === 401) {
                console.log('Unauthorized access. Attempting to refresh token...');
@@ -797,6 +803,7 @@ async function autoLogin() {
            } else if (response.status === 403) {
                console.log('Access forbidden. Please check your permissions.');
                showSnackbar('Access forbidden. You do not have permission to access this resource.');
+               
            } else {
                showSnackbar(`Auto-login failed: ${response.status} - ${responseText}`);
            }
@@ -854,6 +861,13 @@ async function autoLoginWithNewToken(newAccessToken, newRefreshToken) {
 
 async function logout() {
    const refreshToken = localStorage.getItem('refreshToken');
+   if (savedPage) {
+      console.log("Saved page found:", savedPage);
+      localStorage.removeItem('savedPage');
+      console.log("Saved page has been deleted.");
+  } else {
+      console.log("No saved page found.");
+  }
 
    if (!refreshToken) {
        console.error('No refresh token found');
