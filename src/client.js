@@ -268,7 +268,6 @@ var configuration = {
 };
 
 function togglePage(page) {
-   console.log(page);
    switch(page) {
       case 'home':
          togglehome();
@@ -702,7 +701,6 @@ function handleAuth(success) {
       logout();
    } else {
       if (savedPage) {    
-         console.log("in auth - save page: ", savedPage);          
          togglePage(savedPage); 
       } else {
          console.log("no saved page");            
@@ -752,7 +750,6 @@ async function loginAndConnectToWebSocket(username, password) {
        });
 
        const userId = data.userId;
-       savePage('home');
        connect(username, userId, data.accessToken);
    } else {
        console.log("Login failed:", data.message);
