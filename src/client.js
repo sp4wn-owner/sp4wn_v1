@@ -237,15 +237,20 @@ document.addEventListener("DOMContentLoaded", async function() {
    const refreshToken = localStorage.getItem('refreshToken');
 
    if (accessToken) {
-       if (isAccessTokenExpired(accessToken)) {
-           if (refreshToken) {
-               await refreshAccessToken(refreshToken);
-           } else {
-            showSnackbar("User not valid. Please login/register.");
-           }
-       } else {
-           displayContent();
-       }
+      try {
+         autoLogin();
+      } catch (error) {
+         console.log(error);
+      }
+      if (isAccessTokenExpired(accessToken)) {
+         if (refreshToken) {
+            await refreshAccessToken(refreshToken);
+         } else {
+         showSnackbar("User not valid. Please login/register.");
+         }
+      } else {
+         displayContent();
+      }
    } else {
       showSnackbar("Please login.");
       displayContent();

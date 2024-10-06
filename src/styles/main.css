@@ -106,7 +106,6 @@ input:focus {
 }
 #video-placeholder {
   position: absolute;
-  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
@@ -1117,7 +1116,12 @@ footer {
   .stripe-form-container {
     width: 80%;
   }
-  #localVideo, #remoteVideo {  
+  .stream-container {
+    width: 100%;
     height: auto;
+  }
+  
+  #video-placeholder {
+    
   }
 }
