@@ -169,7 +169,7 @@ var remoteVideo = document.querySelector('#remoteVideo');
 
 let profileicon = document.querySelector('#profile-icon');
 let homeicon = document.querySelector('#home-icon');
-let settingsicon = document.querySelector('#settings-icon');
+let settingsicon = document.getElementById('settings-icon');
 
 var deviceaddressinput;
 let locationinput = document.getElementById("locationinput");
@@ -230,16 +230,14 @@ var configuration = {
    ],
    'sdpSemantics': 'unified-plan',
  };
-
- let savedPage;
+ const savedPage = localStorage.getItem('savedPage');
  function savePage(page) {
-   savedPage = page;
-   localStorage.setItem('savedPage', savedPage);
+   console.log("saving to local storage: ", page);
+   localStorage.setItem('savedPage', page);
 }
 
- window.onload = async function() {
-   //const savedInput = localStorage.getItem('savedInput');
-   
+ window.onload = async function() {  
+   document.body.style.display = "none";
    const accessToken = localStorage.getItem('accessToken');
    const refreshToken = localStorage.getItem('refreshToken');
 
@@ -266,15 +264,11 @@ var configuration = {
       showSnackbar("Please login.");
       returnToLogin();
    }
-   document.body.style.display = "block";
+   
 };
 
-document.addEventListener("DOMContentLoaded", async function() {
-   savedPage = localStorage.getItem('savedPage', savedPage);
-   displayContent(savedPage);
-});
-
 function togglePage(page) {
+   console.log(page);
    switch(page) {
       case 'home':
          togglehome();
@@ -285,13 +279,10 @@ function togglePage(page) {
       case 'settings':
          togglesettings();
          break;
-      case 'info':
+      case 'infopage':
          toggleinfo();
          break;
-      case 'updateprofile':
-         toggleprofilesettings();
-         break;
-      case 'updaterobots':
+      case 'robotssettings':
          togglerobotssettings();
          break;
       case 'tokenspage':
@@ -697,12 +688,13 @@ function validatePasswordOnSubmit(password) {
    return true;
 }
 function handleAuth(success) {
+   document.body.style.display = "block";
    if (success === false) {
       showSnackbar("Unable to authenticate user");
       logout();
    } else {
-      console.log("successfully logged in");
-      if (globalUsername == null) {         
+      if (savedPage) {    
+         console.log("in auth - save page: ", savedPage);     
          loginPage.style.display = "none";
          document.getElementsByTagName('header')[0].style.display = "block";
          tokenBalanceDisplay.forEach((element) => {
@@ -711,9 +703,15 @@ function handleAuth(success) {
                toggletokenspage();
             });
          });    
+         checkUsername();  
+         togglePage(savedPage); 
+      } else {
+         console.log("no saved page");
          checkUsername();   
-         togglehome(); 
-      }                 
+         togglehome();
+         
+
+      }                
    }
 };
 
@@ -2056,7 +2054,7 @@ function handleLeave() {
 };
 
 function toggleinfo() {
-   savedPage = 'info';
+   savePage('infopage');
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "block";
@@ -2067,14 +2065,7 @@ function toggleinfo() {
 }
 
 function togglesettings() {
-   savedPage = 'settings';
-   homePage.style.display = "none";
-   profilePage.style.display = "none";
-   infoPage.style.display = "none";
-   settingsPage.style.display = "block";
-   settingsicon.classList.add("active");
-   homeicon.classList.remove("active");
-   profileicon.classList.remove("active");
+   
    toggleprofilesettings();
 
 }
@@ -2085,7 +2076,7 @@ let robotssettingspage = document.getElementById("robotssettingspage");
 let videoplaceholder = document.getElementById("video-placeholder");
 
 async function toggleprofilesettings() {
-   savedPage = 'profilesettings';
+   savePage('settings');
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2104,7 +2095,11 @@ async function toggleprofilesettings() {
    usernameInputfield.value = await getUsername();
 }
 function togglerobotssettings() {   
-   savedPage = 'robotssettings';
+   savePage('robotssettings');
+   homePage.style.display = "none";
+   profilePage.style.display = "none";
+   infoPage.style.display = "none";
+   settingsPage.style.display = "block";
    profilesettings.classList.remove("active");
    robotssettings.classList.add("active");
    tokenspagelink.classList.remove("active");
@@ -2113,7 +2108,7 @@ function togglerobotssettings() {
    tokenspage.style.display = "none";
 }
 function toggletokenspage() {
-   savedPage = 'tokenspage';
+   savePage('tokenspage');
    homePage.style.display = "none";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2137,8 +2132,8 @@ function toggletokenspage() {
 
 
 
-function togglehome() {   
-   savedPage = 'home';
+function togglehome() { 
+   savePage('home');
    homePage.style.display = "block";
    profilePage.style.display = "none";
    infoPage.style.display = "none";
@@ -2168,7 +2163,7 @@ function handleProfileTitleClick() {
    toggleprofilesettings();
 }
 function toggleprofile(msg) { 
-   savedPage = 'local';  
+   savePage('profile');
    stopStreamInterval();
    mobileOrientation();
    setTimeout(getPromotedStreams(), 50);

@@ -406,6 +406,9 @@ button:hover {
 #info-icon.active {
   color: lime;
 }
+#settings-icon.active {
+  color: lime;
+}
 #profiletitle {
   font-family: monospace; 
   display: block; 
