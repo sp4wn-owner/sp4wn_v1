@@ -694,13 +694,20 @@ function validatePasswordOnSubmit(password) {
    }
    return true;
 }
-function handleAuth(success) {
+async function handleAuth(success) {
    document.body.style.display = "block";
    if (success === false) {
       showSnackbar("Unable to authenticate user");
       logout();
-   } else {
-      checkUsername();  
+   } else {      
+      if(globalUsername) {
+         profileTitle.innerHTML = globalUsername;
+      } else {
+         console.log("awaiting");
+         await checkUsername();
+         profileTitle.innerHTML = globalUsername;
+      }
+      
       if (savedPage) {    
          togglePage(savedPage); 
       } else {
@@ -966,65 +973,75 @@ function getPromotedStreams() {
 }
 
 let promotedimage;
+let isProcessing = false; 
+
 function handleStreams(images) {
-   let ratetext = ' tokens/min';
-   const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
-   const premadeInfoIcon = `<i class="fa fa-info"></i>`;
-   for (let i = 0; i< images.length; i++) {
-      let text = images[i].username;
-      let imgurl = images[i].imageDataUrl;
-      let rate = images[i].tokenrate;
-      if (rate == 0 || rate == null) {
-         rate = "FREE";
-         ratetext = '';
-      }
-      let hostlocation = images[i].location;
-      let description = images[i].description;
-      let divElement = document.createElement('div');
-      let divElementIcon = document.createElement('div');
-      let divStreamName = document.createElement('div');
-      let imgElement = document.createElement('img');
-      let divElementRate = document.createElement('div');
-      let elementRateSpan = document.createElement('span');
-      let rateElement = document.createElement('span');
-      let locationElement = document.createElement('span');
-    //  let descContainerElem = document.createElement('div');
-   //   let descElement = document.createElement('span');
-      divElement.classList.add("live-streams-container"); 
-      divStreamName.classList.add("live-streams-names");
-      
-      rateElement.innerHTML = rate;
-      locationElement.innerHTML = hostlocation;
-      //descElement.innerHTML = description;
-      divStreamName.innerHTML = text;
-      imgElement.src = imgurl;
-      imgElement.style.width = '250px';
+    
+    if (isProcessing) {
+        console.log("Function is already processing.");
+        return; 
+    }
 
-      liveStreams.appendChild(divElement);
-      divElement.appendChild(imgElement);      
-      divElement.appendChild(divStreamName);
-      divElement.appendChild(divElementRate);
-      divElementRate.appendChild(rateElement);      
-      divElementRate.appendChild(elementRateSpan);  
-      elementRateSpan.innerText = ratetext;      
-      divElement.appendChild(divElementIcon);
-      divElementIcon.innerHTML = premadeMarkerIcon;
-      divElementIcon.appendChild(locationElement);
-    //  divElement.appendChild(descContainerElem);
-    //  descContainerElem.innerHTML = premadeInfoIcon;
-    //  descContainerElem.appendChild(descElement);
-      
-      divElement.onclick = function() {
-         checkProfile(text, rate, description, imgurl);
-      };
-   }
+    isProcessing = true;
 
-   if (images.length < 1) {
-      document.getElementById("live-span-public").style.display = "block";      
-   } else {
-      document.getElementById("live-span-public").style.display = "none";      
-   }
+    let ratetext = ' tokens/min';
+    const premadeMarkerIcon = `<i class="fa fa-map-marker"></i>`;
+    
+    for (let i = 0; i < images.length; i++) {
+        let text = images[i].username;
+        let imgurl = images[i].imageDataUrl;
+        let rate = images[i].tokenrate;
+        
+        if (rate == 0 || rate == null) {
+            rate = "FREE";
+            ratetext = '';
+        }
+
+        let hostlocation = images[i].location;
+        let description = images[i].description;
+        let divElement = document.createElement('div');
+        let divElementIcon = document.createElement('div');
+        let divStreamName = document.createElement('div');
+        let imgElement = document.createElement('img');
+        let divElementRate = document.createElement('div');
+        let elementRateSpan = document.createElement('span');
+        let rateElement = document.createElement('span');
+        let locationElement = document.createElement('span');
+        
+        divElement.classList.add("live-streams-container"); 
+        divStreamName.classList.add("live-streams-names");
+        
+        rateElement.innerHTML = rate;
+        locationElement.innerHTML = hostlocation;
+        divStreamName.innerHTML = text;
+        imgElement.src = imgurl;
+        imgElement.style.width = '250px';
+
+        liveStreams.appendChild(divElement);
+        divElement.appendChild(imgElement);      
+        divElement.appendChild(divStreamName);
+        divElement.appendChild(divElementRate);
+        divElementRate.appendChild(rateElement);      
+        divElementRate.appendChild(elementRateSpan);  
+        elementRateSpan.innerText = ratetext;      
+        divElement.appendChild(divElementIcon);
+        divElementIcon.innerHTML = premadeMarkerIcon;
+        divElementIcon.appendChild(locationElement);
+
+        divElement.onclick = function() {
+            checkProfile(text, rate, description, imgurl);
+        };
+    }
+
+    if (images.length < 1) {
+        document.getElementById("live-span-public").style.display = "block";      
+    } else {
+        document.getElementById("live-span-public").style.display = "none";      
+    }
+
+    isProcessing = false;
 }
+
 
 function handlePromotedStreams(images) {
    //let ratetext = ' tokens/min';
@@ -1037,7 +1054,7 @@ function handlePromotedStreams(images) {
          ratetext = '';
       }
       let description = images[i].description;
-      let promotedimageDataURL = images[i].imageDataUrl;
+      //let promotedimageDataURL = images[i].imageDataUrl;
       let divElement = document.createElement('div');
       let divStreamName = document.createElement('div');
       
@@ -1075,7 +1092,14 @@ function checkProfile (userdata, rate, description, imageurl) {
    otheruser = userdata;   
    robotdescription = description;  
    promotedimage = imageurl;  
-   toggleprofile('remote');
+   if (otheruser == globalUsername) {
+      toggleprofile('local');
+   } if (otheruser != globalUsername) {
+      toggleprofile('remote');
+   } else {
+      console.log("Not sure who target user is: ", otheruser);
+   }
+  
 }
 
 let autoRedeemInterval;

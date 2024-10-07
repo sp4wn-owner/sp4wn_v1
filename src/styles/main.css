@@ -574,7 +574,26 @@ text-decoration: none;
   background-color: #fefefe;
   width: 35%;
 }
-
+#streamdescinput:focus {
+  outline: none;
+  border-color: #66afe9;
+}
+#streamdescinput {
+  resize: none; 
+  max-height: 60vh;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 95%;
+}
+#streamdescinput, #locationinput, #tokenrateinput {
+  font-family: monospace;
+}
+#promoted-span {
+  font-family: monospace;
+  font-size: 20px;
+}
 .close {
   color: #aaaaaa;
   float: right;
