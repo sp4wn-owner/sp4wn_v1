@@ -2999,9 +2999,6 @@ let selectedAmount = null;
 
 const tokenAmountSelect = document.getElementById('token-amount');
 
-
-
-
 form.addEventListener('submit', async (event) => {
    event.preventDefault();
 
@@ -3010,38 +3007,51 @@ form.addEventListener('submit', async (event) => {
 
    const username = await getUsername();
 
-   try {
-       const userId = getUserIdFromAccessToken();
+   const selectedOption = tokenAmountSelect.options[tokenAmountSelect.selectedIndex];
 
-       const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ 
-               amount: tokenamount, 
-               username: username, 
-               tokenamount: selectedTokens,
-               userId: userId
-           }), 
-       }).then(r => r.json());
+   selectedTokens = selectedOption ? selectedOption.value : null;
+   selectedAmount = selectedOption ? selectedOption.getAttribute('data-amount') : null;
 
-       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-           payment_method: {
-               card: cardElement,
-           },
-       });
-
-       if (error) {
-           paymentResult.innerText = error.message;
-       } else {
-           if (paymentIntent.status === 'succeeded') {               
-               paymentResult.innerText = 'Payment succeeded!';
-           }
-       }
-   } catch (error) {
-       console.error('Payment processing error:', error);
-       paymentResult.innerText = 'An error occurred while processing payment.';
-   } finally {
-       submitButton.disabled = false;
+   if (!selectedTokens) {
+      alert('Please select the number of tokens.');
+      return;
+   } else {
+      console.log(`Selected Tokens: ${selectedTokens}`);
+      console.log(`Selected Amount: ${selectedAmount}`);
+      
+      try {
+         const userId = getUserIdFromAccessToken();
+  
+         const { clientSecret } = await fetch('https://sp4wn-signaling-server.onrender.com/create-payment-intent', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ 
+                 amount: tokenamount, 
+                 username: username, 
+                 tokenamount: selectedTokens,
+                 userId: userId
+             }), 
+         }).then(r => r.json());
+  
+         const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+             payment_method: {
+                 card: cardElement,
+             },
+         });
+  
+         if (error) {
+             paymentResult.innerText = error.message;
+         } else {
+             if (paymentIntent.status === 'succeeded') {               
+                 paymentResult.innerText = 'Payment succeeded!';
+             }
+         }
+     } catch (error) {
+         console.error('Payment processing error:', error);
+         paymentResult.innerText = 'An error occurred while processing payment.';
+     } finally {
+         submitButton.disabled = false;
+     }
    }
 });
 
