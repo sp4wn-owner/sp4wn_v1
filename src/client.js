@@ -1745,6 +1745,7 @@ function ICEstatus() {
             break;
          case 'disconnected':
             console.warn('ICE Connection is disconnected.');
+            handleLeave();
             break;
          case 'closed':
             console.log('ICE Connection has closed.');
@@ -1948,6 +1949,7 @@ function dcpeerB() {
 
       dc.onclose = () => {
          console.log("Data channel B has been closed");
+         stopAutoRedeem();
      };
    };
 }
@@ -2028,10 +2030,8 @@ function handleClientDisconnect() {
 }
 
 function handleLeave() {   
-
    if (liveVideo == 1) {
-      updatelive('addlive');
-      connectedUser = null;
+      updatelive('addlive');   
       if (dc === open) {
          dc.close();
       }
@@ -2039,6 +2039,11 @@ function handleLeave() {
       handleClientDisconnect();
       captureImage();
       startimagecapture(15000);
+      send({
+         type: "leave",
+         othername: connectedUser
+      });
+      connectedUser = null;
    } 
    
    if (liveremoteVideo == 1) {
@@ -2051,11 +2056,6 @@ function handleLeave() {
       yourConn.onicecandidate = null;
       yourConn.onaddstream = null;
       if(connectedUser != null) {
-         send({
-            type: "leave",
-            othername: connectedUser,
-            username: globalUsername
-         });
          if (dc === open) {
             dc.close();
          }
