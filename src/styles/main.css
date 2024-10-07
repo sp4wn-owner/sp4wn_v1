@@ -590,7 +590,7 @@ text-decoration: none;
 #streamdescinput, #locationinput, #tokenrateinput {
   font-family: monospace;
 }
-#promoted-span {
+#promoted-span, #live-span-public {
   font-family: monospace;
   font-size: 20px;
 }
