@@ -2177,12 +2177,12 @@ function handleProfileTitleClick() {
 function toggleprofile(msg) { 
    savePage('profile');
    stopStreamInterval();
-   mobileOrientation();
    setTimeout(getPromotedStreams(), 50);
    startPromotedStreamInterval(30000);
    var data = msg;
    if (isMobileOrSmallScreen()) {
       profilePage.style.display = "block";
+      mobileOrientation();
    } else {
       profilePage.style.display = "grid";
    }
@@ -2242,7 +2242,7 @@ function toggleprofile(msg) {
             videoplaceholder.style.display = 'block'; 
             videoplaceholder.src = promotedimage;
             robotdescriptionelement. innerHTML = robotdescription;
-            remoteVideo.style.display = "none";
+            remoteVideo.style.display = "block";
             localVideo.style.display = "none";
             goliveBtn.style.display = "none";
             endliveBtn.style.display = "none";
