@@ -309,7 +309,7 @@ button:hover {
   text-underline-offset: 10px;
 }
 #profilepage {
-  grid-template-columns: 1fr 3fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   height: 800px;
 }
 .two-column-layout {
