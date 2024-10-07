@@ -1121,10 +1121,9 @@ footer {
   }
   .stream-container {
     width: 100%;
-    height: auto;
   }
   
-  #video-placeholder {
-    
+  #localVideo, #remoteVideo {
+    height: auto;
   }
 }

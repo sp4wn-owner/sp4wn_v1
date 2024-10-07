@@ -1031,6 +1031,7 @@ function handlePromotedStreams(images) {
    for (let i = 0; i< images.length; i++) {
       let text = images[i].username;
       let rate = images[i].tokenrate;
+      let imageurl = images[i].imageDataUrl;
       if (rate == 0 || rate == null) {
          rate = "FREE";
          ratetext = '';
@@ -1058,7 +1059,7 @@ function handlePromotedStreams(images) {
       //elementRateSpan.innerText = ratetext;         
       
       divElement.onclick = function() {
-         checkProfile(text, rate, description, imagedata);
+         checkProfile(text, rate, description, imageurl);
       };
    }
 
@@ -1069,11 +1070,11 @@ function handlePromotedStreams(images) {
    }
 }
 
-function checkProfile (userdata, rate, description, imagedata) {
+function checkProfile (userdata, rate, description, imageurl) {
    tokenrate = rate;
    otheruser = userdata;   
    robotdescription = description;  
-   promotedimage = imagedata;  
+   promotedimage = imageurl;  
    toggleprofile('remote');
 }
 
