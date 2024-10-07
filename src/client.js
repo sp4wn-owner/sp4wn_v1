@@ -700,6 +700,7 @@ function handleAuth(success) {
       showSnackbar("Unable to authenticate user");
       logout();
    } else {
+      checkUsername();  
       if (savedPage) {    
          togglePage(savedPage); 
       } else {
@@ -714,7 +715,6 @@ function handleAuth(success) {
             toggletokenspage();
          });
       });  
-      checkUsername();        
    }
 };
 
