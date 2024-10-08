@@ -10,4 +10,4 @@ TODO:
   
 -bigger & better telepresence robots
 
-~potentially a cryptocurrency-based system using javascript frameworks (robot to robot payments using NFC?)
+~potentially a cryptocurrency-based system (robot to robot payments using NFC?)

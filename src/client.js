@@ -1075,7 +1075,7 @@ function handlePromotedStreams(images) {
       //divElementRate.appendChild(elementRateSpan);   
       //elementRateSpan.innerText = ratetext;         
       
-      divElement.onclick = function() {
+      divElement.onclick = function() {         
          checkProfile(text, rate, description, imageurl);
       };
    }
@@ -1544,8 +1544,8 @@ function validateInput(event) {
    const validValue = value.replace(/[^0-9]/g, '');
    let numericValue = Number(validValue);
 
-   if (numericValue < 10) {
-       numericValue = 10;
+   if (numericValue < 0) {
+       numericValue = 0;
    } else if (numericValue > 990) {
        numericValue = 990;
    }
@@ -1566,7 +1566,7 @@ function getTokenRate() {
 function validateTokenRate() {
    const value = parseInt(tokenrateinput.value);
 
-   if (value >= 10 && value <= 990 && value % 10 === 0) {
+   if (value >= 0 && value <= 990 && value % 10 === 0) {
       confirmVideoBtn.disabled = false;
       tokenrateinput.classList.remove('invalid-input');
       tokenrateinput.setCustomValidity("");
@@ -1869,6 +1869,10 @@ function stopStreamedVideo(localVideo) {
  spawnBtn.addEventListener("click", async (event) => {
    spawnBtn.disabled = true; // Disable button to prevent multiple clicks
    connectedUser = otheruser;
+   if (tokenrate == "FREE") {
+      tokenrate = 0;
+   }
+   console.log(tokenrate);
 
    const balance = await checkBalance();
    if (balance === null) {
@@ -1943,6 +1947,7 @@ async function openDataChannelWithRetry(maxRetries = 5, baseDelay = 1000) {
            console.log("Data channel is open");
            const redeemSuccess = await redeemTokens(tokenrate);
            if (redeemSuccess) {
+               
                startAutoRedeem(tokenrate);
                handleUIOnConnection();
            } else {
