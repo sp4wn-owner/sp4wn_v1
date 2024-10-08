@@ -1460,15 +1460,47 @@ function createPeerConnection() {
        resolve(yourConn);
    });
 }
+function setCodec(sdp, codecsToKeep) {
+   const lines = sdp.split('\r\n');
+   let codecs = [];
+   let mLineIndex = -1;
+
+   lines.forEach((line, index) => {
+       if (line.startsWith('m=')) {
+           mLineIndex = index;
+       }
+       if (line.startsWith('a=rtpmap:')) {
+           const parts = line.split(' ');
+           const codecPayloadType = parts[0].split(':')[1];
+           const codecName = parts[1].split('/')[0];
+
+           // Collect the codec info
+           codecs.push({ payloadType: codecPayloadType, name: codecName });
+       }
+   });
+
+   // Filter codecs based on what you want to keep
+   const selectedPayloadTypes = codecs
+       .filter(codec => codecsToKeep.includes(codec.name))
+       .map(codec => codec.payloadType);
+
+   // Replace the codec in the m-line
+   if (mLineIndex !== -1) {
+       const mLineParts = lines[mLineIndex].split(' ');
+       mLineParts.splice(3, mLineParts.length - 3); // Remove existing codec payloads
+       const newMLine = `${mLineParts.slice(0, 3).join(' ')} ${selectedPayloadTypes.join(' ')}`;
+       lines[mLineIndex] = newMLine;
+   }
+
+   return lines.join('\r\n');
+}
+
+
 
 function createOffer() {
    return new Promise((resolve, reject) => {
        yourConn.createOffer()
            .then(offer => {
-               //console.log('Original SDP:', offer.sdp);
-               //const modifiedSdp = disableCompressionCodecs(offer.sdp);
-               //console.log('Modified SDP:', modifiedSdp);
-               //return yourConn.setLocalDescription(new RTCSessionDescription({ type: offer.type, sdp: modifiedSdp }))
                return yourConn.setLocalDescription(offer)
                .then(() => offer);
             })
@@ -1488,87 +1520,23 @@ function createOffer() {
 
 async function watchStream(name) {
    connectedUser = name;
-   console.log(connectedUser);
+   console.log(yourConn.iceConnectionState);
    if (yourConn.iceConnectionState === "closed") {  
       console.log("ice closed");
       beginICE();
+
    } else {
-      console.log("sending offer");
+      console.log("sending offer");  
       if (isDataChannelOpen()) {
          console.log("data channel is open");
-      } else {opendc();}  
+      } else {opendc();} 
    }
    await createOffer();
-}
-// Function to disable compression codecs in SDP
-function disableCompressionCodecs(sdp) {
-   const lines = sdp.split('\r\n');
-
-   // Keep track of media lines and codec lines
-   const modifiedLines = [];
-   let mediaLinesFound = false;
-
-   for (const line of lines) {
-       // Check if this is a media line
-       if (line.startsWith('m=')) {
-           mediaLinesFound = true; // Found a media line
-       }
-
-       // Remove specific codec entries while keeping the media line intact
-       if (!line.startsWith('a=rtpmap:') || !line.includes('VP8') && !line.includes('H264')) {
-           modifiedLines.push(line);
-       }
-   }
-
-   if (!mediaLinesFound) {
-       throw new Error('Invalid SDP: No media lines found.');
-   }
-
-    // Join the lines back into a single SDP string
-    const modifiedSdp = modifiedLines.join('\r\n');
-
-    // Validate the modified SDP
-    if (!isValidSdp(modifiedSdp)) {
-      throw new Error('Invalid SDP after modification.');
-  }
-  return modifiedSdp;
-}
-
-// Function to validate the SDP structure
-function isValidSdp(sdp) {
-   return sdp.includes('m=') && sdp.includes('a=rtpmap:');
-}
-
-async function afterlocalVideo() {
-   if(localVideo) {
-      goliveBtn.style.display = "none";
-      endliveBtn.style.display = "block";
-      liveVideo = 1;         
-      updatelive("addlive");
-      setTimeout(() => {
-         captureImage();
-      }, 1000);
-      
-   }   
-}
-
-async function initiateConn() {
-   try {
-      localStream = await getMediaStream({ video: true, audio: true });
-      localVideo.srcObject = localStream;
-      video = localVideo;
-
-      yourConn = await createPeerConnection();
-      await addStreamToPeerConnection(localStream);
-      await afterlocalVideo();
-      
-  } catch (error) {
-      console.error('Error in starting call:', error);
-  }
 }
 
 let tokenrateinput = document.getElementById("tokenrateinput");
 let tokenrate;
+tokenrateinput.addEventListener('input', validateTokenRate);
 
 function validateInput(event) {
    let value = event.target.value;
@@ -1594,6 +1562,7 @@ function getTokenRate() {
    return tokenrate;
 }
 
+
 function validateTokenRate() {
    const value = parseInt(tokenrateinput.value);
 
@@ -1609,7 +1578,62 @@ function validateTokenRate() {
    }
 }
 
-tokenrateinput.addEventListener('input', validateTokenRate);
+async function afterLocalVideo() {
+   if(localVideo) {
+      goliveBtn.style.display = "none";
+      endliveBtn.style.display = "block";
+      liveVideo = 1;         
+      updatelive("addlive");
+      setTimeout(() => {
+         captureImage();
+      }, 1000);
+      
+   }   
+}
+
+async function initiateConn() {
+   try {
+      localStream = await getMediaStream({ video: true, audio: true });
+      localVideo.srcObject = localStream;
+      video = localVideo;
+      yourConn = await createPeerConnection();
+      const transceiver = yourConn.addTransceiver('video', { direction: 'sendonly' });
+      const sender = transceiver.sender;
+
+      if (localStream.getVideoTracks().length > 0) {
+         const videoTrack = localStream.getVideoTracks()[0];
+         sender.replaceTrack(videoTrack)
+            .then(() => {
+                  console.log("Track replaced successfully");
+            })
+            .catch(error => {
+                  console.error("Error replacing track:", error);
+            });
+      } else {
+         console.error("No video tracks available in localStream");
+      }
+
+      const audioTransceiver = yourConn.addTransceiver('audio', { direction: 'sendonly' });
+         const audioSender = audioTransceiver.sender;
+
+         if (localStream.getAudioTracks().length > 0) {
+               const audioTrack = localStream.getAudioTracks()[0];
+               await audioSender.replaceTrack(audioTrack);
+               console.log("Audio track replaced successfully");
+         } else {
+               console.error("No audio tracks available in localStream");
+         }
+
+      console.log("Local Stream Tracks: ", localStream.getTracks());
+
+      await afterLocalVideo(); 
+      beginICE(); 
+      ICEstatus();
+   } catch (error) {
+      console.error('Error in starting call:', error);
+   }
+}
+
 
 confirmVideoBtn.onclick = function() {
    
@@ -1759,6 +1783,12 @@ function ICEstatus() {
             break;
          case 'connected':
             console.log('ICE Connection has been established.');
+            if(localVideo == 1) {
+               opendc();
+            } 
+            if(remoteVideo == 1) {
+               dcpeerB();
+            }
             break;
          case 'completed':
             console.log('ICE Connection is completed.');
@@ -1836,79 +1866,127 @@ function stopStreamedVideo(localVideo) {
  }
 
 
- spawnBtn.addEventListener("click", async (event) => {   
-   spawnBtn.disabled = true;
-   connectedUser = otheruser;  
-   const balance = await checkBalance();
+ spawnBtn.addEventListener("click", async (event) => {
+   spawnBtn.disabled = true; // Disable button to prevent multiple clicks
+   connectedUser = otheruser;
 
-   if (balance != null) {
-       console.log('Balance checked successfully.');
-       
-       if (balance < tokenrate) {
-         showSnackbar("Your token balance is too low.");
-         spawnBtn.disabled = false;
+   const balance = await checkBalance();
+   if (balance === null) {
+       console.log('Failed to check balance.');
+       spawnBtn.disabled = false; // Re-enable button if balance check fails
+       return;
+   }
+
+   console.log('Balance checked successfully.');
+   if (balance < tokenrate) {
+       showSnackbar("Your token balance is too low.");
+       spawnBtn.disabled = false; // Re-enable button if balance is insufficient
+       return;
+   }
+
+   initializePeerConnection();
+   
+   send({
+       type: "watch",
+       username: globalUsername,
+       host: connectedUser
+   });
+   dcpeerB();
+   beginICE();
+   console.log("Attempting to connect...");
+   const isConnected = await checkICEStatus();
+
+   if (isConnected) {
+       handleConnectionEstablished();
+       await openDataChannelWithRetry();
+   } else {
+       console.error('ICE connection was not established.');
+       spawnBtn.disabled = false; // Re-enable button if connection fails
+   }
+});
+let remoteStream;
+function initializePeerConnection() {
+   yourConn = new RTCPeerConnection(configuration);
+   remoteStream = new MediaStream();
+   remoteVideo.srcObject = remoteStream;
+
+   yourConn.ontrack = (event) => {
+      console.log(event.streams[0]);
+      remoteStream.addTrack(event.track);
+      remoteVideo.srcObject = remoteStream;
+      console.log("Received track:", event.track);
+   };
+   
+   
+}
+
+async function handleConnectionEstablished() {
+   remoteVideo.style.display = "block";
+   videoplaceholder.style.display = 'none'; 
+   videoplaceholder.src = "";
+}
+
+function isStreamLive() {
+   return remoteStream && remoteStream.getTracks().some(track => track.readyState === 'live');
+}
+
+async function openDataChannelWithRetry(maxRetries = 5, baseDelay = 1000) {
+   let retries = 0;
+   let delay = baseDelay;
+
+   while (retries < maxRetries) {
+      if (isDataChannelOpen()) {
+         if (!isStreamLive()) {
+            console.log("Media stream is not live.");
+            return;
+         }
+           console.log("Data channel is open");
+           const redeemSuccess = await redeemTokens(tokenrate);
+           if (redeemSuccess) {
+               startAutoRedeem(tokenrate);
+               handleUIOnConnection();
+           } else {
+               console.error('Token redemption failed.');
+           }
            return;
        }
+       dcpeerB();
+       console.log(`Data channel is not open. Retrying in ${delay} ms...`);
+       await new Promise(resolve => setTimeout(resolve, delay));
 
-       yourConn = new RTCPeerConnection(configuration);       
-       stream = new MediaStream();           
-       remoteVideo.srcObject = stream;
+       // Increment the delay for the next retry
+       delay += baseDelay; 
+       retries++;
+   }
 
-       yourConn.ontrack = (event) => {
-           remoteVideo.srcObject = event.streams[0];
-       };               
-
-       send({
-           type: "watch",
-           username: globalUsername,
-           host: connectedUser
-       });
-       dcpeerB();  
-       beginICE(); 
-
-       console.log("Attempting to connect...");     
-
-       await checkICEStatus().then(async (isConnected) => {
-           if (isConnected) {
-               remoteVideo.style.display = "block";
-               videoplaceholder.style.display = 'none'; 
-               videoplaceholder.src = "";
-               const redeemSuccess = await redeemTokens(tokenrate);
-               if (redeemSuccess) {
-                   startAutoRedeem(tokenrate);
-                   handleUIOnConnection();
-               } else {
-                   console.error('Token redemption failed.');
-               }
-           } else {
-               console.error('ICE connection was not established.');
-           }
-       });
-       
-   } else {
-       console.log('Failed to check balance.');
-   } 
-});
+   console.error('Max retries reached. Data channel could not be opened.');
+   spawnBtn.disabled = false; // Re-enable button after max retries
+}
 
 async function checkICEStatus(maxRetries = 5, delay = 1500) {
    for (let retries = 0; retries < maxRetries; retries++) {
        await new Promise(resolve => setTimeout(resolve, delay));
-       ICEstatus();
-       console.log("ICE status is ", yourConn.iceConnectionState);
+       ICEstatus(); // Update the ICE status
 
+       console.log("ICE status is ", yourConn.iceConnectionState);
        if (yourConn.iceConnectionState === 'connected') {
            console.log('PeerConnection is connected!');
+           dcpeerB();
            return true;
        } else {
            console.log('PeerConnection is not connected. Current state:', yourConn.iceConnectionState);
        }
    }
    console.error('Max retries reached. ICE connection is still not connected.');
-   spawnBtn.disabled = false;
+   spawnBtn.disabled = false; // Re-enable button after max retries
    return false; 
 }
 
+
 function handleUIOnConnection() {
+   remoteVideo.style.display = "block";
+   videoplaceholder.style.display = 'none'; 
+   videoplaceholder.src = "";
    video = remoteVideo;
    liveremoteVideo = 1;
    spawnBtn.disabled = false;
@@ -1926,11 +2004,7 @@ function handleUIOnConnection() {
        console.log("Gamepad disconnected:", event.gamepad);
    });
 
-   if (isDataChannelOpen()) {
-       console.log("Data channel is open");
-   } else {
-       retryFunction(dcpeerB);
-   }
+   
 }
 
 
@@ -1949,7 +2023,7 @@ async function retryFunction(fn, retries = 3, delay = 1000) {
        } catch (error) {
            console.error(`Attempt ${i + 1} failed: ${error.message}`);
            if (i < retries - 1) {
-               await new Promise(res => setTimeout(res, delay)); // Wait before retrying
+               await new Promise(res => setTimeout(res, delay));
            }
        }
    }
@@ -1991,7 +2065,7 @@ function isDataChannelOpen() {
          
          send({
             type: "addlive",
-            username: username
+            username: globalUsername
          });
          break;
       case "addremotelive":
@@ -2003,7 +2077,7 @@ function isDataChannelOpen() {
       case "local":
          send({
             type: "updatelive",
-            username: username
+            username: globalUsername
          });
          break;
 
@@ -2019,7 +2093,7 @@ function isDataChannelOpen() {
  }
 
 
-function handleOffer(offer) {
+ function handleOffer(offer) {
 
    yourConn.setRemoteDescription(new RTCSessionDescription(offer));
 
@@ -2038,12 +2112,22 @@ function handleOffer(offer) {
 };
 
 function handleAnswer(answer) {
-   yourConn.setRemoteDescription(new RTCSessionDescription(answer));
-};
+   yourConn.setRemoteDescription(new RTCSessionDescription(answer))
+      .catch((error) => {
+         console.log("Error when setting remote description: ", error);
+      });
+}
 
 function handleCandidate(candidate) {
-   yourConn.addIceCandidate(new RTCIceCandidate(candidate));
-};
+   yourConn.addIceCandidate(new RTCIceCandidate(candidate))
+      .then(() => {
+         console.log("ICE candidate added successfully:", candidate);
+      })
+      .catch((error) => {
+         console.error("Error adding ICE candidate:", error);
+      });
+}
+
 
 function handleClientDisconnect() {
    if (server) {
