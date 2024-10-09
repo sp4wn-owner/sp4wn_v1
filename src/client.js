@@ -1614,15 +1614,15 @@ async function initiateConn() {
       }
 
       const audioTransceiver = yourConn.addTransceiver('audio', { direction: 'sendonly' });
-         const audioSender = audioTransceiver.sender;
+      const audioSender = audioTransceiver.sender;
 
-         if (localStream.getAudioTracks().length > 0) {
-               const audioTrack = localStream.getAudioTracks()[0];
-               await audioSender.replaceTrack(audioTrack);
-               console.log("Audio track replaced successfully");
-         } else {
-               console.error("No audio tracks available in localStream");
-         }
+      if (localStream.getAudioTracks().length > 0) {
+            const audioTrack = localStream.getAudioTracks()[0];
+            await audioSender.replaceTrack(audioTrack);
+            console.log("Audio track replaced successfully");
+      } else {
+            console.error("No audio tracks available in localStream");
+      }
 
       console.log("Local Stream Tracks: ", localStream.getTracks());
 
@@ -2070,7 +2070,7 @@ function isDataChannelOpen() {
          
          send({
             type: "addlive",
-            username: globalUsername
+            username: username
          });
          break;
       case "addremotelive":
@@ -2082,7 +2082,7 @@ function isDataChannelOpen() {
       case "local":
          send({
             type: "updatelive",
-            username: globalUsername
+            username: username
          });
          break;
 
